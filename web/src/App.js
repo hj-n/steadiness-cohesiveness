@@ -20,12 +20,14 @@ function App() {
           dataset="sphere"
           height={size}
           width={size}
+          isLabel={false}
         />
         <FimifView
           method="tsne"
           dataset="swiss_roll"
           height={size}
           width={size}
+          isLabel={false}
         />
       </FimifWrapper>
       <FimifWrapper>
@@ -34,6 +36,8 @@ function App() {
           dataset="mnist_test_euclidean"
           height={size * 2}
           width= {size * 2}
+          isLabel={true}
+          labelNum = {10}
         />
       </FimifWrapper>
     </div>

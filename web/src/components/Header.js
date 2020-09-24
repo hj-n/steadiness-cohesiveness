@@ -10,7 +10,7 @@ function Header() {
       <div>
       <AppBar>
         <Toolbar>
-          <Typography variant="h6">FiMiF</Typography>
+          <Typography variant="h6">FiMiF Web Demo</Typography>
         </Toolbar>
       </AppBar>
 

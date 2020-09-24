@@ -31,8 +31,9 @@ function FimifView(props) {
 
     const cbrush = useRef();
 
-    const xS = useRef();
-    const yS = useRef();
+    const xS = useRef();   // xScale
+    const yS = useRef();   // yScale
+    const cS = useRef();   // colorScale
 
 
     useEffect(() => { 
@@ -51,6 +52,18 @@ function FimifView(props) {
         const yScale = d3.scaleLinear()
                          .domain([minY, maxY])
                          .range([0, height]);
+
+        const colorDomain = [...Array(props.labelNum).keys()]
+        console.log(colorDomain);
+        const colorRange = ["#4e79a7","#f28e2c","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#e15759","#5E4FA2"];
+        // const colorRange = ["#3288BD", "#5E4FA2", "#66C2A5", "#ABDDA4", "#E6F598", "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"];
+        const colorScale =  d3.scaleOrdinal()
+            .domain(colorDomain)
+            .range(colorRange);
+        cS.current = colorScale;
+
+
+        
 
         xS.current = xScale;
         yS.current = yScale;
@@ -71,7 +84,12 @@ function FimifView(props) {
            .join(
                enter => {
                    enter.append("circle")
-                        .attr("fill", "blue")
+                        .attr("fill", d => {
+                            if(props.isLabel) {
+                                return colorScale(data[d[2]].label);
+                            }   
+                            else return "blue";
+                        })
                         .attr("cx", d => xScale(d[0]))
                         .attr("cy", d => yScale(d[1]))
                         .style("opacity", 0.3)
@@ -103,12 +121,28 @@ function FimifView(props) {
            );
 
            svg.on("click", () => {
-               svg.selectAll("circle").style("opacity", 0.3).attr("fill", "blue");
+               svg.selectAll("circle")
+                  .style("opacity", 0.3)
+                  .attr("fill", d => {
+                      if(d === undefined) return "blue";
+                      if(props.isLabel) {
+                          return colorScale(data[d[2]].label);
+                      }   
+                      else return "blue";
+                  });
                cbrush.current.style("opacity", 0);
            });
            d3.select("#scatterplot" + props.dataset + props.method).on("click", () => {
-                svg.selectAll("circle").style("opacity", 0.3).attr("fill", "blue");
-                cbrush.current.style("opacity", 0);
+                svg.selectAll("circle")
+                   .style("opacity", 0.3)
+                   .attr("fill", d => {
+                       if(d === undefined) return "blue";
+                       if(props.isLabel) {
+                           return colorScale(data[d[2]].label);
+                       }   
+                       else return "blue";
+                   });
+                cbrush.current.style("opacity", 0).attr("r", 0);
            });
         
         
@@ -194,7 +228,15 @@ function FimifView(props) {
                .attr("fill", d => {
                    if(d === undefined) return "blue";
                    if(NDContainedIdices[d[2]]) return "red";
+                   else if(props.isLabel) {
+                        return cS.current(data[d[2]].label);
+                   }   
                    else return "blue";
+               })
+               .style("opacity", d => {
+                   if(d === undefined) return "blue";
+                   if(NDContainedIdices[d[2]]) return 1;
+                   else return 0.3;
 
                })
         }
