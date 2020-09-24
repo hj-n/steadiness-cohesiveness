@@ -1,17 +1,22 @@
 import React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import * as d3 from 'd3'
 import styled from 'styled-components'
 
 
 function FimifView(props) {
 
+    let jsonFileName = props.dataset + "_" + props.method + ".json";
+    let data = require("../json/" + jsonFileName);
+    const embeddedData = data.map((d, i) => {
+        if(d.emb.length == 2) d.emb.push(i);   // avoid double pushing (due to rendering issue)
+        return d.emb;
+    });
+
+    
+
     useEffect(() => { 
         // Executes when new data arrives
-        const jsonFileName = props.dataset + "_" + props.method + ".json";
-        const data = require("../json/" + jsonFileName);
-
-        const embeddedData = data.map(d => d.emb);
         
         const width = props.width;
         const height = props.height;
@@ -46,10 +51,20 @@ function FimifView(props) {
                         .attr("fill", "blue")
                         .attr("cx", d => xScale(d[0]))
                         .attr("cy", d => yScale(d[1]))
+                        .style("opacity", 0.3)
                         .attr("r", radius);
-
                }
-           )
+           );
+        
+        svg.selectAll("circle")
+           .on("mouseover", function(){ d3.select(this).style("opacity", 1)  .attr("r", radius + 2); })
+           .on("mouseout" , function(){ d3.select(this).style("opacity", 0.3).attr("r", radius);     })
+           .on("click", () => {
+
+            
+           });
+
+
 
 
     }, [props.dataset, props.method])

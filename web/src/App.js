@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from "./js/Header"
-import FimifView from "./js/FimifView"
+import Header from "./components/Header"
+import FimifView from "./components/FimifView"
 
 
 
