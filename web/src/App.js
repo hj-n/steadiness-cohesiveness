@@ -1,31 +1,24 @@
 import React from 'react';
-import AppBar from '@material-ui/core/AppBar'
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import Header from "./js/Header"
+import FimifView from "./js/FimifView"
 
 
-const useStyles = makeStyles({
-  header : {
-    background: "#8ae1f2", 
-    padding: 10,
-    color: "black"
-    
-  }
-})
 
 
 function App() {
 
-  const classes = useStyles();
+  const size = 500;
+
 
   return (
     <div>
-      <AppBar className={classes.header}>
-        <Typography variant="h6">
-          FiMiF
-        </Typography>
-      </AppBar>
-      
+      <Header/>
+      <FimifView
+        method="tsne"
+        dataset="sphere"
+        height={size}
+        width={size}
+      />
     </div>
   );
 }
