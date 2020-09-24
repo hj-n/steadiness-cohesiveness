@@ -2,9 +2,10 @@
 
 Metric for the evaluation of Dimensionality Embedding, which focuses on **Fi**nding **Mi**ssing **F**amily
 
+<p align="center">
 <img src="https://user-images.githubusercontent.com/38465539/94182412-ed416400-fedb-11ea-82af-b85ea3621916.png" width="40%">
 <img src="https://user-images.githubusercontent.com/38465539/94182424-f16d8180-fedb-11ea-9487-0ea94df39a45.png" width="39%">
-
+</p>
 ### Installation
 
 ```
