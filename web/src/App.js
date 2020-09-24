@@ -28,6 +28,14 @@ function App() {
           width={size}
         />
       </FimifWrapper>
+      <FimifWrapper>
+        <FimifView
+          method="tsne"
+          dataset="mnist_test_euclidean"
+          height={size * 2}
+          width= {size * 2}
+        />
+      </FimifWrapper>
     </div>
   );
 }

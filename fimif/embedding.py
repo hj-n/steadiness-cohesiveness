@@ -27,13 +27,15 @@ class Embedding:
     
 
 class TsneEmbedding(Embedding):
-    def __init__(self, data_name, hd_data):
+    def __init__(self, data_name, hd_data, label=None, metric='euclidean'):
         Embedding.__init__(self, data_name)
-        embedded = TSNE(n_components=2).fit_transform(hd_data)
+        embedded = TSNE(n_components=2, metric=metric).fit_transform(hd_data)
         for idx, datum in enumerate(hd_data):
             datum_set = {}
             datum_set["raw"] = datum.tolist()
             datum_set["emb"] = embedded[idx].tolist()
+            if(label != None):
+                datum_set["label"] = label[idx]
             self.data.append(datum_set)
         
         self.size = hd_data.shape[0]
