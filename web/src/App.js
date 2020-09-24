@@ -21,6 +21,7 @@ function App() {
           height={size}
           width={size}
           isLabel={false}
+          metric = "euclidean"
         />
         <FimifView
           method="tsne"
@@ -28,6 +29,7 @@ function App() {
           height={size}
           width={size}
           isLabel={false}
+          metric = "euclidean"
         />
       </FimifWrapper>
       <FimifWrapper>
@@ -38,6 +40,18 @@ function App() {
           width= {size * 2}
           isLabel={true}
           labelNum = {10}
+          metric = "euclidean"
+        />
+      </FimifWrapper>
+      <FimifWrapper>
+        <FimifView
+          method="tsne"
+          dataset="mnist_test_cosine_similarity"
+          height={size * 2}
+          width= {size * 2}
+          isLabel={true}
+          labelNum = {10}
+          metric = "cosine_similarity"
         />
       </FimifWrapper>
     </div>

@@ -62,9 +62,6 @@ function FimifView(props) {
             .range(colorRange);
         cS.current = colorScale;
 
-
-        
-
         xS.current = xScale;
         yS.current = yScale;
         
@@ -170,13 +167,30 @@ function FimifView(props) {
             let svg = d3.select("#scatterplot" + props.dataset + props.method);
 
 
-            function NDDistance(arr1, arr2) {
+            function NDEuclideanDistance(arr1, arr2) {
                 if(arr1.length !== arr2.length) throw "Array length Mismatch";
                 let sum = 0;
                 for(let i = 0; i < arr1.length; i++) 
                     sum += Math.pow(arr1[i] - arr2[i], 2);
                 return Math.sqrt(sum);
             }
+
+            function NDCosineDistance(arr1, arr2) {
+                if(arr1.length !== arr2.length) throw "Array length Mismatch";
+                let dot = 0;
+                let m1  = 0;
+                let m2  = 0;
+                for(let i = 0; i < arr1.length; i++) {
+                    dot += arr1[i] * arr2[i];
+                    m1  += arr1[i] * arr1[i];
+                    m2  += arr2[i] * arr2[i];
+                }
+                m1 = Math.sqrt(m1);
+                m2 = Math.sqrt(m2);
+                return 1 - dot / (m1 * m2);
+            }
+
+            const NDDistance = props.metric == "euclidean" ? NDEuclideanDistance : NDCosineDistance;
             
             let farthestIdx = 0;
             let farthestRadius = 0;

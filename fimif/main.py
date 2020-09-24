@@ -13,13 +13,13 @@ PATH_TO_WEB = "../web/src/json/"
 # data = swiss_roll(n=4000, r=10)
 # data = sphere(n=1000, r=10)
 
-### MNIST TEST data ###
+### mnist_test data ###
 image, label = mnist_test()
 data = [np.array(datum).flatten() for datum in image]
 data = np.array(data)
 
 start = time.time()
-emb_tsne = TsneEmbedding("mnist_test", data, label=label)
+emb_tsne = TsneEmbedding("mnist_test_cosine_similarity", data, label=label, metric="cosine")
 end   = time.time()
 
 hp.print_time_spent(start, end, emb_tsne.get_info())
