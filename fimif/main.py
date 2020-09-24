@@ -1,12 +1,11 @@
 
 import tadasets
 
-from data_generation import TsneDataPair 
+from data_generation import *
 
 data = tadasets.sphere(n=1000, r=10)
 
-sphere_tsne_dp = TsneDataPair(data)
+emb_sphere_tsne = TsneEmbedding(data)
 
-
-print(sphere_tsne_dp.data)
+emb_sphere_tsne.print_file(file_name="./test.json")
 
