@@ -10,20 +10,24 @@ import numpy as np
 PATH_TO_WEB = "../web/src/json/"
 ######################
 ### swiss_roll data ###
-# data = swiss_roll(n=4000, r=10)
+data = swiss_roll(n=4000, r=10)
 
-# start = time.time()
-# emb_tsne = TsneEmbedding("swiss_roll", data, label=label, metric="cosine")
-# end   = time.time()
+start = time.time()
+emb_tsne = TsneEmbedding("swiss_roll", data, label=label, metric="cosine")
+end   = time.time()
+hp.print_time_spent(start, end, emb_tsne.get_info())
+emb_tsne.print_file(path=PATH_TO_WEB)
 ######################
 
 ######################
 ### sphere data ###
-# data = sphere(n=1000, r=10)
+data = sphere(n=1000, r=10)
 
-# start = time.time()
-# emb_tsne = TsneEmbedding("swiss_roll", data, label=label, metric="cosine")
-# end   = time.time()
+start = time.time()
+emb_tsne = TsneEmbedding("swiss_roll", data, label=label, metric="cosine")
+end   = time.time()
+hp.print_time_spent(start, end, emb_tsne.get_info())
+emb_tsne.print_file(path=PATH_TO_WEB)
 ######################
 
 ######################
@@ -36,13 +40,16 @@ data = np.array(data)
 start = time.time()
 emb_tsne = TsneEmbedding("mnist_test_cosine_similarity", data, label=label, metric="cosine")
 end   = time.time()
+hp.print_time_spent(start, end, emb_tsne.get_info())
+emb_tsne.print_file(path=PATH_TO_WEB)
 
 ### TSNE with mnist & Euclidean distance ###
-# start = time.time()
-# emb_tsne = TsneEmbedding("mnist_test_euclidean", data, label=label, metric="cosine")
-# end   = time.time()
-######################
+start = time.time()
+emb_tsne = TsneEmbedding("mnist_test_euclidean", data, label=label, metric="cosine")
+end   = time.time()
 hp.print_time_spent(start, end, emb_tsne.get_info())
+emb_tsne.print_file(path=PATH_TO_WEB)
+######################
 
 
 emb_tsne.print_file(path=PATH_TO_WEB)
