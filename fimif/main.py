@@ -1,13 +1,14 @@
 import time
 import tadasets
 
-from data_generation import *
+from embedding import *
+from dataset_gen import *
 import helper as hp
 
 
 PATH_TO_WEB = "../web/src/json/"
 
-data = tadasets.swiss_roll(n=1000, r=10)
+data = swiss_roll(n=4000, r=10)
 
 
 start = time.time()

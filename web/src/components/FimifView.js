@@ -41,8 +41,6 @@ function FimifView(props) {
         const height = props.height;
         const margin = { hor: props.width / 20, ver: props.height / 20 };
 
-        // console.log(embeddedData);
-
         const [minX, maxX] = d3.extent(embeddedData, d => d[0]);
         const [minY, maxY] = d3.extent(embeddedData, d => d[1]);
 
@@ -177,7 +175,6 @@ function FimifView(props) {
                    }
             });
             
-            console.log(rMode);
             
             
 
@@ -204,7 +201,7 @@ function FimifView(props) {
     }, [isCb, rMode])
 
     return (
-        <div style={{width: props.width * 1.1}}>
+        <div style={{width: props.width * 1.1, margin: 40}}>
             <H5>{props.method.toUpperCase()} embedding result ({props.dataset.toUpperCase()} dataset)</H5>
             <RadioWrapper>
                 <RadioGroup row aria-label="gender" name="gender1" value={rMode} onChange={handleChange}>
