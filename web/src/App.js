@@ -42,8 +42,6 @@ function App() {
           labelNum = {10}
           metric = "euclidean"
         />
-      </FimifWrapper>
-      <FimifWrapper>
         <FimifView
           method="tsne"
           dataset="mnist_test_cosine_similarity"
