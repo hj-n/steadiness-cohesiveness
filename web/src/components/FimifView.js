@@ -2,6 +2,9 @@ import React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3'
 import styled from 'styled-components'
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 
 function FimifView(props) {
@@ -21,7 +24,15 @@ function FimifView(props) {
     const [cbidx, setCbidx] = useState(0);     // circle index
     const [isCb, setIsCb]   = useState(false); // is brushing?
 
+    const [rMode, setRMode] = useState("2d") // true: use max 2D dist point, false: use max ND dist point
+    const handleChange = (event) => {
+        setRMode(event.target.value);
+    };
+
     const cbrush = useRef();
+
+    const xS = useRef();
+    const yS = useRef();
 
 
     useEffect(() => { 
@@ -30,7 +41,7 @@ function FimifView(props) {
         const height = props.height;
         const margin = { hor: props.width / 20, ver: props.height / 20 };
 
-        console.log(embeddedData);
+        // console.log(embeddedData);
 
         const [minX, maxX] = d3.extent(embeddedData, d => d[0]);
         const [minY, maxY] = d3.extent(embeddedData, d => d[1]);
@@ -42,6 +53,10 @@ function FimifView(props) {
         const yScale = d3.scaleLinear()
                          .domain([minY, maxY])
                          .range([0, height]);
+
+        xS.current = xScale;
+        yS.current = yScale;
+        
         
         const radius = 3;
 
@@ -84,28 +99,119 @@ function FimifView(props) {
                    .on("end", () => {
                        cbrush.current.style("opacity", 0.3);
                        setIsCb(false);
+                       
                    })
            
-           )
+           );
+
+           svg.on("click", () => {
+               svg.selectAll("circle").style("opacity", 0.3).attr("fill", "blue");
+               cbrush.current.style("opacity", 0);
+           });
+           d3.select("#scatterplot" + props.dataset + props.method).on("click", () => {
+                svg.selectAll("circle").style("opacity", 0.3).attr("fill", "blue");
+                cbrush.current.style("opacity", 0);
+           });
+        
+        
         // ANCHOR brushing
         cbrush.current = svg.append("circle").style("opacity", 0);
     }, [])
 
 
-    // For brushing
+    // Called while brushing
     useEffect(() => {
         if(isCb) {
+            const curR = Math.sqrt(Math.pow((cbx - bx),2) + Math.pow((cby - by),2))
             cbrush.current.style("opacity", 0.5)
                           .attr("cx", cbx)
                           .attr("cy", cby)
-                          .attr("r", () => { return Math.sqrt(Math.pow((cbx - bx),2) + Math.pow((cby - by),2))} )
+                          .attr("r", curR);
         }
     }, [by])
 
+    // Calls after brushing
+    useEffect(() => {
+        if(!isCb && cbx !== bx) {
+            
+            // Render 2d-circle-contained point
+            let svg = d3.select("#scatterplot" + props.dataset + props.method);
+
+
+            function NDDistance(arr1, arr2) {
+                if(arr1.length !== arr2.length) throw "Array length Mismatch";
+                let sum = 0;
+                for(let i = 0; i < arr1.length; i++) 
+                    sum += Math.pow(arr1[i] - arr2[i], 2);
+                return Math.sqrt(sum);
+            }
+            
+            let farthestIdx = 0;
+            let farthestRadius = 0;
+            svg.selectAll("circle")
+               .style("opacity", (d) => {
+                   if(d === undefined) return 0.3
+                   const dist = Math.sqrt(Math.pow((cbx - xS.current(d[0])),2) + Math.pow((cby - yS.current(d[1])),2));
+                   const curR =  Math.sqrt(Math.pow((cbx - bx),2) + Math.pow((cby - by),2))
+                
+                
+                   // return opacity  
+                   if(curR < dist) return 0.3;
+                   else {
+                       if(rMode === "2d") {
+                            // update 2d-farthest point
+                            if(dist > farthestRadius) {
+                                farthestRadius = dist;
+                                farthestIdx = d[2];
+                            }
+                        }
+                       // update ND-farthest point
+                       else {
+                        let NDDist = NDDistance(data[d[2]].raw, data[cbidx].raw);
+                            if(NDDist > farthestRadius) {
+                                farthestRadius = NDDist;
+                                farthestIdx = d[2];
+                            }
+                        }
+                       return 0.8;
+                   }
+            });
+            
+            console.log(rMode);
+            
+            
+
+            const farthestNDRadius = NDDistance(data[cbidx].raw, data[farthestIdx].raw);
+
+
+            // find contained point in ND space
+            let NDContainedIdices = {}
+            for(let i = 0; i < data.length; i++) {
+                let curNDRadius = NDDistance(data[cbidx].raw, data[i].raw);
+                if(curNDRadius <= farthestNDRadius) 
+                    NDContainedIdices[i] = true;
+                else NDContainedIdices[i] = false;
+            }
+
+            svg.selectAll("circle")
+               .attr("fill", d => {
+                   if(d === undefined) return "blue";
+                   if(NDContainedIdices[d[2]]) return "red";
+                   else return "blue";
+
+               })
+        }
+    }, [isCb, rMode])
 
     return (
         <div style={{width: props.width * 1.1}}>
-            <H5>{props.method.toUpperCase()} embedding result of {props.dataset.toUpperCase()} dataset</H5>
+            <H5>{props.method.toUpperCase()} embedding result ({props.dataset.toUpperCase()} dataset)</H5>
+            <RadioWrapper>
+                <RadioGroup row aria-label="gender" name="gender1" value={rMode} onChange={handleChange}>
+                    <FormControlLabel value="2d" control={<Radio />} label="2D radius" />
+                    <FormControlLabel value="nd" control={<Radio />} label="ND radius" />
+                </RadioGroup>
+            </RadioWrapper>
             <svg id={"scatterplot" + props.dataset + props.method}></svg>
         </div>
     )
@@ -116,6 +222,13 @@ const H5 = styled.h5`
     font-size: 1.1em; 
     text-align: center;
 `;
+
+const RadioWrapper = styled.div`
+    justify-content: center;
+    display: flex;
+    alignIterms: 'center';
+
+`
 
 export default FimifView;
 

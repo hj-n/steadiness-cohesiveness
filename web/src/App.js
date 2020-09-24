@@ -19,6 +19,12 @@ function App() {
         height={size}
         width={size}
       />
+      <FimifView
+        method="tsne"
+        dataset="swiss_roll"
+        height={size}
+        width={size}
+      />
     </div>
   );
 }
