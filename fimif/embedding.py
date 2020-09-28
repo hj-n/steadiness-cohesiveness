@@ -32,8 +32,8 @@ class SpheresEmbedding(Embedding):
             raise Exception("spheres data length unmatching error")
         for idx, raw_datum in enumerate(raw_data):
             datum_set = {}
-            datum_set["raw"] = raw_datum[:-1]
-            datum_set["emb"] = emb_data[idx][:-1]
+            datum_set["raw"] = [ float(el) for el in raw_datum[:-1] ]
+            datum_set["emb"] = [ float(el) for el in emb_data[idx][:-1] ]
             datum_set["label"] = raw_datum[-1]
             self.data.append(datum_set)
         self.method_name = method_name

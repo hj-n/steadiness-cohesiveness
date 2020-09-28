@@ -14,7 +14,7 @@ function App() {
   return (
     <div>
       <Header/>
-      <FimifWrapper>
+      {/* <FimifWrapper>
         <FimifView
           method="tsne"
           dataset="sphere"
@@ -53,13 +53,42 @@ function App() {
           labelNum = {10}
           metric = "cosine_similarity"
         />
-      </FimifWrapper>
+      </FimifWrapper> */}
       <FimifWrapper>
         <FimifView
           method="umato"
           dataset="spheres"
-          height={size}
-          width= {size}
+          height={size * 0.5}
+          width= {size * 0.5}
+          isLabel={true}
+          labelNum = {10}
+          metric = "euclidean"
+        />
+        <FimifView
+          method="umap"
+          dataset="spheres"
+          height={size * 0.5}
+          width= {size * 0.5}
+          isLabel={true}
+          labelNum = {10}
+          metric = "euclidean"
+        />
+      </FimifWrapper>
+      <FimifWrapper>
+        <FimifView
+          method="tsne"
+          dataset="spheres"
+          height={size * 0.5}
+          width= {size * 0.5}
+          isLabel={true}
+          labelNum = {10}
+          metric = "euclidean"
+        />
+        <FimifView
+          method="pca"
+          dataset="spheres"
+          height={size * 0.5}
+          width= {size * 0.5}
           isLabel={true}
           labelNum = {10}
           metric = "euclidean"
