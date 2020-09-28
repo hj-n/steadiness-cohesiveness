@@ -32,8 +32,6 @@ class SpheresEmbedding(Embedding):
             raise Exception("spheres data length unmatching error")
         for idx, raw_datum in enumerate(raw_data):
             datum_set = {}
-            if(idx == 0):
-                print(raw_datum)
             datum_set["raw"] = raw_datum[:-1]
             datum_set["emb"] = emb_data[idx][:-1]
             datum_set["label"] = raw_datum[-1]
