@@ -54,6 +54,17 @@ function App() {
           metric = "cosine_similarity"
         />
       </FimifWrapper>
+      <FimifWrapper>
+        <FimifView
+          method="umato"
+          dataset="spheres"
+          height={size}
+          width= {size}
+          isLabel={true}
+          labelNum = {10}
+          metric = "euclidean"
+        />
+      </FimifWrapper>
     </div>
   );
 }

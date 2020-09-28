@@ -24,8 +24,26 @@ class Embedding:
         info = [self.data_name, self.method_name]
         return info
 
-    
+## Generates Spheres embedding with pre-computed raw / emb data
+class SpheresEmbedding(Embedding):
+    def __init__(self, data_name, raw_data, emb_data, method_name):
+        Embedding.__init__(self, data_name)
+        if (len(raw_data) != len(emb_data)):
+            raise Exception("spheres data length unmatching error")
+        for idx, raw_datum in enumerate(raw_data):
+            datum_set = {}
+            if(idx == 0):
+                print(raw_datum)
+            datum_set["raw"] = raw_datum[:-1]
+            datum_set["emb"] = emb_data[idx][:-1]
+            datum_set["label"] = raw_datum[-1]
+            self.data.append(datum_set)
+        self.method_name = method_name
+        self.size = len(raw_data)
 
+
+
+## Generates TSNE Embedding with given data
 class TsneEmbedding(Embedding):
     def __init__(self, data_name, hd_data, label=None, metric='euclidean'):
         Embedding.__init__(self, data_name)
