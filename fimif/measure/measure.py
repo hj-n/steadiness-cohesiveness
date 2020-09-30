@@ -20,7 +20,7 @@ class FimifMeasure:
                  cluster_shape = "circle",     # shape of generated 2D cluster : "circle" or "convexhull"
                  k = 4,                        # k value for knn
                  cluster_seed_num = 20,        # number of seed points to form a random cluster 
-                 iter = 1000,                  # number of iterations
+                 iter = 200,                   # number of iterations (200 is enough, usually...)
                  class_num = None              # If not given, calculated
                 ):
         self.data = data
@@ -73,31 +73,36 @@ class FimifMeasure:
     # Evaluate the avg missing family proportion
     def evaluate(self):
 
-        start = time.time()
+        # start = time.time()
 
-        sum = 0
-        error = 0
-        for _ in range(self.iter):
-            cluster = self.__random_cluster()
-            back_projection = self.__backward_projected_result(cluster)
-            cluster_set  = set(cluster)
-            backward_set = set(back_projection)
-            missing_families = backward_set - cluster_set
-            if(len(backward_set) == 0):
-                error += 1
-                continue
-            proportion = len(missing_families) / len(backward_set)
-            sum += proportion
-            self.log.append(proportion)
+        # sum = 0
+        # error = 0
+        # for _ in range(self.iter):
+        #     cluster = self.__random_cluster()
+        #     back_projection = self.__backward_projected_result(cluster)
+        #     cluster_set  = set(cluster)
+        #     backward_set = set(back_projection)
+        #     missing_families = backward_set - cluster_set
+        #     if(len(backward_set) == 0):
+        #         error += 1
+        #         continue
+        #     proportion = len(missing_families) / len(backward_set)
+        #     sum += proportion
+        #     self.log.append(proportion)
         
 
-        self.avg_proportion = sum / (self.iter - error)
-        print("Avg val:", self.avg_proportion)
+        # self.avg_proportion = sum / (self.iter - error)
+        # print("Avg val:", self.avg_proportion)
         
-        end = time.time()
-        print("Elpased time for measurement:", end - start, "seconds")
+        # end = time.time()
+        # print("Elpased time for measurement:", end - start, "seconds")
 
-
+        cluster = self.__random_cluster()
+        back_projection = self.__backward_projected_result(cluster)
+        cluster_set  = set(cluster)
+        backward_set = set(back_projection)
+        missing_families = backward_set - cluster_set
+       
        
 
 
@@ -167,7 +172,22 @@ class FimifMeasure:
             return result
         def convexhull_backward():
             # TODO
-            return []
+            cluster = range(500)
+            raw_points = self.raw[cluster].tolist()
+            print(raw_points)
+            # print(raw_points)
+            hull = ConvexHullWithScipy(raw_points)
+            result = []
+            # for idx, point in enumerate(self.raw):
+            #     if hull.is_in_hull(point):
+            #         result.append(idx)
+            # print(hull.is_in_hull(self.raw))
+            for idx, bool_val in enumerate(hull.is_in_hull(self.raw)):
+                if bool_val:
+                    result.append(idx)
+            print(len(cluster))
+            print(len(result))
+            return result
         def convexhull_approx_backward():
             # TODO
             return []

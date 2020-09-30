@@ -85,7 +85,7 @@ function App() {
           metric = "euclidean"
         />
         <FimifView
-          method="pca"
+          method="topoae"
           dataset="spheres"
           height={size * 0.5}
           width= {size * 0.5}
