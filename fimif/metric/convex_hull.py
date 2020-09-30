@@ -1,8 +1,6 @@
 import abc
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull, Delaunay
-import time
 
 
 # Convex Hull Interface
@@ -46,13 +44,11 @@ class ConvexHullWithScipy(ConvexHullABC):
 
 
 class ConvexHullApprox(ConvexHullABC):
-    __init__(self, data):
+    def __init__(self, data):
         ConvexHullABC.__init__(self, data)
-
 
     def __compute_convex_hull(self):
         pass
 
     def is_in_hull(self, points):
         pass
-

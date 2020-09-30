@@ -1,3 +1,8 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+from convex_hull import *
 
 ## TEST code for convex hull implementation
 def test_convex_hull_with_scipy(num, dim):
@@ -32,4 +37,4 @@ def test_convex_hull_with_scipy(num, dim):
     if dim == 2:
         plt.show()
 
-test_convex_hull_with_scipy(10000, 5)
+test_convex_hull_with_scipy(30, 2)
