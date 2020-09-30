@@ -25,7 +25,7 @@ class ConvexHullABC:
         pass
 
 
-
+## NOTE Convex Hull implementation with scipy
 ## Quite Scalable for until... ( < 1 seconds in mac mini 2018)
 ## dimension: 5
 ## Convex hull candidate: 10000
@@ -43,6 +43,8 @@ class ConvexHullWithScipy(ConvexHullABC):
         return self.delaunay.find_simplex(points) >= 0
 
 
+## NOTE Approximate Convex Hull implementation
+## Based on "Conputing the approximate convex hull in high dimensions". Sartuouzadeh et al.
 class ConvexHullApprox(ConvexHullABC):
     def __init__(self, data):
         ConvexHullABC.__init__(self, data)

@@ -1,8 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import sys
+
 
 from convex_hull import *
+from measure import *
 
 ## TEST code for convex hull implementation
 def test_convex_hull_with_scipy(num, dim):
@@ -37,4 +40,8 @@ def test_convex_hull_with_scipy(num, dim):
     if dim == 2:
         plt.show()
 
-test_convex_hull_with_scipy(30, 2)
+def test_fimif_measure_vanilla():
+    pass
+
+
+test_fimif_measure_vanilla()

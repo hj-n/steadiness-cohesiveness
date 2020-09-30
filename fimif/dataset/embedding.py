@@ -17,8 +17,6 @@ class Embedding:
         with open(file_name, "w", encoding="utf-8") as json_file:
             json.dump(self.data, json_file, ensure_ascii=False, indent=4)
 
-
-    
     def get_info(self):
         # parses info (indicated in class identifier) and return as string
         info = [self.data_name, self.method_name]

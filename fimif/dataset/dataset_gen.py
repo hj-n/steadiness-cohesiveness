@@ -4,14 +4,14 @@ from array import array
 from os.path  import join
 import tadasets
 
-def swiss_roll(nn, rr):
-    return tadasets.swiss_roll(n=nn, r=rr)
+def swiss_roll(n, r):
+    return tadasets.swiss_roll(n=n, r=r)
 
-def shpere(nn, rr):
-    return tadasets.sphere(n=nn, r=rr)
+def sphere(n, r):
+    return tadasets.sphere(n=n, r=r)
 
-def torus(nn, cc, aa):
-    return tadasets.torus(n=nn, c=cc, a=aa)
+def torus(n, c, a):
+    return tadasets.torus(n=n, c=c, a=a)
 
 
 # MNIST Data Loader Class
