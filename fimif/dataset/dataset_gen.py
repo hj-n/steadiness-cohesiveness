@@ -50,6 +50,6 @@ class MnistDataloader():
 
 def mnist_test():
     # returns image / label data from mnist TEST dataset
-    mnistLoader = MnistDataloader("./data/mnist_test/t10k-images-idx3-ubyte", "./data/mnist_test/t10k-labels-idx1-ubyte")
+    mnistLoader = MnistDataloader("./raw_data/mnist_test/t10k-images-idx3-ubyte", "./raw_data/mnist_test/t10k-labels-idx1-ubyte")
     return mnistLoader.load_data()
     
