@@ -42,16 +42,76 @@ def test_convex_hull_with_scipy(num, dim):
         plt.show()
 
 def test_fimif_measure_vanilla():
-    file = open("./json/swiss_roll_tsne.json", "r") 
+    print("TSNE-SPHERES")
+    file = open("./json/spheres_tsne.json", "r") 
     data = json.load(file)
     measure = FimifMeasure(
                            data=data, 
                            boundary="hyperball", 
-                           cluster_selection="entire", 
+                           cluster_selection="class", 
                            cluster_shape="circle",
                            k=4, 
-                           cluster_seed_num=2,
+                           cluster_seed_num=4,
                            iter=1000,
+                           class_num=11,
+                          )
+    measure.evaluate()
+    print("UMAP-SPHERES")
+    file = open("./json/spheres_umap.json", "r") 
+    data = json.load(file)
+    measure = FimifMeasure(
+                           data=data, 
+                           boundary="hyperball", 
+                           cluster_selection="class", 
+                           cluster_shape="circle",
+                           k=4, 
+                           cluster_seed_num=4,
+                           iter=1000,
+                           class_num=11,
+                          )
+    measure.evaluate()
+    print("PCA-SPHERES")
+    file = open("./json/spheres_pca.json", "r") 
+    data = json.load(file)
+    measure = FimifMeasure(
+                           data=data, 
+                           boundary="hyperball", 
+                           cluster_selection="class", 
+                           cluster_shape="circle",
+                           k=4, 
+                           cluster_seed_num=4,
+                           iter=1000,
+                           class_num=11,
+                          )
+    
+    measure.evaluate()
+    print("TOPOAE-SPHERES")
+    file = open("./json/spheres_topoae.json", "r") 
+    data = json.load(file)
+    measure = FimifMeasure(
+                           data=data, 
+                           boundary="hyperball", 
+                           cluster_selection="class", 
+                           cluster_shape="circle",
+                           k=4, 
+                           cluster_seed_num=4,
+                           iter=1000,
+                           class_num=11,
+                          )
+    
+    measure.evaluate()
+    print("UMATO-SPHERES")
+    file = open("./json/spheres_umato.json", "r") 
+    data = json.load(file)
+    measure = FimifMeasure(
+                           data=data, 
+                           boundary="hyperball", 
+                           cluster_selection="class", 
+                           cluster_shape="circle",
+                           k=4, 
+                           cluster_seed_num=4,
+                           iter=1000,
+                           class_num=11,
                           )
     
     measure.evaluate()

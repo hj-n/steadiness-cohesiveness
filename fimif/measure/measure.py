@@ -20,7 +20,8 @@ class FimifMeasure:
                  cluster_shape = "circle",     # shape of generated 2D cluster : "circle" or "convexhull"
                  k = 4,                        # k value for knn
                  cluster_seed_num = 20,        # number of seed points to form a random cluster 
-                 iter = 1000                   # number of iterations
+                 iter = 1000,                  # number of iterations
+                 class_num = None              # If not given, calculated
                 ):
         self.data = data
         self.boundary = boundary
@@ -29,11 +30,14 @@ class FimifMeasure:
         self.k = k
         self.cluster_seed_num = cluster_seed_num
         self.iter = iter
+        self.class_num = class_num
 
         self.size = len(data)
         self.dim  = len(data[0]["raw"])
         self.emb  = np.array([ el["emb"] for el in data ])
         self.raw  = np.array([ el["raw"] for el in data ])
+        if "label" in self.data[0]:
+            self.class_label = np.array([ el["label"] for el in data ])
 
         self.log = []
         self.avg_proportion = None
@@ -47,13 +51,14 @@ class FimifMeasure:
 
         # KNN construction for both raw and emb
         start = time.time()
-        self.__knn_raw()
+        # ANCHOR should uncomment it afterward
+        # self.__knn_raw()
         end = time.time()
-        print("KNN RAW construction: ", end - start)
+        # print("KNN RAW construction: ", end - start)
         start = time.time()
         self.__knn_emb()
         end = time.time()
-        print("KNN EMB construction: ", end - start)
+        # print("KNN EMB construction: ", end - start)
 
     def __knn_raw(self):
         raw_tree = KDTree(self.raw)
@@ -92,6 +97,7 @@ class FimifMeasure:
         end = time.time()
         print("Elpased time for measurement:", end - start, "seconds")
 
+
        
 
 
@@ -100,8 +106,20 @@ class FimifMeasure:
         def seeds_from_entire():
             return random.sample(range(self.size), self.cluster_seed_num)
         def seeds_from_class():
-            # TODO
-            return []
+            if "label" not in self.data[0]:
+                raise "Cannot use class-based random selection in current dataset"
+            if self.class_num == None:
+                classes = set(self.class_label)
+                self.class_num = len(classes)
+
+            current_class = random.randint(0, self.class_num - 1)
+
+            current_class_idx_array = []
+            for (idx, label) in enumerate(self.class_label):
+                if label == current_class:
+                    current_class_idx_array.append(idx)
+            return random.sample(current_class_idx_array, self.cluster_seed_num)
+
         def seeds_from_knn():
             # TODO
             return []
