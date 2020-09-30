@@ -19,7 +19,8 @@ class FimifMeasure:
                  cluster_selection = "entire", # cluster selection method : select point within "entire" or "class" or "knn_based"
                  cluster_shape = "circle",     # shape of generated 2D cluster : "circle" or "convexhull"
                  k = 4,                        # k value for knn
-                 cluster_seed_num = 20         # number of seed points to form a random cluster 
+                 cluster_seed_num = 20,        # number of seed points to form a random cluster 
+                 iter = 1000                   # number of iterations
                 ):
         self.data = data
         self.boundary = boundary
@@ -27,11 +28,15 @@ class FimifMeasure:
         self.cluster_shape = cluster_shape
         self.k = k
         self.cluster_seed_num = cluster_seed_num
+        self.iter = iter
 
         self.size = len(data)
         self.dim  = len(data[0]["raw"])
         self.emb  = np.array([ el["emb"] for el in data ])
         self.raw  = np.array([ el["raw"] for el in data ])
+
+        self.log = []
+        self.avg_proportion = None
 
         self.raw_neighbors = None
         self.emb_neighbors = None
@@ -60,18 +65,34 @@ class FimifMeasure:
         neighbors = emb_tree.query(self.emb, self.k + 1, return_distance=False)
         self.emb_neighbors = neighbors[:, 1:]
 
-    # Real evaluation
+    # Evaluate the avg missing family proportion
     def evaluate(self):
-        cluster = self.__random_cluster()
-        back_projection = self.__backward_projected_result(cluster)
-        cluster_set  = set(cluster)
-        backward_set = set(back_projection)
-        missing_families = backward_set - cluster_set
-        print(cluster_set)
-        print(backward_set)
-        print(missing_families)
+
+        start = time.time()
+
+        sum = 0
+        error = 0
+        for _ in range(self.iter):
+            cluster = self.__random_cluster()
+            back_projection = self.__backward_projected_result(cluster)
+            cluster_set  = set(cluster)
+            backward_set = set(back_projection)
+            missing_families = backward_set - cluster_set
+            if(len(backward_set) == 0):
+                error += 1
+                continue
+            proportion = len(missing_families) / len(backward_set)
+            sum += proportion
+            self.log.append(proportion)
         
+
+        self.avg_proportion = sum / (self.iter - error)
+        print("Avg val:", self.avg_proportion)
         
+        end = time.time()
+        print("Elpased time for measurement:", end - start, "seconds")
+
+       
 
 
     def __random_cluster(self):

@@ -50,9 +50,22 @@ def test_fimif_measure_vanilla():
                            cluster_selection="entire", 
                            cluster_shape="circle",
                            k=4, 
-                           cluster_seed_num=2
+                           cluster_seed_num=2,
+                           iter=1000,
                           )
+    
     measure.evaluate()
+
+    avg_log = []
+    sum = 0
+    for idx, val in enumerate(measure.log):
+        sum += val
+        avg_log.append(sum / (idx + 1))
+   
+    plt.plot(range(len(measure.log)), measure.log, 'o')
+    plt.plot(range(len(measure.log)), avg_log, 'v')
+    plt.show()
+
 
 
 test_fimif_measure_vanilla()
