@@ -1,30 +1,46 @@
 import numpy as np
 import time
+import random
 from convex_hull import *
 from enum import Enum
 from sklearn.neighbors import KDTree
+
+## Helper
+from smallest_enclosing_circle import *
+
 
 
 ## Fimif Measure class 
 class FimifMeasure:
     def __init__(
                  self, 
-                 data,             # dataset with raw, emb, (label)
-                 boundary,         # boundary calculation : "hyperball", "convexhull", "convexhull_approx"
-                 point_selection,  # point selection method : select point within "entire" or "class"
-                 k = 4             # default value for k
+                 data,                         # dataset with raw, emb, (label)
+                 boundary = "hyperball",       # boundary calculation : "hyperball", "convexhull", "convexhull_approx"
+                 cluster_selection = "entire", # cluster selection method : select point within "entire" or "class" or "knn_based"
+                 cluster_shape = "circle",     # shape of generated 2D cluster : "circle" or "convexhull"
+                 k = 4,                        # k value for knn
+                 cluster_seed_num = 20         # number of seed points to form a random cluster 
                 ):
         self.data = data
-        self.emb = np.array([ el["emb"] for el in data ])
-        self.raw = np.array([ el["raw"] for el in data ])
         self.boundary = boundary
-        self.point_selection = point_selection
+        self.cluster_selection = cluster_selection
+        self.cluster_shape = cluster_shape
         self.k = k
+        self.cluster_seed_num = cluster_seed_num
+
+        self.size = len(data)
+        self.dim  = len(data[0]["raw"])
+        self.emb  = np.array([ el["emb"] for el in data ])
+        self.raw  = np.array([ el["raw"] for el in data ])
+
         self.raw_neighbors = None
         self.emb_neighbors = None
         self.__initial_setup()
 
     def __initial_setup(self):
+        ## STUB should eliminate time measurement afterward
+
+        # KNN construction for both raw and emb
         start = time.time()
         self.__knn_raw()
         end = time.time()
@@ -33,17 +49,98 @@ class FimifMeasure:
         self.__knn_emb()
         end = time.time()
         print("KNN EMB construction: ", end - start)
-        
 
     def __knn_raw(self):
         raw_tree = KDTree(self.raw)
         neighbors = raw_tree.query(self.raw, self.k + 1, return_distance=False)
         self.raw_neighbors = neighbors[:, 1:]
-        print(self.raw_neighbors)
 
     def __knn_emb(self):
         emb_tree = KDTree(self.emb)
         neighbors = emb_tree.query(self.emb, self.k + 1, return_distance=False)
         self.emb_neighbors = neighbors[:, 1:]
-        print(self.emb_neighbors)
+
+    # Real evaluation
+    def evaluate(self):
+        cluster = self.__random_cluster()
+        back_projection = self.__backward_projected_result(cluster)
+        cluster_set  = set(cluster)
+        backward_set = set(back_projection)
+        missing_families = backward_set - cluster_set
+        print(cluster_set)
+        print(backward_set)
+        print(missing_families)
+        
+        
+
+
+    def __random_cluster(self):
+        
+        def seeds_from_entire():
+            return random.sample(range(self.size), self.cluster_seed_num)
+        def seeds_from_class():
+            # TODO
+            return []
+        def seeds_from_knn():
+            # TODO
+            return []
+        seed_selector = {
+            "entire"   : seeds_from_entire,
+            "class"    : seeds_from_class,
+            "knn_based": seeds_from_knn,
+        }
+
+        def circle_cluster(seeds):
+            points = [(arr[0], arr[1]) for arr in self.emb[seeds]]
+            c = make_circle(points)
+            cluster = []
+            for idx, point in enumerate(self.emb):
+                dist = math.sqrt((point[0] - c[0]) ** 2 + (point[1] - c[1]) ** 2)
+                if (dist <= c[2]):
+                    cluster.append(idx)
+            return cluster
+        def convexhull_cluster(seeds):
+            # TODO
+            return []
+        cluster_constructor = {
+            "circle"        : circle_cluster,
+            "convexhull"    : convexhull_cluster,
+        }
+
+        return cluster_constructor[self.cluster_shape](seed_selector[self.cluster_selection]())
+
+    def __backward_projected_result(self, cluster):
+
+        def hyperball_backward():
+            raw_points = self.raw[cluster]
+            center_approx = raw_points.mean(axis=0)
+            radius = -1
+            for point in raw_points:
+                dist = np.linalg.norm(point - center_approx)
+                if radius < dist:
+                    radius = dist
+            result = []
+            for idx, point in enumerate(self.raw):
+                dist = np.linalg.norm(point - center_approx)
+                if radius >= dist:
+                    result.append(idx)
+
+            return result
+        def convexhull_backward():
+            # TODO
+            return []
+        def convexhull_approx_backward():
+            # TODO
+            return []
+        
+        
+        boundary_selection = {
+            "hyperball"        : hyperball_backward,
+            "convexhull"       : convexhull_backward,
+            "convexhull_approx": convexhull_approx_backward
+        }
+        return boundary_selection[self.boundary]()
+        
+
+    
 

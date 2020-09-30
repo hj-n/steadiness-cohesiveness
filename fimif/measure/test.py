@@ -42,10 +42,17 @@ def test_convex_hull_with_scipy(num, dim):
         plt.show()
 
 def test_fimif_measure_vanilla():
-    file = open("./json/spheres_pca.json", "r") 
+    file = open("./json/swiss_roll_tsne.json", "r") 
     data = json.load(file)
-    measure = FimifMeasure(data, "convexhull", "class", k=4)
-    
+    measure = FimifMeasure(
+                           data=data, 
+                           boundary="hyperball", 
+                           cluster_selection="entire", 
+                           cluster_shape="circle",
+                           k=4, 
+                           cluster_seed_num=2
+                          )
+    measure.evaluate()
 
 
 test_fimif_measure_vanilla()
