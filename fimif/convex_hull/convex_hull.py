@@ -15,7 +15,6 @@ class ConvexHullABC:
         self.size = len(data)
         self.dim  = len(data[0])
         self.hull = None       # final convex hull
-        self.delaunay = None
 
     @abc.abstractmethod
     def __compute_convex_hull(self):
@@ -46,8 +45,10 @@ class ConvexHullWithScipy(ConvexHullABC):
         return self.delaunay.find_simplex(points) >= 0
 
 
+
+
 ## TEST code for convex hull implementation
-def test_convex_hull(num, dim):
+def test_convex_hull_with_scipy(num, dim):
     points = np.random.rand(num, dim)
 
     # Convex hull construction
@@ -79,4 +80,4 @@ def test_convex_hull(num, dim):
     if dim == 2:
         plt.show()
 
-test_convex_hull(10000, 5)
+test_convex_hull_with_scipy(10000, 5)
