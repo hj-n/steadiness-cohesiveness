@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import sys
+import json
 
 
 from convex_hull import *
@@ -41,7 +42,10 @@ def test_convex_hull_with_scipy(num, dim):
         plt.show()
 
 def test_fimif_measure_vanilla():
-    pass
+    file = open("./json/spheres_pca.json", "r") 
+    data = json.load(file)
+    measure = FimifMeasure(data, "convexhull", "class", k=4)
+    
 
 
 test_fimif_measure_vanilla()
