@@ -172,21 +172,12 @@ class FimifMeasure:
             return result
         def convexhull_backward():
             # TODO
-            cluster = range(500)
             raw_points = self.raw[cluster].tolist()
-            print(raw_points)
-            # print(raw_points)
             hull = ConvexHullWithScipy(raw_points)
             result = []
-            # for idx, point in enumerate(self.raw):
-            #     if hull.is_in_hull(point):
-            #         result.append(idx)
-            # print(hull.is_in_hull(self.raw))
             for idx, bool_val in enumerate(hull.is_in_hull(self.raw)):
                 if bool_val:
                     result.append(idx)
-            print(len(cluster))
-            print(len(result))
             return result
         def convexhull_approx_backward():
             # TODO
