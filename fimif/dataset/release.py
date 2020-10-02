@@ -17,7 +17,7 @@ PATH = PATH_TO_MEASURE
 data = swiss_roll(n=4000, r=10)
 
 start = time.time()
-emb_tsne = TsneEmbedding("swiss_roll", data, metric="cosine")
+emb_tsne = TsneEmbedding("swiss_roll", data, metric="euclidean")
 end   = time.time()
 hp.print_time_spent(start, end, emb_tsne.get_info())
 emb_tsne.print_file(path=PATH)
@@ -28,7 +28,7 @@ emb_tsne.print_file(path=PATH)
 data = sphere(n=1000, r=10)
 
 start = time.time()
-emb_tsne = TsneEmbedding("sphere", data, metric="cosine")
+emb_tsne = TsneEmbedding("sphere", data, metric="euclidean")
 end   = time.time()
 hp.print_time_spent(start, end, emb_tsne.get_info())
 emb_tsne.print_file(path=PATH)
@@ -49,7 +49,7 @@ emb_tsne.print_file(path=PATH)
 
 ### TSNE with mnist & Euclidean distance ###
 start = time.time()
-emb_tsne = TsneEmbedding("mnist_test_euclidean", data, label=label, metric="cosine")
+emb_tsne = TsneEmbedding("mnist_test_euclidean", data, label=label, metric="euclidean")
 end   = time.time()
 hp.print_time_spent(start, end, emb_tsne.get_info())
 emb_tsne.print_file(path=PATH)

@@ -36,12 +36,10 @@ class ConvexHullWithScipy(ConvexHullABC):
         self.__compute_convex_hull()
 
     def __compute_convex_hull(self):
+        
         self.hull = ConvexHull(self.data)
-        # print(self.data)
         self.hull_vertices = self.hull.points[np.unique(self.hull.simplices)]
         hull_vertices = [self.data[i] for i in self.hull.vertices]
-        # print(self.hull_vertices)
-        # print(hull_vertices)
         self.delaunay = Delaunay(hull_vertices)
  
     def is_in_hull(self, points):

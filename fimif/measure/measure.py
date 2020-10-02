@@ -8,6 +8,8 @@ from sklearn.neighbors import KDTree
 ## Helper
 from smallest_enclosing_circle import *
 
+import tadasets
+
 
 
 ## Fimif Measure class 
@@ -73,36 +75,29 @@ class FimifMeasure:
     # Evaluate the avg missing family proportion
     def evaluate(self):
 
-        # start = time.time()
+        start = time.time()
 
-        # sum = 0
-        # error = 0
-        # for _ in range(self.iter):
-        #     cluster = self.__random_cluster()
-        #     back_projection = self.__backward_projected_result(cluster)
-        #     cluster_set  = set(cluster)
-        #     backward_set = set(back_projection)
-        #     missing_families = backward_set - cluster_set
-        #     if(len(backward_set) == 0):
-        #         error += 1
-        #         continue
-        #     proportion = len(missing_families) / len(backward_set)
-        #     sum += proportion
-        #     self.log.append(proportion)
+        sum = 0
+        error = 0
+        for _ in range(self.iter):
+            cluster = self.__random_cluster()
+            back_projection = self.__backward_projected_result(cluster)
+            cluster_set  = set(cluster)
+            backward_set = set(back_projection)
+            missing_families = backward_set - cluster_set
+            if(len(backward_set) == 0):
+                error += 1
+                continue
+            proportion = len(missing_families) / len(backward_set)
+            sum += proportion
+            self.log.append(proportion)
         
 
-        # self.avg_proportion = sum / (self.iter - error)
-        # print("Avg val:", self.avg_proportion)
+        self.avg_proportion = sum / (self.iter - error)
+        print("Avg val:", self.avg_proportion)
         
-        # end = time.time()
-        # print("Elpased time for measurement:", end - start, "seconds")
-
-        cluster = self.__random_cluster()
-        back_projection = self.__backward_projected_result(cluster)
-        cluster_set  = set(cluster)
-        backward_set = set(back_projection)
-        missing_families = backward_set - cluster_set
-       
+        end = time.time()
+        print("Elpased time for measurement:", end - start, "seconds")
        
 
 
@@ -172,12 +167,13 @@ class FimifMeasure:
             return result
         def convexhull_backward():
             # TODO
-            raw_points = self.raw[cluster].tolist()
+            raw_points = self.raw[cluster]
             hull = ConvexHullWithScipy(raw_points)
             result = []
             for idx, bool_val in enumerate(hull.is_in_hull(self.raw)):
                 if bool_val:
                     result.append(idx)
+            result = set(result).union(set(cluster))    ## add missing boundaries by adding original cluster idx
             return result
         def convexhull_approx_backward():
             # TODO

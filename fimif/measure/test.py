@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import time
 import sys
 import json
-
+import tadasets
 
 from convex_hull import *
 from measure import *
@@ -65,8 +65,8 @@ def test_fimif_measure_vanilla():
                            cluster_selection="entire", 
                            cluster_shape="circle",
                            k=4, 
-                           cluster_seed_num=2,
-                           iter=200,
+                           cluster_seed_num=4,
+                           iter=1000,
                            class_num=11,
                           )
     measure.evaluate()
@@ -79,25 +79,25 @@ def test_fimif_measure_vanilla():
                            cluster_selection="entire", 
                            cluster_shape="circle",
                            k=4, 
-                           cluster_seed_num=2,
-                           iter=200,
+                           cluster_seed_num=4,
+                           iter=1000,
                            class_num=11,
                           )
     measure.evaluate()
 
     
 
-    # avg_log = []
-    # sum = 0
-    # for idx, val in enumerate(measure.log):
-    #     sum += val
-    #     avg_log.append(sum / (idx + 1))
+    avg_log = []
+    sum = 0
+    for idx, val in enumerate(measure.log):
+        sum += val
+        avg_log.append(sum / (idx + 1))
    
-    # plt.plot(range(len(measure.log)), measure.log, 'o')
-    # plt.plot(range(len(measure.log)), avg_log, 'v')
-    # plt.show()
+    plt.plot(range(len(measure.log)), measure.log, 'o')
+    plt.plot(range(len(measure.log)), avg_log, 'v')
+    plt.show()
 
 
 
-# test_fimif_measure_vanilla()
+test_fimif_measure_vanilla()
 
