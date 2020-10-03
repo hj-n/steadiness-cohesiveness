@@ -57,8 +57,12 @@ class ConvexHullApprox(ConvexHullABC):
     def __compute_convex_hull(self):
         z = np.random.rand(3)
         S = np.random.rand(30, 3)
-        x = self.__distance_to__hull(z, S)
-        print(x)
+
+        z = np.array([3., 3.])
+        S = np.array([[1., 0.], [0., 1.], [1., 1.], [0., 0.], [1.5, 1.5]])
+
+        dist = self.__distance_to__hull(z, S)
+        print(dist)
     
     # INPUT  z: target point (d), S: points set (n X d)
     # OUTPUT distance (the result of quadratic programming)
@@ -75,10 +79,11 @@ class ConvexHullApprox(ConvexHullABC):
         b = np.array([1.])
         lb = np.zeros(n)
 
-       
         x = solve_qp(P=P, q=q, A=A, b=b, lb=lb)
-        return x
 
+        interior_point = (S.T * x).T.sum(axis=0)
+        dist = np.linalg.norm(z - interior_point)
+        return dist
 
         
     
