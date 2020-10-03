@@ -142,8 +142,71 @@ def test_plot_approx_convex_hull():
     plt.show()
 
 
+def test_approx_convex_hull_speed():
+
+    def test_for_dim(dim, data_num, test_num):
+        
+
+        print("=====================================")
+        print(data_num, "data points,", dim, "dimensions")
+        data = np.random.rand(data_num, dim)
+
+        print("#### GENERATION TIME ####")
+        ## CONVEX Hull Generation    
+        start = time.time()
+        convex_hull_scipy = ConvexHullWithScipy(data)
+        end = time.time()
+        print("Time elapsed (scipy ver.) :", end - start, "seconds")
+
+        start = time.time()
+        convex_hull_approx = ConvexHullApprox(data, 0.5, 0.000001)
+        end = time.time()
+        print("Time elapsed (approx ver.):", end - start, "seconds")
+
+        ## TESTING for 4000 outer points
+
+        random_data = np.random.rand(test_num, dim)
+        outside_scipy = []
+        outside_approx = []
+
+
+        print("#### TESTING TIME ####")
+        start = time.time()
+        outside_scipy = np.invert(convex_hull_scipy.is_in_hull(random_data))
+        end = time.time()
+        print("Time elapsed (scipy ver.) :", end - start, "seconds")
+
+        start = time.time()
+        outside_approx = np.invert(convex_hull_approx.is_in_hull(random_data))
+        end = time.time()
+        print("Time elapsed (approx ver.):", end - start, "seconds")
+
+        outside_scipy_idx = list(np.array(range(4000))[outside_scipy])
+        outside_approx_idx = list(np.array(range(4000))[outside_approx])
+
+        outside_scipy_array = random_data[outside_scipy]
+        outside_approx_array = random_data[outside_approx]
+
+        difference_set = set(outside_approx_idx) - set(outside_scipy_idx)
+
+        print("====== TEST RESULT ======")
+        print("Total random point tested:", 4000)
+        print("REAL   outside points num:", len(outside_scipy_array))
+        print("APPROX outside points num:", len(outside_approx_array))
+        print("Difference               :", len(difference_set))
+        print("Error rate               :", float(len(difference_set)) / 4000)
+        print("=========================")
+        print("=====================================")
+
+
+
+    for i in range(2, 13):
+        test_for_dim(i, 100, 4000)
+
     
-test_plot_approx_convex_hull()
+    
+
+test_approx_convex_hull_speed()
 
 
 
