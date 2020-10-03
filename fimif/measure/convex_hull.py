@@ -1,5 +1,6 @@
 import abc
 import numpy as np
+import copy
 from scipy.spatial import ConvexHull, Delaunay
 from qpsolvers import solve_qp
 
@@ -63,22 +64,100 @@ class ConvexHullApprox(ConvexHullABC):
 
 
     def __compute_convex_hull(self):
-        extreme_points = set()      # for convex hull
-        S = set(range(len(self.data)))   # original points
-        V = len(S) * self.vertices_limit_ratio
+        E = set()      # for convex hull (holds INDEX)
+        S = set(range(len(self.data)))   # original points INDEX
+        e_max_num = len(S) * self.vertices_limit_ratio
+
         current_error = float('inf')
-        while(len(extreme_points) < V and current_error > self.error):
-            break
+        while(len(E) < e_max_num and current_error > self.error):
+            print(current_error)
+            # print(E)
+            candidate, error, interior_points = self.__find_next_point(S, E)
+            E_origin = E
+            E.add(candidate)
+            S = S - interior_points
+            current_error = error
+            
+            
 
 
-        # z = np.random.rand(3)
-        # S = np.random.rand(30, 3)
+            if len(E) > 1:
+                E_list = list(E)
+                E_data = self.data[E_list]
+                interior_in_E = set()
 
-        # z = np.array([0.5, 0.5])
-        # S = np.array([[1., 0.], [0., 1.], [1., 1.], [0., 0.], [1.5, 1.5]])
+                E_copy = copy.deepcopy(E)
+                
+                for point_idx in E:
+                    E_copy.remove(point_idx)
+                    if -1e-9 < self.__distance_to_hull(self.data[point_idx], self.data[list(E_copy)]) < 1e-9:
+                        interior_in_E.add(point_idx)
+                    E_copy.add(point_idx)
+                E -= interior_in_E
+            
 
-        # dist = self.__distance_to_hull(z, S)
-        # print(dist)
+
+        self.hull_vertices = list(E)
+            
+
+    def __find_next_point(self, S, E):
+        ## data extraction by idx
+        
+        I = S - E
+        N = len(I)
+        S = list(S)
+        E = list(E)
+
+        S_data = self.data[S]
+        E_data = self.data[E]
+
+        indicies = np.zeros(N)
+        max_arr = np.zeros(N)
+        matrix = np.zeros((N, N))
+
+        for idx in range(N):
+            # print(S_data[0].shape)
+            # print(E_data.shape)
+            # print(np.array([S_data[point_idx]]).shape)
+            # # print(np.concatenate((E_data, S_data[point_idx]), axis=0).shape)
+            # print(point_idx)
+            dist = self.__distance_to_hull(S_data[0], 
+                                           np.concatenate((E_data, np.array([S_data[idx]])), axis=0))
+            matrix[0][idx] = dist 
+            max_arr[idx] = dist 
+        candidate_idx = np.argmin(max_arr)
+        indicies = indicies.astype(int)
+        indicies[candidate_idx] += 1
+
+        while indicies[candidate_idx] < N:
+            # print(indicies[candidate_idx])
+            # print(S_data[indicies[candidate_idx]])
+            # print()
+            dist = self.__distance_to_hull(S_data[indicies[candidate_idx]], 
+                                           np.concatenate((E_data, np.array([S_data[candidate_idx]])), axis=0))
+            matrix[indicies[candidate_idx]][candidate_idx] = dist
+            max_arr[candidate_idx] = max_arr[candidate_idx] if max_arr[candidate_idx] > dist else dist
+            candidate_idx = np.argmin(max_arr)
+            indicies[candidate_idx] += 1
+        # print(len(max_arr))
+        error = max_arr[candidate_idx]
+        interior_points = set()
+
+        # print(len(S))
+        # print(len(E))
+
+        I.remove(S[candidate_idx])
+        I = list(I)
+
+        for i in range(N):
+            val = matrix[i][candidate_idx]
+            if -1e-9 < val < 1e-9:
+                if S[i] in I:
+                    interior_points.add(S[i])
+        # print("interior", len(interior_points))
+        return S[candidate_idx], error, interior_points
+
+
     
     # INPUT  z: target point (d), S: points set (n X d)
     # OUTPUT distance (the result of quadratic programming)
@@ -88,7 +167,7 @@ class ConvexHullApprox(ConvexHullABC):
         n, d = S.shape
 
         P = np.dot(S, S.T)
-        P += np.eye(P.shape[0]) * 0.0000000000001
+        P += np.eye(P.shape[0]) * 0.00000000001
         q = - np.dot(S, z).reshape((n,))
         A = np.ones(n)
         b = np.array([1.])

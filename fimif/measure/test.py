@@ -100,8 +100,20 @@ def test_fimif_measure_vanilla():
 
 
 def test_convex_hull_approx():
-    data = tadasets.swiss_roll(n=300, r=10)
-    convex_hull = ConvexHullApprox(data, 0.5, 0.01)
+    data = tadasets.swiss_roll(n=100, r=10)
+    convex_hull_approx = ConvexHullApprox(data, 0.5, 0.00001)
+    convex_hull_scipy = ConvexHullWithScipy(data)
+
+    scipy_vertices = set(convex_hull_scipy.hull.vertices)
+    approx_vertices = set(convex_hull_approx.hull_vertices)
+
+    difference = scipy_vertices - approx_vertices
+
+    print(scipy_vertices)
+    print(approx_vertices)
+    print(difference)
     
 test_convex_hull_approx()
+
+
 
