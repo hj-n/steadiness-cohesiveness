@@ -23,7 +23,10 @@ class FimifMeasure:
                  k = 4,                        # k value for knn
                  cluster_seed_num = 20,        # number of seed points to form a random cluster 
                  iter = 200,                   # number of iterations (200 is enough, usually...)
-                 class_num = None              # If not given, calculated
+                 class_num = None,             # If not given, calculated
+                 vertices_limit_ratio = None,  # for approx convex hull
+                 error = None,                 # for approx convex hull
+                 show_error = False            # for convex hull
                 ):
         self.data = data
         self.boundary = boundary
@@ -33,6 +36,9 @@ class FimifMeasure:
         self.cluster_seed_num = cluster_seed_num
         self.iter = iter
         self.class_num = class_num
+        self.vertices_limit_ratio = vertices_limit_ratio
+        self.error = error
+        self.show_error = show_error
 
         self.size = len(data)
         self.dim  = len(data[0]["raw"])
@@ -166,7 +172,6 @@ class FimifMeasure:
 
             return result
         def convexhull_backward():
-            # TODO
             raw_points = self.raw[cluster]
             hull = ConvexHullWithScipy(raw_points)
             result = []
@@ -176,8 +181,17 @@ class FimifMeasure:
             result = set(result).union(set(cluster))    ## add missing boundaries by adding original cluster idx
             return result
         def convexhull_approx_backward():
-            # TODO
-            return []
+            if(self.vertices_limit_ratio == None or self.error == None):
+                raise "Missing argument for Approximate Convex hull"
+
+            raw_points = self.raw[cluster]
+            hull = ConvexHullApprox(raw_points, self.vertices_limit_ratio, self.error, self.show_error)
+            result = []
+            for idx, bool_val in enumerate(hull.is_in_hull(self.raw)):
+                if bool_val:
+                    result.append(idx)
+            result = set(result).union(set(cluster))    ## add missing boundaries by adding original cluster idx
+            return result
         
         
         boundary_selection = {

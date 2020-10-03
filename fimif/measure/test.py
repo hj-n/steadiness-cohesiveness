@@ -57,6 +57,9 @@ def test_fimif_measure_vanilla():
     #                        class_num=11,
     #                       )
     # measure.evaluate()
+
+    iteration = 2
+
     print("SWISS_ROLL_HYPERBALL")
     file = open("./json/swiss_roll_tsne.json", "r") 
     data = json.load(file)
@@ -67,7 +70,7 @@ def test_fimif_measure_vanilla():
                            cluster_shape="circle",
                            k=4, 
                            cluster_seed_num=4,
-                           iter=1000,
+                           iter=iteration,
                            class_num=11,
                           )
     measure.evaluate()
@@ -81,8 +84,25 @@ def test_fimif_measure_vanilla():
                            cluster_shape="circle",
                            k=4, 
                            cluster_seed_num=4,
-                           iter=1000,
+                           iter=iteration,
                            class_num=11,
+                          )
+    measure.evaluate()
+    print("SWISS_ROLL_CONVEXHULL")
+    file = open("./json/swiss_roll_tsne.json", "r") 
+    data = json.load(file)
+    measure = FimifMeasure(
+                           data=data, 
+                           boundary="convexhull_approx", 
+                           cluster_selection="entire", 
+                           cluster_shape="circle",
+                           k=4, 
+                           cluster_seed_num=2,
+                           iter=iteration,
+                           class_num=11,
+                           vertices_limit_ratio=0.4,
+                           error = 0.000001,
+                           show_error=True
                           )
     measure.evaluate()
 
@@ -141,7 +161,7 @@ def test_plot_approx_convex_hull():
 
     plt.show()
 
-
+## TEST code for the acceleration of approximate convex hull 
 def test_approx_convex_hull_speed():
 
     def test_for_dim(dim, data_num, test_num):
@@ -200,13 +220,13 @@ def test_approx_convex_hull_speed():
 
 
 
-    for i in range(2, 13):
-        test_for_dim(i, 100, 4000)
+    for i in range(2, 9):
+        test_for_dim(i, 200, 4000)
 
     
     
 
 test_approx_convex_hull_speed()
 
-
+# test_fimif_measure_vanilla()
 

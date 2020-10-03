@@ -174,4 +174,4 @@ class ConvexHullApprox(ConvexHullABC):
         
     
     def is_in_hull(self, points):
-        return [self.__distance_to_hull(point, self.data[self.hull_vertices]) < self.error for point in points]
+        return [self.__distance_to_hull(point, self.data[self.hull_vertices]) < 1e-9 for point in points]

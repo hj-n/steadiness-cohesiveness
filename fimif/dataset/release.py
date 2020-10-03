@@ -14,7 +14,7 @@ PATH = PATH_TO_MEASURE
 
 #################################
 ### TSNE with swiss_roll data ###
-data = swiss_roll(n=4000, r=10)
+data = swiss_roll(n=400, r=10)
 
 start = time.time()
 emb_tsne = TsneEmbedding("swiss_roll", data, metric="euclidean")
