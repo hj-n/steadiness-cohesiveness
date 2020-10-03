@@ -98,22 +98,52 @@ def test_fimif_measure_vanilla():
     plt.plot(range(len(measure.log)), avg_log, 'v')
     plt.show()
 
-
-def test_convex_hull_approx():
-    data = tadasets.swiss_roll(n=100, r=10)
-    convex_hull_approx = ConvexHullApprox(data, 0.5, 0.00001)
+## TEST code for plotting the result of approx / scipy-based convex hull
+def test_plot_approx_convex_hull():
+    dim = 2
+    data = np.random.rand(100, dim)
+    convex_hull_approx = ConvexHullApprox(data, 0.5, 0.000001)
     convex_hull_scipy = ConvexHullWithScipy(data)
 
     scipy_vertices = set(convex_hull_scipy.hull.vertices)
     approx_vertices = set(convex_hull_approx.hull_vertices)
 
-    difference = scipy_vertices - approx_vertices
+    scipy_vertices_coor = data[convex_hull_scipy.hull.vertices]
+    approx_vertices_coor = data[convex_hull_approx.hull_vertices]
 
-    print(scipy_vertices)
-    print(approx_vertices)
-    print(difference)
+    plt.plot(data[:, 0], data[:, 1], 'o')
+
+    random_data = 5 * np.random.rand(4000, dim) - 2.5
+    outside_scipy = []
+    outside_approx = []
+
+    outside_scipy = np.invert(convex_hull_scipy.is_in_hull(random_data))
+    outside_approx = np.invert(convex_hull_approx.is_in_hull(random_data))
+
+    outside_scipy_idx = list(np.array(range(4000))[outside_scipy])
+    outside_approx_idx = list(np.array(range(4000))[outside_approx])
+
+    outside_scipy_array = random_data[outside_scipy]
+    outside_approx_array = random_data[outside_approx]
+
+    difference_set = set(outside_approx_idx) - set(outside_scipy_idx)
+
+    print("====== TEST RESULT ======")
+    print("Total random point tested:", 4000)
+    print("REAL   outside points num:", len(outside_scipy_array))
+    print("APPROX outside points num:", len(outside_approx_array))
+    print("Difference               :", len(difference_set))
+    print("Error rate               :", float(len(difference_set)) / 4000)
+    print("=========================")
+
+    plt.plot(outside_approx_array[:, 0], outside_approx_array[:, 1], 'd')
+    plt.plot(outside_scipy_array[:, 0], outside_scipy_array[:, 1], 'v')
+
+    plt.show()
+
+
     
-test_convex_hull_approx()
+test_plot_approx_convex_hull()
 
 
 

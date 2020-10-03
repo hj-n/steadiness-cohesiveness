@@ -55,11 +55,13 @@ class ConvexHullApprox(ConvexHullABC):
                  self, 
                  data, 
                  vertices_limit_ratio,    # max vertices ratio
-                 error                    # limit error for distance
+                 error,                   # limit error for distance
+                 show_error=False          # show error variation
                 ):
         ConvexHullABC.__init__(self, data)
         self.vertices_limit_ratio = vertices_limit_ratio
         self.error = error
+        self.show_error =show_error
         self.__compute_convex_hull()
 
 
@@ -70,17 +72,14 @@ class ConvexHullApprox(ConvexHullABC):
 
         current_error = float('inf')
         while(len(E) < e_max_num and current_error > self.error):
-            print(current_error)
-            # print(E)
+            if self.show_error:
+                print("Current error:", current_error)
             candidate, error, interior_points = self.__find_next_point(S, E)
             E_origin = E
             E.add(candidate)
             S = S - interior_points
             current_error = error
             
-            
-
-
             if len(E) > 1:
                 E_list = list(E)
                 E_data = self.data[E_list]
@@ -116,11 +115,7 @@ class ConvexHullApprox(ConvexHullABC):
         matrix = np.zeros((N, N))
 
         for idx in range(N):
-            # print(S_data[0].shape)
-            # print(E_data.shape)
-            # print(np.array([S_data[point_idx]]).shape)
-            # # print(np.concatenate((E_data, S_data[point_idx]), axis=0).shape)
-            # print(point_idx)
+
             dist = self.__distance_to_hull(S_data[0], 
                                            np.concatenate((E_data, np.array([S_data[idx]])), axis=0))
             matrix[0][idx] = dist 
@@ -130,23 +125,19 @@ class ConvexHullApprox(ConvexHullABC):
         indicies[candidate_idx] += 1
 
         while indicies[candidate_idx] < N:
-            # print(indicies[candidate_idx])
-            # print(S_data[indicies[candidate_idx]])
-            # print()
+
             dist = self.__distance_to_hull(S_data[indicies[candidate_idx]], 
                                            np.concatenate((E_data, np.array([S_data[candidate_idx]])), axis=0))
             matrix[indicies[candidate_idx]][candidate_idx] = dist
             max_arr[candidate_idx] = max_arr[candidate_idx] if max_arr[candidate_idx] > dist else dist
             candidate_idx = np.argmin(max_arr)
             indicies[candidate_idx] += 1
-        # print(len(max_arr))
+
         error = max_arr[candidate_idx]
         interior_points = set()
 
-        # print(len(S))
-        # print(len(E))
-
-        I.remove(S[candidate_idx])
+        if S[candidate_idx] in I:
+            I.remove(S[candidate_idx])
         I = list(I)
 
         for i in range(N):
@@ -183,4 +174,4 @@ class ConvexHullApprox(ConvexHullABC):
         
     
     def is_in_hull(self, points):
-        pass
+        return [self.__distance_to_hull(point, self.data[self.hull_vertices]) < self.error for point in points]
