@@ -101,7 +101,7 @@ def test_fimif_measure_vanilla():
 
 def test_convex_hull_approx():
     data = tadasets.swiss_roll(n=300, r=10)
-    convex_hull = ConvexHullApprox(data)
+    convex_hull = ConvexHullApprox(data, 0.5, 0.01)
     
 test_convex_hull_approx()
 

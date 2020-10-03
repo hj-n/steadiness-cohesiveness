@@ -50,24 +50,39 @@ class ConvexHullWithScipy(ConvexHullABC):
 ## Assumes n dimension
 ## Based on "Conputing the approximate convex hull in high dimensions". Sartuouzadeh et al.
 class ConvexHullApprox(ConvexHullABC):
-    def __init__(self, data):
+    def __init__(
+                 self, 
+                 data, 
+                 vertices_limit_ratio,    # max vertices ratio
+                 error                    # limit error for distance
+                ):
         ConvexHullABC.__init__(self, data)
+        self.vertices_limit_ratio = vertices_limit_ratio
+        self.error = error
         self.__compute_convex_hull()
 
+
     def __compute_convex_hull(self):
-        z = np.random.rand(3)
-        S = np.random.rand(30, 3)
+        extreme_points = set()      # for convex hull
+        S = set(range(len(self.data)))   # original points
+        V = len(S) * self.vertices_limit_ratio
+        current_error = float('inf')
+        while(len(extreme_points) < V and current_error > self.error):
+            break
 
-        z = np.array([3., 3.])
-        S = np.array([[1., 0.], [0., 1.], [1., 1.], [0., 0.], [1.5, 1.5]])
 
-        dist = self.__distance_to__hull(z, S)
-        print(dist)
+        # z = np.random.rand(3)
+        # S = np.random.rand(30, 3)
+
+        # z = np.array([0.5, 0.5])
+        # S = np.array([[1., 0.], [0., 1.], [1., 1.], [0., 0.], [1.5, 1.5]])
+
+        # dist = self.__distance_to_hull(z, S)
+        # print(dist)
     
     # INPUT  z: target point (d), S: points set (n X d)
     # OUTPUT distance (the result of quadratic programming)
-    def __distance_to__hull(self, z, S):
-        
+    def __distance_to_hull(self, z, S):
         S = np.array(S)
         z = np.array(z)
         n, d = S.shape
@@ -84,6 +99,7 @@ class ConvexHullApprox(ConvexHullABC):
         interior_point = (S.T * x).T.sum(axis=0)
         dist = np.linalg.norm(z - interior_point)
         return dist
+
 
         
     
