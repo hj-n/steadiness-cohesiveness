@@ -41,6 +41,7 @@ def test_convex_hull_with_scipy(num, dim):
     if dim == 2:
         plt.show()
 
+## TEST code for vanilla measure
 def test_fimif_measure_vanilla():
     # print("ATSNE-SPHERES")
     # file = open("./json/spheres_atsne.json", "r") 
@@ -98,6 +99,9 @@ def test_fimif_measure_vanilla():
     plt.show()
 
 
-
-test_fimif_measure_vanilla()
+def test_convex_hull_approx():
+    data = tadasets.swiss_roll(n=300, r=10)
+    convex_hull = ConvexHullApprox(data)
+    
+test_convex_hull_approx()
 

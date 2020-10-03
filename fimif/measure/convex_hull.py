@@ -1,6 +1,7 @@
 import abc
 import numpy as np
 from scipy.spatial import ConvexHull, Delaunay
+from qpsolvers import solve_qp
 
 
 # Convex Hull Interface
@@ -36,7 +37,6 @@ class ConvexHullWithScipy(ConvexHullABC):
         self.__compute_convex_hull()
 
     def __compute_convex_hull(self):
-        
         self.hull = ConvexHull(self.data)
         self.hull_vertices = self.hull.points[np.unique(self.hull.simplices)]
         hull_vertices = [self.data[i] for i in self.hull.vertices]
@@ -47,13 +47,40 @@ class ConvexHullWithScipy(ConvexHullABC):
 
 
 ## NOTE Approximate Convex Hull implementation
+## Assumes n dimension
 ## Based on "Conputing the approximate convex hull in high dimensions". Sartuouzadeh et al.
 class ConvexHullApprox(ConvexHullABC):
     def __init__(self, data):
         ConvexHullABC.__init__(self, data)
+        self.__compute_convex_hull()
 
     def __compute_convex_hull(self):
-        pass
+        z = np.random.rand(3)
+        S = np.random.rand(30, 3)
+        x = self.__distance_to__hull(z, S)
+        print(x)
+    
+    # INPUT  z: target point (d), S: points set (n X d)
+    # OUTPUT distance (the result of quadratic programming)
+    def __distance_to__hull(self, z, S):
+        
+        S = np.array(S)
+        z = np.array(z)
+        n, d = S.shape
 
+        P = np.dot(S, S.T)
+        P += np.eye(P.shape[0]) * 0.0000000000001
+        q = - np.dot(S, z).reshape((n,))
+        A = np.ones(n)
+        b = np.array([1.])
+        lb = np.zeros(n)
+
+       
+        x = solve_qp(P=P, q=q, A=A, b=b, lb=lb)
+        return x
+
+
+        
+    
     def is_in_hull(self, points):
         pass
