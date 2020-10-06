@@ -10,7 +10,7 @@ Metric for the evaluation of Dimensionality Embedding, which focuses on **Fi**nd
 ### Installation
 
 ```
-git clone https://github.com/jeonhyun97/fimif.git
+git clone https://github.com/hj-n/fimif.git
 ```
 
 ### Data generation
