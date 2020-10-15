@@ -48,10 +48,36 @@ class Fimif:
 
     def __measure(self):
         x = True
-        for i in range(self.iter):
-            random_cluster = self.__random_cluster_selection(x)
-            clusters = self.__find_groups(random_cluster, x)
-            self.__compute_distortion(clusters, x)
+        false_distortion_weight_list = []
+        missing_distortion_weight_list = []
+        for mode in [True, False]:
+            for i in range(self.iter):
+                random_cluster = self.__random_cluster_selection(mode)
+                clusters = self.__find_groups(random_cluster, mode)
+                current_list = self.__compute_distortion(clusters, mode)
+                if mode:
+                    false_distortion_weight_list += current_list
+                else:
+                    missing_distortion_weight_list += current_list
+
+        false_weight_sum = 0
+        false_distortion_sum = 0
+        for (distortion, weight) in false_distortion_weight_list:
+            false_distortion_sum += distortion * weight
+            false_weight_sum += weight
+        self.score_false = 1 - false_distortion_sum / false_weight_sum 
+        missing_weight_sum = 0
+        missing_distortion_sum = 0
+        for (distortion, weight) in missing_distortion_weight_list:
+            missing_distortion_sum += distortion * weight
+            missing_weight_sum += weight
+        self.score_missing = 1 - missing_distortion_sum / missing_weight_sum 
+
+        print(self.score_false)
+        print(self.score_missing)
+
+        self.score = (1 + self.beta * self.beta) * ((self.score_false * self.score_missing) / (self.beta * self.beta * self.score_false + self.score_missing))
+        print(self.score)
         
 
 
@@ -102,22 +128,17 @@ class Fimif:
                 distortion = None
                 if is_false:
                     mu_group = np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x - np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
-                    distortion = (mu_group - self.min_mu_compress) / (self.max_mu_compress - self.min_mu_compress) if mu_group > 0 else 0
+                    distortion = (mu_group - self.min_mu_compress) / (self.max_mu_compress - self.min_mu_compress) if mu_group > 0 else 0               # discard if mu_group < 0 (not compressed)
                 else:
                     mu_group = - np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x + np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
-                    distortion = (mu_group - self.min_mu_stretch) / (self.max_mu_stretch - self.min_mu_stretch) if mu_group > 0 else 0
+                    distortion = (mu_group - self.min_mu_stretch) / (self.max_mu_stretch - self.min_mu_stretch) if mu_group > 0 else 0                  # discard if mu_group < 0 (not stretched)
                 weight = len(groups[i]) * len(groups[j])
                 distortion_weight_list.append((distortion, weight))
 
 
         return distortion_weight_list
 
-        
 
-
-
-
-        
         
 
     def __initial_dist_setup(self):
@@ -161,11 +182,24 @@ class Fimif:
 
     
 
-file = open("./json/sphere_tsne.json", "r") 
-data = json.load(file)
+def test_file(file_name):
+    file = open("./json/" + file_name + ".json", "r") 
+    data = json.load(file)
 
-raw = np.array([datum["raw"] for datum in data])
-emb = np.array([datum["emb"] for datum in data])
 
-Fimif(raw, emb, iteration=30)
+    raw = np.array([datum["raw"] for datum in data])
+    emb = np.array([datum["emb"] for datum in data])
+
+    print("TEST for", file_name, "data")
+
+    Fimif(raw, emb, iteration=2)
+
+
+
+test_file("spheres_atsne")
+test_file("spheres_pca")
+test_file("spheres_topoae")
+test_file("spheres_tsne")
+test_file("spheres_umap")
+test_file("spheres_umato")
 
