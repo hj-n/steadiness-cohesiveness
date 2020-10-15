@@ -29,6 +29,12 @@ class Fimif:
         ## intermediate variables
         self.raw_neighbors = None
         self.emb_neighbors = None 
+        self.dist_max_x = None    # raw space
+        self.dist_max_y = None    # emb space
+        self.max_mu_stretch = None
+        self.min_mu_stretch = None
+        self.max_mu_compress = None
+        self.min_mu_compress = None 
 
         ## target score
         self.score_missing = None
@@ -36,6 +42,7 @@ class Fimif:
         self.score = None     
 
         self.__initial_knn_graph_setup()
+        self.__initial_dist_setup()
         self.__measure()
 
 
@@ -43,7 +50,7 @@ class Fimif:
         for i in range(self.iter):
             random_cluster = self.__random_cluster_selection(True)
             clusters = self.__find_groups(random_cluster, True)
-            
+
 
 
     def __random_cluster_selection(self, is_false):
@@ -79,6 +86,27 @@ class Fimif:
         
         
 
+    def __initial_dist_setup(self):
+        X = np.zeros((self.N, self.N))
+        Y = np.zeros((self.N, self.N))
+        for i in range(self.N):
+            for j in range(i):
+                X[i][j] = np.linalg.norm(self.raw[i] - self.raw[j])
+                X[j][i] = X[i][j]
+                Y[i][j] = np.linalg.norm(self.emb[i] - self.emb[j])
+                Y[j][i] = Y[i][j]
+        self.dist_max_x = np.max(X)
+        self.dist_max_y = np.max(Y)
+        X = X / self.dist_max_x
+        Y = Y / self.dist_max_y ## normalize
+        D = X - Y 
+        D_max = np.max(D)
+        D_min = np.min(D)
+        self.max_mu_compress = D_max
+        self.min_mu_compress = 0 if D_min < 0 else D_min
+        self.max_mu_stretch = -D_min
+        self.min_mu_stretch = 0 if D_max > 0 else -D_max
+        
 
     
 
