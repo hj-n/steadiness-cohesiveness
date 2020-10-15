@@ -47,9 +47,12 @@ class Fimif:
 
 
     def __measure(self):
+        x = True
         for i in range(self.iter):
-            random_cluster = self.__random_cluster_selection(True)
-            clusters = self.__find_groups(random_cluster, True)
+            random_cluster = self.__random_cluster_selection(x)
+            clusters = self.__find_groups(random_cluster, x)
+            self.__compute_distortion(clusters, x)
+        
 
 
 
@@ -82,6 +85,37 @@ class Fimif:
             clusters.append([random_cluster_list[idx] for idx in cluster])
 
         return clusters
+
+    def __compute_distortion(self, groups, is_false):
+        group_num = len(groups)
+        group_x = [] # ND centroid of groups
+        group_y = [] # 2D centroid of groups
+        for i in range(group_num):
+            group_x.append(np.average(self.raw[groups[i]], axis=0))
+            group_y.append(np.average(self.emb[groups[i]], axis=0))
+
+
+        distortion_weight_list = []
+
+        for i in range(group_num):
+            for j in range(i):
+                distortion = None
+                if is_false:
+                    mu_group = np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x - np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
+                    distortion = (mu_group - self.min_mu_compress) / (self.max_mu_compress - self.min_mu_compress) if mu_group > 0 else 0
+                else:
+                    mu_group = - np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x + np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
+                    distortion = (mu_group - self.min_mu_stretch) / (self.max_mu_stretch - self.min_mu_stretch) if mu_group > 0 else 0
+                weight = len(groups[i]) * len(groups[j])
+                distortion_weight_list.append((distortion, weight))
+
+
+        return distortion_weight_list
+
+        
+
+
+
 
         
         
@@ -133,5 +167,5 @@ data = json.load(file)
 raw = np.array([datum["raw"] for datum in data])
 emb = np.array([datum["emb"] for datum in data])
 
-Fimif(raw, emb, iteration=1)
+Fimif(raw, emb, iteration=30)
 
