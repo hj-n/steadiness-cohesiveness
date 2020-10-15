@@ -4,6 +4,7 @@ import json
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
+from fimifpath import *
 
 
 class Fimif:
@@ -25,6 +26,12 @@ class Fimif:
         self.walk_num = walk_num
         self.max_cluster_num = max_cluster_num
         self.beta = beta
+
+
+        ## variables for FimifPath
+        self.fimifpath_list = []
+        for _ in range(self.N):
+            self.fimifpath_list.append(FimifPath())  ## one fimifPath class object per point 
 
         ## intermediate variables
         self.raw_neighbors = None
@@ -73,11 +80,11 @@ class Fimif:
             missing_weight_sum += weight
         self.score_missing = 1 - missing_distortion_sum / missing_weight_sum 
 
-        print(self.score_false)
-        print(self.score_missing)
 
         self.score = (1 + self.beta * self.beta) * ((self.score_false * self.score_missing) / (self.beta * self.beta * self.score_false + self.score_missing))
-        print(self.score)
+        print("False Score (Precision):", self.score_false)
+        print("False Score (Recall):",self.score_missing)
+        print("F_beta Score:", self.score)
         
 
 
@@ -134,6 +141,13 @@ class Fimif:
                     distortion = (mu_group - self.min_mu_stretch) / (self.max_mu_stretch - self.min_mu_stretch) if mu_group > 0 else 0                  # discard if mu_group < 0 (not stretched)
                 weight = len(groups[i]) * len(groups[j])
                 distortion_weight_list.append((distortion, weight))
+
+                ## The constants which should be send to fimifPath 
+                ## G_i (mine)  : len(group_y[i])   // 굳이 다른 점들 좌표 다 안 받고 평균값 조정해가면서 가능함 개굿
+                ## G_j (yours) : len(group_y[j])
+                ## max_mu, min_mu : depends on is_false
+                ## ND dist : np.linalg.norm(group_x[i] - group_x[j])
+                ## false or missing ? : is_false
 
 
         return distortion_weight_list
@@ -192,7 +206,7 @@ def test_file(file_name):
 
     print("TEST for", file_name, "data")
 
-    Fimif(raw, emb, iteration=2)
+    Fimif(raw, emb, iteration=1000)
 
 
 
