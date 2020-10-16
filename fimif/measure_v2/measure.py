@@ -30,8 +30,8 @@ class Fimif:
 
         ## variables for FimifPath
         self.fimifpath_list = []
-        for _ in range(self.N):
-            self.fimifpath_list.append(FimifPath())  ## one fimifPath class object per point 
+        for i in range(self.N):
+            self.fimifpath_list.append(FimifPath(self.emb[i][0], self.emb[i][1]))  ## one fimifPath class object per point 
 
         ## intermediate variables
         self.raw_neighbors = None
@@ -83,7 +83,7 @@ class Fimif:
 
         self.score = (1 + self.beta * self.beta) * ((self.score_false * self.score_missing) / (self.beta * self.beta * self.score_false + self.score_missing))
         print("False Score (Precision):", self.score_false)
-        print("False Score (Recall):",self.score_missing)
+        print("Missing Score  (Recall):",self.score_missing)
         print("F_beta Score:", self.score)
         
 
@@ -133,27 +133,33 @@ class Fimif:
         for i in range(group_num):
             for j in range(i):
                 distortion = None
+                max_mu = None
+                min_mu = None
                 if is_false:
                     mu_group = np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x - np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
                     distortion = (mu_group - self.min_mu_compress) / (self.max_mu_compress - self.min_mu_compress) if mu_group > 0 else 0               # discard if mu_group < 0 (not compressed)
+                    max_mu, min_mu = self.max_mu_compress, self.min_mu_compress
                 else:
                     mu_group = - np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x + np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
                     distortion = (mu_group - self.min_mu_stretch) / (self.max_mu_stretch - self.min_mu_stretch) if mu_group > 0 else 0                  # discard if mu_group < 0 (not stretched)
+                    max_mu, min_mu = self.max_mu_stretch, self.min_mu_stretch
                 weight = len(groups[i]) * len(groups[j])
                 distortion_weight_list.append((distortion, weight))
 
                 ## The constants which should be send to fimifPath 
-                ## G_i (mine)  : len(group_y[i])   // 굳이 다른 점들 좌표 다 안 받고 평균값 조정해가면서 가능함 개굿
-                ## G_j (yours) : len(group_y[j])
+                ## G_i (mine)  : len(groups[i])   // 굳이 다른 점들 좌표 다 안 받고 평균값 조정해가면서 가능함 개굿
+                ## G_j (yours) : len(groups[j])
                 ## max_mu, min_mu : depends on is_false
                 ## ND dist : np.linalg.norm(group_x[i] - group_x[j])
+                ## centroid : group_y[i] (2D centroid)
                 ## false or missing ? : is_false
+                ND_dist = np.linalg.norm(group_x[i] - group_x[j])
+                for point_idx in groups[i]:
+                    self.fimifpath_list[point_idx].add_group(len(groups[i]), len(groups[j]), max_mu, min_mu, ND_dist, group_y[i], group_y[j], is_false)
+                    
 
 
         return distortion_weight_list
-
-
-        
 
     def __initial_dist_setup(self):
         X = np.zeros((self.N, self.N))
@@ -166,6 +172,8 @@ class Fimif:
                 Y[j][i] = Y[i][j]
         self.dist_max_x = np.max(X)
         self.dist_max_y = np.max(Y)
+        for path in self.fimifpath_list:
+            path.add_max_dists(self.dist_max_x, self.dist_max_y)
         X = X / self.dist_max_x
         Y = Y / self.dist_max_y ## normalize
         D = X - Y 
@@ -175,6 +183,17 @@ class Fimif:
         self.min_mu_compress = 0 if D_min < 0 else D_min
         self.max_mu_stretch = -D_min
         self.min_mu_stretch = 0 if D_max > 0 else -D_max
+        
+    def optimize_path(self):
+        
+        path_list = []
+        for path in self.fimifpath_list:
+            path.optimize()
+            path_list.append(path.get_trace())
+        
+        
+        return path_list
+        
         
 
     
@@ -206,14 +225,18 @@ def test_file(file_name):
 
     print("TEST for", file_name, "data")
 
-    Fimif(raw, emb, iteration=1000)
+    fimif = Fimif(raw, emb, iteration=1000)
+    path_list = fimif.optimize_path()
+    with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
+            json.dump(path_list, json_file, ensure_ascii=False, indent=4)
+    
 
 
 
-test_file("spheres_atsne")
-test_file("spheres_pca")
-test_file("spheres_topoae")
-test_file("spheres_tsne")
-test_file("spheres_umap")
-test_file("spheres_umato")
+test_file("sphere_tsne")
+# test_file("spheres_pca")
+# test_file("spheres_topoae")
+# test_file("spheres_tsne")
+# test_file("spheres_umap")
+# test_file("spheres_umato")
 
