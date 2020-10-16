@@ -14,7 +14,7 @@ class Fimif:
                  emb,     # emb data
                  iteration=1000, # iteration number
                  k=6,     # for constructing knn graph
-                 walk_num=500, # random walk number
+                 walk_num=1000, # random walk number
                  max_cluster_num=20, # max cluster num for x-means clustering
                  beta=1 # beta for F_beta score calculation
                 ):
@@ -70,13 +70,13 @@ class Fimif:
         false_weight_sum = 0
         false_distortion_sum = 0
         for (distortion, weight) in false_distortion_weight_list:
-            false_distortion_sum += distortion * weight
+            false_distortion_sum += distortion * distortion * weight
             false_weight_sum += weight
         self.score_false = 1 - false_distortion_sum / false_weight_sum 
         missing_weight_sum = 0
         missing_distortion_sum = 0
         for (distortion, weight) in missing_distortion_weight_list:
-            missing_distortion_sum += distortion * weight
+            missing_distortion_sum += distortion * distortion * weight
             missing_weight_sum += weight
         self.score_missing = 1 - missing_distortion_sum / missing_weight_sum 
 
