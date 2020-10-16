@@ -34,6 +34,7 @@ hp.print_time_spent(start, end, emb_tsne.get_info())
 emb_tsne.print_file(path=PATH)
 #############################
 
+'''
 #######################
 ### mnist_test data ###
 image, label = mnist_test()
@@ -55,7 +56,7 @@ hp.print_time_spent(start, end, emb_tsne.get_info())
 emb_tsne.print_file(path=PATH)
 
 ######################
-
+'''
 
 ######################
 #### spheres data #### (different to tadaset sphere) 

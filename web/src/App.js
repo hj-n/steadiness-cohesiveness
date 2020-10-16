@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import Header from "./components/Header"
 import FimifView from "./components/FimifView"
+import FimifMap from "./components/FimifMap"
 
 
 
@@ -14,6 +15,13 @@ function App() {
   return (
     <div>
       <Header/>
+      <FimifMap
+        method="tsne"
+        dataset="sphere"
+        height={size}
+        width={size}
+        isLabel={false}
+      />
       {/* <FimifWrapper>
         <FimifView
           method="tsne"
@@ -53,7 +61,7 @@ function App() {
           labelNum = {10}
           metric = "cosine_similarity"
         />
-      </FimifWrapper> */}
+      </FimifWrapper>
       <FimifWrapper>
         <FimifView
           method="umato"
@@ -94,6 +102,7 @@ function App() {
           metric = "euclidean"
         />
       </FimifWrapper>
+       */}
     </div>
   );
 }
