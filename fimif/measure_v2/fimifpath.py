@@ -43,10 +43,10 @@ class FimifPath:
 
     def optimize(self):
         
-        lr = 0.01
+        lr = 0.00005
         
         
-        for _ in range(200):
+        for _ in range(1000):
             
             ## forward pass
             false_loss_sum = 0
@@ -114,6 +114,9 @@ class FimifPath:
             
             y1_grad = missing_y1_grad_sum + false_y1_grad_sum
             y2_grad = missing_y2_grad_sum + false_y2_grad_sum
+
+            # y1_grad = y1_grad / (missing_weight_sum + false_weight_sum)
+            # y2_grad = y2_grad / (missing_weight_sum + false_weight_sum)
             
             self.y1 -= lr * y1_grad
             self.y2 -= lr * y2_grad
@@ -124,9 +127,8 @@ class FimifPath:
             for fg in self.missing_groups:
                 fg["centroid_mine"] = (fg["centroid_mine"] * fg["group_size_mine"] - self.trace[-2] + self.trace[-1]) / fg["group_size_mine"]
                 
-            # print("------")
-            # print(missing_loss_sum, false_loss_sum, missing_loss_sum + false_loss_sum)
-            # print(y1_grad_sum, "," ,y2_grad_sum)
+
+        #     print(missing_loss_sum, false_loss_sum, missing_loss_sum + false_loss_sum)
         # print(self.trace)
             
         

@@ -14,6 +14,8 @@ function FimifMap(props) {
     });
 
     let pathFileName = props.dataset + "_" + props.method + "_path.json";
+    console.log(jsonFileName)
+    console.log(pathFileName)
     let pathData = require("../json/" + pathFileName);
     console.log(pathData)
 
@@ -27,8 +29,30 @@ function FimifMap(props) {
         const height = props.height;
         const margin = { hor: props.width / 20, ver: props.height / 20 };
 
-        const [minX, maxX] = d3.extent(embeddedData, d => d[0]);
-        const [minY, maxY] = d3.extent(embeddedData, d => d[1]);
+        let [minX, maxX] = d3.extent(embeddedData, d => d[0]);
+        let [minY, maxY] = d3.extent(embeddedData, d => d[1]);
+
+        let x = 2.5
+
+        minX = x * minX;
+        maxX = x * maxX;
+        minY = x * minY;
+        maxY = x * maxY;
+
+        // for(let i = 0; i < 1000; i++) {
+        //     for(let j = 0; j < 201; j++) {
+        //     // console.log(pathData[i][0], pathData[i][1])
+        //     minX = minX < pathData[i][j][0] ? minX : pathData[i][j][0] ;
+        //     maxX = maxX > pathData[i][j][0] ? maxX : pathData[i][j][0];
+        //     minY = minY < pathData[i][j][1] ? minY : pathData[i][j][1] ;
+        //     maxY = maxY > pathData[i][j][1] ? maxX : pathData[i][j][1];
+        //     }
+
+        // }
+
+        console.log(minX, maxX)
+        console.log(minY, maxY)
+
 
         const xScale = d3.scaleLinear()
                          .domain([minX, maxX])
@@ -104,13 +128,20 @@ function FimifMap(props) {
                     y: d[1]
                 }
             });
-            console.log(test)
+            // console.log(test)
             svg.append("path")
-               .attr("d", line(test.slice(0, 4)))
+               .attr("d", line(test.slice(0,150)))
                .attr("stroke", "blue")
-               .attr("stroke-width", 3)
-               .attr("fill", null)
+               .attr("stroke-width", 1)
+               .attr("fill", "none")
                .style("opacity", 0.3);
+
+            //    svg.append("path")
+            //    .attr("d", line(test.slice(40, 100)))
+            //    .attr("stroke", "blue")
+            //    .attr("stroke-width", 1)
+            //    .attr("fill", "none")
+            //    .style("opacity", 0.3);
                
         }
     });

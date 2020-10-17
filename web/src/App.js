@@ -17,7 +17,7 @@ function App() {
       <Header/>
       <FimifMap
         method="tsne"
-        dataset="sphere"
+        dataset="sphere2"
         height={size}
         width={size}
         isLabel={false}

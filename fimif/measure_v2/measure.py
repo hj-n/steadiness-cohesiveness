@@ -70,13 +70,13 @@ class Fimif:
         false_weight_sum = 0
         false_distortion_sum = 0
         for (distortion, weight) in false_distortion_weight_list:
-            false_distortion_sum += distortion * distortion * weight
+            false_distortion_sum += distortion * weight
             false_weight_sum += weight
         self.score_false = 1 - false_distortion_sum / false_weight_sum 
         missing_weight_sum = 0
         missing_distortion_sum = 0
         for (distortion, weight) in missing_distortion_weight_list:
-            missing_distortion_sum += distortion * distortion * weight
+            missing_distortion_sum += distortion *  weight
             missing_weight_sum += weight
         self.score_missing = 1 - missing_distortion_sum / missing_weight_sum 
 
@@ -187,7 +187,7 @@ class Fimif:
     def optimize_path(self):
         
         path_list = []
-        for path in self.fimifpath_list:
+        for path in self.fimifpath_list[:1000]:
             path.optimize()
             path_list.append(path.get_trace())
         
@@ -227,7 +227,7 @@ def test_file(file_name):
 
     fimif = Fimif(raw, emb, iteration=1000)
     path_list = fimif.optimize_path()
-    with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
+    with open("./../../web/src/json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
             json.dump(path_list, json_file, ensure_ascii=False, indent=4)
     
 
