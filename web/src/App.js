@@ -22,6 +22,13 @@ function App() {
         width={size}
         isLabel={false}
       />
+      <FimifMap
+        method="tsne"
+        dataset="swiss_roll"
+        height={size}
+        width={size}
+        isLabel={false}
+      />
       {/* <FimifWrapper>
         <FimifView
           method="tsne"
