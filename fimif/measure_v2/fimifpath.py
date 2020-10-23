@@ -41,12 +41,14 @@ class FimifPath:
     def F_grad(self, x):
         return 2 * x
 
-    def optimize(self):
+    def optimize(self, step=1000):
         
         lr = 0.00005
+
+        false_ratio = 1   # monotonic decrease
         
         
-        for _ in range(1000):
+        for i in range(step):
             
             ## forward pass
             false_loss_sum = 0
@@ -112,8 +114,10 @@ class FimifPath:
             ## update step
             ## position update
             
-            y1_grad = missing_y1_grad_sum + false_y1_grad_sum
-            y2_grad = missing_y2_grad_sum + false_y2_grad_sum
+            y1_grad = missing_y1_grad_sum * (1-false_ratio) + false_y1_grad_sum * false_ratio
+            y2_grad = missing_y2_grad_sum * (1-false_ratio) + false_y2_grad_sum * false_ratio
+
+            false_ratio = 1 - ((i + 1) / step) 
 
             # y1_grad = y1_grad / (missing_weight_sum + false_weight_sum)
             # y2_grad = y2_grad / (missing_weight_sum + false_weight_sum)

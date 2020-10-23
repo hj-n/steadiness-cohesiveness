@@ -14,7 +14,7 @@ class Fimif:
                  emb,     # emb data
                  iteration=1000, # iteration number
                  k=6,     # for constructing knn graph
-                 walk_num=1000, # random walk number
+                 walk_num=200, # random walk number
                  max_cluster_num=20, # max cluster num for x-means clustering
                  beta=1 # beta for F_beta score calculation
                 ):
@@ -59,6 +59,10 @@ class Fimif:
         missing_distortion_weight_list = []
         for mode in [True, False]:
             for i in range(self.iter):
+                ## for progress checking
+                if i % 100 = 0:
+                    print(str(i) + "-th iteration completed")
+
                 random_cluster = self.__random_cluster_selection(mode)
                 clusters = self.__find_groups(random_cluster, mode)
                 current_list = self.__compute_distortion(clusters, mode)
@@ -188,7 +192,7 @@ class Fimif:
         
         path_list = []
         for path in self.fimifpath_list[:1000]:
-            path.optimize()
+            path.optimize(200)
             path_list.append(path.get_trace())
         
         

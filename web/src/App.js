@@ -15,14 +15,14 @@ function App() {
   return (
     <div>
       <Header/>
-      {/* <FimifMap
+      <FimifMap
         method="tsne"
-        dataset="sphere2"
+        dataset="sphere"
         height={size}
         width={size}
         isLabel={false}
-      /> */}
-      <FimifWrapper>
+      />
+      {/* <FimifWrapper>
         <FimifView
           method="tsne"
           dataset="sphere"
@@ -101,7 +101,7 @@ function App() {
           labelNum = {10}
           metric = "euclidean"
         />
-      </FimifWrapper>
+      </FimifWrapper> */}
       
     </div>
   );
