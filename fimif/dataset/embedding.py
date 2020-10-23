@@ -14,6 +14,7 @@ class Embedding:
     def print_file(self, path=None):
         identifier = self.data_name + "_" + self.method_name + ".json"
         file_name = "./" + identifier if path == None else path + identifier
+        print(file_name)
         with open(file_name, "w", encoding="utf-8") as json_file:
             json.dump(self.data, json_file, ensure_ascii=False, indent=4)
 

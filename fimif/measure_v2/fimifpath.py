@@ -114,10 +114,10 @@ class FimifPath:
             ## update step
             ## position update
             
-            y1_grad = missing_y1_grad_sum * (1-false_ratio) + false_y1_grad_sum * false_ratio
-            y2_grad = missing_y2_grad_sum * (1-false_ratio) + false_y2_grad_sum * false_ratio
+            y1_grad = missing_y1_grad_sum * (1 - false_ratio) + false_y1_grad_sum * false_ratio
+            y2_grad = missing_y2_grad_sum * (1  -false_ratio) + false_y2_grad_sum * false_ratio
 
-            false_ratio = 1 - ((i + 1) / step) 
+            false_ratio = (1 - ((i + 1) / step))
 
             # y1_grad = y1_grad / (missing_weight_sum + false_weight_sum)
             # y2_grad = y2_grad / (missing_weight_sum + false_weight_sum)

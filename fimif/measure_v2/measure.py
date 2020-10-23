@@ -60,7 +60,7 @@ class Fimif:
         for mode in [True, False]:
             for i in range(self.iter):
                 ## for progress checking
-                if i % 100 = 0:
+                if i % 100 == 0:
                     print(str(i) + "-th iteration completed")
 
                 random_cluster = self.__random_cluster_selection(mode)
@@ -192,7 +192,7 @@ class Fimif:
         
         path_list = []
         for path in self.fimifpath_list[:1000]:
-            path.optimize(200)
+            path.optimize(1000)
             path_list.append(path.get_trace())
         
         
@@ -231,13 +231,13 @@ def test_file(file_name):
 
     fimif = Fimif(raw, emb, iteration=1000)
     path_list = fimif.optimize_path()
-    with open("./../../web/src/json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
+    with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
             json.dump(path_list, json_file, ensure_ascii=False, indent=4)
     
 
 
 
-test_file("sphere_tsne")
+test_file("swiss_roll_tsne")
 # test_file("spheres_pca")
 # test_file("spheres_topoae")
 # test_file("spheres_tsne")
