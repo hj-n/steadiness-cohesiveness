@@ -39,17 +39,6 @@ function FimifMap(props) {
         minY = x * minY;
         maxY = x * maxY;
 
-        // for(let i = 0; i < 1000; i++) {
-        //     for(let j = 0; j < 201; j++) {
-        //     // console.log(pathData[i][0], pathData[i][1])
-        //     minX = minX < pathData[i][j][0] ? minX : pathData[i][j][0] ;
-        //     maxX = maxX > pathData[i][j][0] ? maxX : pathData[i][j][0];
-        //     minY = minY < pathData[i][j][1] ? minY : pathData[i][j][1] ;
-        //     maxY = maxY > pathData[i][j][1] ? maxX : pathData[i][j][1];
-        //     }
-
-        // }
-
 
         const xScale = d3.scaleLinear()
                          .domain([minX, maxX])
@@ -60,9 +49,7 @@ function FimifMap(props) {
                          .range([0, height]);
 
         const colorDomain = [...Array(props.labelNum).keys()]
-        // console.log(colorDomain);
         const colorRange = ["#4e79a7","#f28e2c","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#e15759","#5E4FA2"];
-        // const colorRange = ["#3288BD", "#5E4FA2", "#66C2A5", "#ABDDA4", "#E6F598", "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"];
         const colorScale =  d3.scaleOrdinal()
             .domain(colorDomain)
             .range(colorRange);
@@ -72,7 +59,7 @@ function FimifMap(props) {
         yS.current = yScale;
         
         
-        const radius = 3;
+        const radius = 1.75;
 
         // ANCHOR SVG width / height setting
         const svg = d3.select("#scatterplot" + props.dataset + props.method)
@@ -128,21 +115,29 @@ function FimifMap(props) {
             });
             // console.log(test)
 
+            let length = 1000
+
             svg.append("g")
                .selectAll("path")
-               .data(test.slice(0,1000))
+               .data(test.slice(0,length))
                .join(
                    enter => enter.
                     append("path")
                     .attr("d", (d,i,nodes) => {
-                        
                         return line([test[i], test[i+1]])
                     })
-                    .attr("stroke", "blue")
-                    .attr("stroke-width", 1)
+                    .attr("stroke", (d) => {
+                        if(props.isLabel) {
+                            return colorScale(data[embeddedData[i][2]].label);
+                        }   
+                        else return "blue";
+                    })
+                    .attr("stroke-width", (d, i) => {
+                        return 3 - 3 * (i / length);
+                    })
                     .attr("fill", "none")
                     .style("opacity", (d, i) => {
-                        return 1 - (i / 1000);
+                        return 1 - (i / length);
                     })
                )
 
