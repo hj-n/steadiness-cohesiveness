@@ -18,8 +18,7 @@ class Fimif:
                  walk_num=200,             # random walk number,
                  clustering="hdbscan",     # clustering methods for high dimensions
                  clustering_parameter={},  # clustering paramters for currnet clustering method
-                 beta=1,                   # beta for F_beta score calculation
-                 lr=0.00005
+                 beta=1                    # beta for F_beta score calculation
                 ):
         self.raw = raw
         self.emb = emb
@@ -35,7 +34,7 @@ class Fimif:
         ## variables for FimifPath
         self.fimifpath_list = []
         for i in range(self.N):
-            self.fimifpath_list.append(FimifPath(self.emb[i][0], self.emb[i][1], lr))  ## one fimifPath class object per point 
+            self.fimifpath_list.append(FimifPath(self.emb[i][0], self.emb[i][1]))  ## one fimifPath class object per point 
 
         ## intermediate variables
         self.raw_neighbors = None
@@ -217,6 +216,8 @@ class Fimif:
                 Y[j][i] = Y[i][j]
         self.dist_max_x = np.max(X)
         self.dist_max_y = np.max(Y)
+
+        print(self.dist_max_y)
         for path in self.fimifpath_list:
             path.add_max_dists(self.dist_max_x, self.dist_max_y)
         X = X / self.dist_max_x
@@ -264,7 +265,7 @@ class Fimif:
 
 
 
-def test_file(file_name, lr):
+def test_file(file_name):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
 
@@ -273,7 +274,7 @@ def test_file(file_name, lr):
     emb = np.array([datum["emb"] for datum in data])
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=2000, lr=lr)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num=200)
     path_list = fimif.optimize_path()
     with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
             json.dump(path_list, json_file, ensure_ascii=False, indent=4)
@@ -281,15 +282,17 @@ def test_file(file_name, lr):
 
 
 
-test_file("mnist_test_1_euclidean_tsne", 0.00001)
-test_file("mnist_test_2_euclidean_tsne", 0.00002)
-test_file("mnist_test_3_euclidean_tsne", 0.00003)
-test_file("mnist_test_4_euclidean_tsne", 0.00004)
-test_file("mnist_test_5_euclidean_tsne", 0.00005)
-test_file("mnist_test_6_euclidean_tsne", 0.00006)
-test_file("mnist_test_7_euclidean_tsne", 0.00007)
-test_file("mnist_test_8_euclidean_tsne", 0.00008)
-test_file("mnist_test_9_euclidean_tsne", 0.00009)
+test_file("sphere_tsne")
+test_file("sphere_umap")
+test_file("sphere_pca")
+# test_file("mnist_test_2_euclidean_tsne", 0.00002)
+# test_file("mnist_test_3_euclidean_tsne", 0.00003)
+# test_file("mnist_test_4_euclidean_tsne", 0.00004)
+# test_file("mnist_test_5_euclidean_tsne", 0.00005)
+# test_file("mnist_test_6_euclidean_tsne", 0.00006)
+# test_file("mnist_test_7_euclidean_tsne", 0.00007)
+# test_file("mnist_test_8_euclidean_tsne", 0.00008)
+# test_file("mnist_test_9_euclidean_tsne", 0.00009)
 # test_file("spheres_pca")
 # test_file("spheres_topoae")
 # test_file("spheres_tsne")

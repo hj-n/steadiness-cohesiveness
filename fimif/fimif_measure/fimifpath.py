@@ -5,13 +5,12 @@ import numpy as np
 
 
 class FimifPath:
-    def __init__(self, y1, y2, lr):
+    def __init__(self, y1, y2):
         self.false_groups = []
         self.missing_groups = []
         self.y1 = y1
         self.y2 = y2        ## initial 2D coordinates
         self.trace = [[y1, y2]]
-        self.lr = lr
         
     def get_trace(self):
         return self.trace
@@ -44,7 +43,7 @@ class FimifPath:
 
     def optimize(self, step=1000):
         
-        lr = self.lr
+        lr = 0.005 / self.dist_max_x
 
         false_ratio = 1   # monotonic decrease
         
