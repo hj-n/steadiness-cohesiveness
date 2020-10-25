@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import json
+import hdbscan
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
@@ -10,13 +11,15 @@ from fimifpath import *
 class Fimif:
     def __init__(
                  self,
-                 raw,     # raw data
-                 emb,     # emb data
-                 iteration=1000, # iteration number
-                 k=6,     # for constructing knn graph
-                 walk_num=200, # random walk number
-                 max_cluster_num=20, # max cluster num for x-means clustering
-                 beta=1 # beta for F_beta score calculation
+                 raw,                      # raw data
+                 emb,                      # emb data
+                 iteration=1000,           # iteration number
+                 k=6,                      # for constructing knn graph
+                 walk_num=200,             # random walk number,
+                 clustering="hdbscan",     # clustering methods for high dimensions
+                 clustering_parameter={},  # clustering paramters for currnet clustering method
+                 beta=1,                   # beta for F_beta score calculation
+                 lr=0.00005
                 ):
         self.raw = raw
         self.emb = emb
@@ -24,14 +27,15 @@ class Fimif:
         self.iter = iteration
         self.k   = k
         self.walk_num = walk_num
-        self.max_cluster_num = max_cluster_num
+        self.clustering = clustering
+        self.clustering_parameter = clustering_parameter
         self.beta = beta
 
 
         ## variables for FimifPath
         self.fimifpath_list = []
         for i in range(self.N):
-            self.fimifpath_list.append(FimifPath(self.emb[i][0], self.emb[i][1]))  ## one fimifPath class object per point 
+            self.fimifpath_list.append(FimifPath(self.emb[i][0], self.emb[i][1], lr))  ## one fimifPath class object per point 
 
         ## intermediate variables
         self.raw_neighbors = None
@@ -108,20 +112,64 @@ class Fimif:
         return random_cluster
 
     def __find_groups(self, random_cluster, is_false):
-        random_cluster_list = list(random_cluster)
-        xmean_instance = None
-        if is_false:
-            xmean_instance = xmeans(self.raw[random_cluster_list], kmax=self.max_cluster_num, tolerance=0.01)
-        else:
-            xmean_instance = xmeans(self.emb[random_cluster_list], kmax=self.max_cluster_num, tolerance=0.01)
         
-        xmean_instance.process()
-        clusters_idx = xmean_instance.get_clusters()
         clusters = []
-        for cluster in clusters_idx:
-            clusters.append([random_cluster_list[idx] for idx in cluster])
+        random_cluster_list = list(random_cluster)
+        
+        ## parameters for hdbscan
+        min_cluster_size = self.clustering_parameter["min_cluster_size"] if "min_cluster_size" in self.clustering_parameter else 5
+        min_samples      = self.clustering_parameter["min_samples"] if "min_samples" in self.clustering_parameter else 1
+
+        if is_false: 
+            if self.clustering == "hdbscan":
+                clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
+                clusterer.fit(self.raw[random_cluster_list])
+                clusters_idx = {}
+                for (i,label) in enumerate(clusterer.labels_):
+                    if label in clusters_idx:
+                        clusters_idx[label].append(i)
+                    else:
+                        clusters_idx[label] = [i]
+
+                for key in clusters_idx:
+                    if key == -1:
+                        for single_cluster in clusters_idx[key]:
+                            clusters.append([random_cluster_list[single_cluster]])
+                    else:
+                        cluster = clusters_idx[key]
+                        clusters.append([random_cluster_list[idx] for idx in cluster])
+           
+            if self.clustering == "xmeans":
+                max_cluster_num = self.clustering_paramter["max_cluster_num"] if "max_cluster_num" in self.clustering_parameter else 20   ## defualt value:20
+                xmean_instance = xmeans(self.raw[random_cluster_list], kmax=max_cluster_num, tolerance=0.01)
+                xmean_instance.process()
+                clusters_idx = xmean_instance.get_clusters()
+                for cluster in clusters_idx:
+                    clusters.append([random_cluster_list[idx] for idx in cluster])
+
+        else:   ## embedding clustering  default:hdbscan
+            clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
+            clusterer.fit(self.emb[random_cluster_list])
+            clusters_idx = {}
+            for (i,label) in enumerate(clusterer.labels_):
+                if label in clusters_idx:
+                    clusters_idx[label].append(i)
+                else:
+                    clusters_idx[label] = [i]
+
+            for key in clusters_idx:
+                if key == -1:
+                    for single_cluster in clusters_idx[key]:
+                        clusters.append([random_cluster_list[single_cluster]])
+                else:
+                    cluster = clusters_idx[key]
+                    clusters.append([random_cluster_list[idx] for idx in cluster])
+
+
+     
 
         return clusters
+
 
     def __compute_distortion(self, groups, is_false):
         group_num = len(groups)
@@ -150,13 +198,6 @@ class Fimif:
                 weight = len(groups[i]) * len(groups[j])
                 distortion_weight_list.append((distortion, weight))
 
-                ## The constants which should be send to fimifPath 
-                ## G_i (mine)  : len(groups[i])   // 굳이 다른 점들 좌표 다 안 받고 평균값 조정해가면서 가능함 개굿
-                ## G_j (yours) : len(groups[j])
-                ## max_mu, min_mu : depends on is_false
-                ## ND dist : np.linalg.norm(group_x[i] - group_x[j])
-                ## centroid : group_y[i] (2D centroid)
-                ## false or missing ? : is_false
                 ND_dist = np.linalg.norm(group_x[i] - group_x[j])
                 for point_idx in groups[i]:
                     self.fimifpath_list[point_idx].add_group(len(groups[i]), len(groups[j]), max_mu, min_mu, ND_dist, group_y[i], group_y[j], is_false)
@@ -195,7 +236,6 @@ class Fimif:
             path.optimize(1000)
             path_list.append(path.get_trace())
         
-        
         return path_list
         
         
@@ -211,15 +251,20 @@ class Fimif:
         raw_tree = KDTree(self.raw)
         neighbors = raw_tree.query(self.raw, self.k + 1, return_distance=False)
         self.raw_neighbors = neighbors[:, 1:]
+        print("K-NN graph for raw data finished!!")
 
     def __knn_emb(self):
         emb_tree = KDTree(self.emb)
         neighbors = emb_tree.query(self.emb, self.k + 1, return_distance=False)
         self.emb_neighbors = neighbors[:, 1:]
+        print("K-NN graph for emb data finished!!")
 
-    
 
-def test_file(file_name):
+
+
+
+
+def test_file(file_name, lr):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
 
@@ -228,8 +273,7 @@ def test_file(file_name):
     emb = np.array([datum["emb"] for datum in data])
 
     print("TEST for", file_name, "data")
-
-    fimif = Fimif(raw, emb, iteration=1000)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num=2000, lr=lr)
     path_list = fimif.optimize_path()
     with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
             json.dump(path_list, json_file, ensure_ascii=False, indent=4)
@@ -237,7 +281,15 @@ def test_file(file_name):
 
 
 
-test_file("swiss_roll_tsne")
+test_file("mnist_test_1_euclidean_tsne", 0.00001)
+test_file("mnist_test_2_euclidean_tsne", 0.00002)
+test_file("mnist_test_3_euclidean_tsne", 0.00003)
+test_file("mnist_test_4_euclidean_tsne", 0.00004)
+test_file("mnist_test_5_euclidean_tsne", 0.00005)
+test_file("mnist_test_6_euclidean_tsne", 0.00006)
+test_file("mnist_test_7_euclidean_tsne", 0.00007)
+test_file("mnist_test_8_euclidean_tsne", 0.00008)
+test_file("mnist_test_9_euclidean_tsne", 0.00009)
 # test_file("spheres_pca")
 # test_file("spheres_topoae")
 # test_file("spheres_tsne")
