@@ -17,18 +17,18 @@ function App() {
       <Header/>
       <FimifMap
         method="tsne"
-        dataset="sphere"
+        dataset="mnist_test_1_euclidean"
         height={size}
         width={size}
-        isLabel={false}
+        isLabel={true}
       />
-      <FimifMap
+      {/* <FimifMap
         method="tsne"
         dataset="swiss_roll"
         height={size}
         width={size}
         isLabel={false}
-      />
+      /> */}
       {/* <FimifWrapper>
         <FimifView
           method="tsne"
