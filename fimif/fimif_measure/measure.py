@@ -274,7 +274,7 @@ def test_file(file_name):
     emb = np.array([datum["emb"] for datum in data])
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=200)
+    fimif = Fimif(raw, emb, iteration=500, walk_num=300)
     path_list = fimif.optimize_path()
     with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
             json.dump(path_list, json_file, ensure_ascii=False, indent=4)
@@ -282,9 +282,15 @@ def test_file(file_name):
 
 
 
-test_file("sphere_tsne")
-test_file("sphere_umap")
-test_file("sphere_pca")
+# test_file("sphere_tsne")
+# test_file("sphere_umap")
+# test_file("sphere_pca")
+# test_file("swiss_roll_tsne")
+# test_file("swiss_roll_umap")
+# test_file("swiss_roll_pca")
+test_file("mnist_sampled_tsne")
+test_file("mnist_sampled_umap")
+test_file("mnist_sampled_pca")
 # test_file("mnist_test_2_euclidean_tsne", 0.00002)
 # test_file("mnist_test_3_euclidean_tsne", 0.00003)
 # test_file("mnist_test_4_euclidean_tsne", 0.00004)

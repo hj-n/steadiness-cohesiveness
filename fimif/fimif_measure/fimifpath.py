@@ -43,7 +43,7 @@ class FimifPath:
 
     def optimize(self, step=1000):
         
-        lr = 0.005 / self.dist_max_x
+        lr = 0.0025 / self.dist_max_x
 
         false_ratio = 1   # monotonic decrease
         
