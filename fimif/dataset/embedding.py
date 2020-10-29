@@ -1,6 +1,8 @@
 import numpy as np
 import json
 from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+import umap
 
 
 class Embedding:
@@ -42,20 +44,59 @@ class SpheresEmbedding(Embedding):
 
 ## Generates TSNE Embedding with given data
 class TsneEmbedding(Embedding):
-    def __init__(self, data_name, hd_data, label=None, metric='euclidean'):
+    def __init__(self, data_name, hd_data, label=np.array([]), metric='euclidean'):
         Embedding.__init__(self, data_name)
         embedded = TSNE(n_components=2, metric=metric).fit_transform(hd_data)
+
+        label = label.tolist()
         for idx, datum in enumerate(hd_data):
             datum_set = {}
             datum_set["raw"] = datum.tolist()
             datum_set["emb"] = embedded[idx].tolist()
-            if(label != None):
+            if(len(label) != 0):
                 datum_set["label"] = label[idx]
             self.data.append(datum_set)
         
         self.size = hd_data.shape[0]
         self.method_name = "tsne"
 
+## Generates TSNE Embedding with given data
+class PcaEmbedding(Embedding):
+    def __init__(self, data_name, hd_data, label=np.array([])):
+        Embedding.__init__(self, data_name)
+        pca = PCA(n_components=2)
+        embedded = pca.fit_transform(hd_data)
+
+        label = label.tolist()
+        for idx, datum in enumerate(hd_data):
+            datum_set = {}
+            datum_set["raw"] = datum.tolist()
+            datum_set["emb"] = embedded[idx].tolist()
+            if(len(label) != 0):
+                datum_set["label"] = label[idx]
+            self.data.append(datum_set)
+        
+        self.size = hd_data.shape[0]
+        self.method_name = "pca"
+
+## Generates UMAP Embedding with given data
+class UmapEmbedding(Embedding):
+    def __init__(self, data_name, hd_data, label=np.array([])):
+        Embedding.__init__(self, data_name)
+        embedded = umap.UMAP().fit_transform(hd_data)
+        
+
+        label = label.tolist()
+        for idx, datum in enumerate(hd_data):
+            datum_set = {}
+            datum_set["raw"] = datum.tolist()
+            datum_set["emb"] = embedded[idx].tolist()
+            if(len(label) != 0):
+                datum_set["label"] = label[idx]
+            self.data.append(datum_set)
+        
+        self.size = hd_data.shape[0]
+        self.method_name = "umap"
 
 
     
