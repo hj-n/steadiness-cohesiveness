@@ -32,7 +32,7 @@ function FimifMap(props) {
         let [minX, maxX] = d3.extent(embeddedData, d => d[0]);
         let [minY, maxY] = d3.extent(embeddedData, d => d[1]);
 
-        let x = 1.25
+        let x = 2
 
         minX = x * minX;
         maxX = x * maxX;
@@ -97,7 +97,7 @@ function FimifMap(props) {
         //             .y(d => d.y) // set the y values for the line generator 
         //             .curve(d3.curveMonotoneX) // apply smoothing to the line
 
-        let line = d3.line(d => xScale(d.x), d => yScale(d.y)).curve(d3.curveMonotoneX)
+        let line = d3.line(d => xScale(d.x), d => yScale(d.y))
                                                              
                      
         
@@ -115,11 +115,11 @@ function FimifMap(props) {
             });
             // console.log(test)
 
-            let length = 1000
+            let length = 250;
 
             svg.append("g")
                .selectAll("path")
-               .data(test.slice(0,length))
+               .data(test.slice(0, length))
                .join(
                    enter => enter.
                     append("path")
@@ -133,7 +133,7 @@ function FimifMap(props) {
                         else return "blue";
                     })
                     .attr("stroke-width", (d, i) => {
-                        return 3 - 3 * (i / length);
+                        return 1.3 - 1.3 * (i / length);
                     })
                     .attr("fill", "none")
                     .style("opacity", (d, i) => {

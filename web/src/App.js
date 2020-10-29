@@ -9,19 +9,135 @@ import FimifMap from "./components/FimifMap"
 
 function App() {
 
-  const size = 1000;
-
+  const size = 300;
 
   return (
     <div>
       <Header/>
-      <FimifMap
-        method="tsne"
-        dataset="mnist_test_1_euclidean"
+      
+      <FimifWrapper>
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_0"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_1"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_3"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_4"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_5"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+
+
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_6"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+        </FimifWrapper>
+<FimifWrapper>
+        <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_7"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_8"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+
+
+
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_9"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_10"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+       
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_11"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_12"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      <FimifView
+          method="none"
+          dataset="multiclass_swissroll_oneside_13"
+          height={size}
+          width={size}
+          isLabel={true}
+          metric = "euclidean"
+        />
+      
+        </FimifWrapper>
+
+      {/* <FimifMap
+        method="pca"
+        dataset="swiss_roll"
         height={size}
         width={size}
-        isLabel={true}
-      />
+        isLabel={false}
+      /> */}
       {/* <FimifMap
         method="tsne"
         dataset="swiss_roll"

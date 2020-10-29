@@ -89,7 +89,7 @@ function FimifView(props) {
                         })
                         .attr("cx", d => xScale(d[0]))
                         .attr("cy", d => yScale(d[1]))
-                        .style("opacity", 0.3)
+                        .style("opacity", 0.8)
                         .attr("r", radius);
                }
            );
@@ -258,13 +258,13 @@ function FimifView(props) {
 
     return (
         <div style={{width: props.width * 1.1, margin: 40}}>
-            <H5>{props.method.toUpperCase()} embedding result ({props.dataset.toUpperCase()} dataset)</H5>
-            <RadioWrapper>
+            <H5>{props.dataset.toUpperCase()} dataset</H5>
+            {/* <RadioWrapper>
                 <RadioGroup row aria-label="gender" name="gender1" value={rMode} onChange={handleChange}>
                     <FormControlLabel value="2d" control={<Radio />} label="2D radius" />
                     <FormControlLabel value="nd" control={<Radio />} label="ND radius" />
                 </RadioGroup>
-            </RadioWrapper>
+            </RadioWrapper> */}
             <svg id={"scatterplot" + props.dataset + props.method}></svg>
         </div>
     )
