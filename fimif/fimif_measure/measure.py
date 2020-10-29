@@ -64,7 +64,8 @@ class Fimif:
             for i in range(self.iter):
                 ## for progress checking
                 if i % 100 == 0:
-                    print(str(i) + "-th iteration completed")
+                    # print(str(i) + "-th iteration completed")
+                    pass
 
                 random_cluster = self.__random_cluster_selection(mode)
                 clusters = self.__find_groups(random_cluster, mode)
@@ -274,13 +275,27 @@ def test_file(file_name):
     emb = np.array([datum["emb"] for datum in data])
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=500, walk_num=300)
-    path_list = fimif.optimize_path()
-    with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
-            json.dump(path_list, json_file, ensure_ascii=False, indent=4)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num=400)
+    # path_list = fimif.optimize_path()
+    # with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
+    #         json.dump(path_list, json_file, ensure_ascii=False, indent=4)
     
 
 
+test_file("multiclass_swissroll_oneside_0_none")
+test_file("multiclass_swissroll_oneside_1_none")
+test_file("multiclass_swissroll_oneside_2_none")
+test_file("multiclass_swissroll_oneside_3_none")
+test_file("multiclass_swissroll_oneside_4_none")
+test_file("multiclass_swissroll_oneside_5_none")
+test_file("multiclass_swissroll_oneside_6_none")
+test_file("multiclass_swissroll_oneside_7_none")
+test_file("multiclass_swissroll_oneside_8_none")
+test_file("multiclass_swissroll_oneside_9_none")
+test_file("multiclass_swissroll_oneside_10_none")
+test_file("multiclass_swissroll_oneside_11_none")
+test_file("multiclass_swissroll_oneside_12_none")
+test_file("multiclass_swissroll_oneside_13_none")
 
 # test_file("sphere_tsne")
 # test_file("sphere_umap")
@@ -288,9 +303,9 @@ def test_file(file_name):
 # test_file("swiss_roll_tsne")
 # test_file("swiss_roll_umap")
 # test_file("swiss_roll_pca")
-test_file("mnist_sampled_tsne")
-test_file("mnist_sampled_umap")
-test_file("mnist_sampled_pca")
+# test_file("mnist_sampled_tsne")
+# test_file("mnist_sampled_umap")
+# test_file("mnist_sampled_pca")
 # test_file("mnist_test_2_euclidean_tsne", 0.00002)
 # test_file("mnist_test_3_euclidean_tsne", 0.00003)
 # test_file("mnist_test_4_euclidean_tsne", 0.00004)
