@@ -58,21 +58,26 @@ def mss_missing_generator(move):
 
     with open(PATH + "multiclass_swissroll_oneside_"+ str(move) + "_none.json", "w", encoding="utf-8") as json_file:
                 json.dump(multiclass_swissroll_data, json_file, ensure_ascii=False, indent=4)
+                
 
-mss_missing_generator(0)
-mss_missing_generator(1)
-mss_missing_generator(2)
-mss_missing_generator(3)
-mss_missing_generator(4)
-mss_missing_generator(5)
-mss_missing_generator(6)
-mss_missing_generator(7)
-mss_missing_generator(8)
-mss_missing_generator(9)
-mss_missing_generator(10)
-mss_missing_generator(11)
-mss_missing_generator(12)
-mss_missing_generator(13)
+                
+
+
+
+# mss_missing_generator(0)
+# mss_missing_generator(1)
+# mss_missing_generator(2)
+# mss_missing_generator(3)
+# mss_missing_generator(4)
+# mss_missing_generator(5)
+# mss_missing_generator(6)
+# mss_missing_generator(7)
+# mss_missing_generator(8)
+# mss_missing_generator(9)
+# mss_missing_generator(10)
+# mss_missing_generator(11)
+# mss_missing_generator(12)
+# mss_missing_generator(13)
 
 
 # mss_generator(-7)
