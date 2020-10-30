@@ -2,11 +2,12 @@
 This will compare embedding result quantitatively using functions in utils.py
 """
 
-from .models.dataset import read_data
-from .utils import GlobalMeasure, LocalMeasure
+# from .models.dataset import read_data
+from utils import GlobalMeasure, LocalMeasure
 import pandas as pd
 import argparse
 import numpy as np
+import json
 
 MEASURE_GLOBAL_LIST = [
     # "RMSE",
@@ -65,13 +66,27 @@ if __name__ == "__main__":
 
     if args.algo != "all":
         ALGO_LIST = [args.algo]
+        
+    if args.algo == "ss":
+        ALGO_LIST = []
+        
+        ## multiclass swissroll
+        for i in range(-7, 8):
+            ALGO_LIST.append("multiclass_swissroll_" + str(i) + "_none")
+        for i in range(0, 14):
+            ALGO_LIST.append("multiclass_swissroll_oneside_" + str(i) + "_none")
 
     for alg in ALGO_LIST:
 
-        print(f"[INFO] Test on [{args.data}] dataset using [{alg}]")
+        # print(f"[INFO] Test on [{args.data}] dataset using [{alg}]")
 
         # read data & embedding result
-        x, z, label = read_data(args.data, alg)
+        # x, z, label = read_data(args.data, alg)
+        json_file = open("../fimif_measure/json/" + alg + ".json", "r") 
+        json_data = json.load(json_file)
+        x = np.array([datum["raw"] for datum in json_data])
+        z = np.array([datum["emb"] for datum in json_data])
+        label = np.array([datum["label"] for datum in json_data])
 
         if args.load:
             with open('./hubs.npy', 'rb') as f:
@@ -131,4 +146,5 @@ if __name__ == "__main__":
         result = result.pivot(index="measure", columns="algorithm", values="values").fillna(
             "NA"
         )
+        result.to_csv("./results/result.csv")
         print(f"{result}\n")
