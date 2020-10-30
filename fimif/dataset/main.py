@@ -68,7 +68,7 @@ data = np.array(data)
 
 for p in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
     start = time.time()
-    emb_tsne = TsneEmbedding("mnist_test_cosine_similarity", data, label=label, metric="cosine", perplexity=p)
+    emb_tsne = TsneEmbedding("mnist_test_" + str(p), data, label=label, metric="cosine", perplexity=p)
     end   = time.time()
     hp.print_time_spent(start, end, emb_tsne.get_info())
     emb_tsne.print_file(path=PATH)
