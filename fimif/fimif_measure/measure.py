@@ -280,22 +280,9 @@ def test_file(file_name):
     # with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
     #         json.dump(path_list, json_file, ensure_ascii=False, indent=4)
     
+for p in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
+    test_file("mnist_test_" + str(p))
 
-
-test_file("multiclass_swissroll_oneside_0_none")
-test_file("multiclass_swissroll_oneside_1_none")
-test_file("multiclass_swissroll_oneside_2_none")
-test_file("multiclass_swissroll_oneside_3_none")
-test_file("multiclass_swissroll_oneside_4_none")
-test_file("multiclass_swissroll_oneside_5_none")
-test_file("multiclass_swissroll_oneside_6_none")
-test_file("multiclass_swissroll_oneside_7_none")
-test_file("multiclass_swissroll_oneside_8_none")
-test_file("multiclass_swissroll_oneside_9_none")
-test_file("multiclass_swissroll_oneside_10_none")
-test_file("multiclass_swissroll_oneside_11_none")
-test_file("multiclass_swissroll_oneside_12_none")
-test_file("multiclass_swissroll_oneside_13_none")
 
 # test_file("sphere_tsne")
 # test_file("sphere_umap")
