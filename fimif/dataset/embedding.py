@@ -44,9 +44,9 @@ class SpheresEmbedding(Embedding):
 
 ## Generates TSNE Embedding with given data
 class TsneEmbedding(Embedding):
-    def __init__(self, data_name, hd_data, label=np.array([]), metric='euclidean'):
+    def __init__(self, data_name, hd_data, label=np.array([]), metric='euclidean', perplexity=30.0):
         Embedding.__init__(self, data_name)
-        embedded = TSNE(n_components=2, metric=metric).fit_transform(hd_data)
+        embedded = TSNE(n_components=2, metric=metric, perplexity=perplexity).fit_transform(hd_data)
 
         label = label.tolist()
         for idx, datum in enumerate(hd_data):
