@@ -275,13 +275,13 @@ def test_file(file_name):
     emb = np.array([datum["emb"] for datum in data])
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=400)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num=2500)
     # path_list = fimif.optimize_path()
     # with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
     #         json.dump(path_list, json_file, ensure_ascii=False, indent=4)
     
 for p in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
-    test_file("mnist_test_" + str(p))
+    test_file("mnist_test_" + str(p) + "_tsne")
 
 
 # test_file("sphere_tsne")
