@@ -67,14 +67,18 @@ if __name__ == "__main__":
     if args.algo != "all":
         ALGO_LIST = [args.algo]
         
-    if args.algo == "ss":
+    if args.algo == "ss":  ## swiss roll
         ALGO_LIST = []
-        
         ## multiclass swissroll
         for i in range(-7, 8):
             ALGO_LIST.append("multiclass_swissroll_" + str(i) + "_none")
         for i in range(0, 14):
             ALGO_LIST.append("multiclass_swissroll_oneside_" + str(i) + "_none")
+    
+    if args.algo == "mnist":
+        ALGO_LIST = []
+        for i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
+            ALGO_LIST.append("mnist_test_" + str(i) + "_tsne")
 
     for alg in ALGO_LIST:
 
