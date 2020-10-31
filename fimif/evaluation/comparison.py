@@ -77,7 +77,7 @@ if __name__ == "__main__":
     
     if args.algo == "mnist":
         ALGO_LIST = []
-        for i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
+        for i in [1, 5, 50, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000]:
             ALGO_LIST.append("mnist_test_" + str(i) + "_tsne")
 
     for alg in ALGO_LIST:
