@@ -79,6 +79,21 @@ if __name__ == "__main__":
         ALGO_LIST = []
         for i in [1, 5, 50, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000]:
             ALGO_LIST.append("mnist_test_" + str(i) + "_tsne")
+    
+    if args.algo == "mammoth":
+        ALGO_LIST = [] 
+        for n in [3, 5, 10, 15, 20, 50, 100,200]:
+            for d in [0.0, 0.1, 0.25, 0.5, 0.8, 0.99]:
+                key_summary = str(n) + "_" + str(d)
+                ALGO_LIST.append("mammoth_" + key_summary)
+
+    if args.algo == "spheres":
+        ALGO_LIST = []
+        ALGO_LIST = [] 
+        for n in [3, 10, 20, 30, 40, 50, 100, 150, 200, 400, 600, 800, 1000]:
+            for d in [0.0, 0.2, 0.4, 0.5, 0.99]:
+                key_summary = str(n) + "_" + str(d)
+                ALGO_LIST.append("spheres_sampled_" + key_summary)
 
     for alg in ALGO_LIST:
 
@@ -88,9 +103,9 @@ if __name__ == "__main__":
         # x, z, label = read_data(args.data, alg)
         json_file = open("../fimif_measure/json/" + alg + ".json", "r") 
         json_data = json.load(json_file)
-        x = np.array([datum["raw"] for datum in json_data])
-        z = np.array([datum["emb"] for datum in json_data])
-        label = np.array([datum["label"] for datum in json_data])
+        x = np.array([datum["raw"] for datum in json_data]).astype(np.float64)
+        z = np.array([datum["emb"] for datum in json_data]).astype(np.float64)
+        label = np.array([datum["label"] for datum in json_data]).astype(np.float64)
 
         if args.load:
             with open('./hubs.npy', 'rb') as f:

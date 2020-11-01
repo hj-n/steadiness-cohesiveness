@@ -3,6 +3,8 @@ import random
 import json
 import hdbscan
 
+import numba
+
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
 from fimifpath import *
@@ -14,7 +16,7 @@ class Fimif:
                  raw,                      # raw data
                  emb,                      # emb data
                  iteration=1000,           # iteration number
-                 k=6,                      # for constructing knn graph
+                 k=10,                      # for constructing knn graph
                  walk_num=200,             # random walk number,
                  clustering="hdbscan",     # clustering methods for high dimensions
                  clustering_parameter={},  # clustering paramters for currnet clustering method
@@ -199,37 +201,40 @@ class Fimif:
                 distortion_weight_list.append((distortion, weight))
 
                 ND_dist = np.linalg.norm(group_x[i] - group_x[j])
-                for point_idx in groups[i]:
-                    self.fimifpath_list[point_idx].add_group(len(groups[i]), len(groups[j]), max_mu, min_mu, ND_dist, group_y[i], group_y[j], is_false)
+                # for point_idx in groups[i]:
+                #     self.fimifpath_list[point_idx].add_group(len(groups[i]), len(groups[j]), max_mu, min_mu, ND_dist, group_y[i], group_y[j], is_false)
                     
 
 
         return distortion_weight_list
 
+    
     def __initial_dist_setup(self):
-        X = np.zeros((self.N, self.N))
-        Y = np.zeros((self.N, self.N))
-        for i in range(self.N):
-            for j in range(i):
-                X[i][j] = np.linalg.norm(self.raw[i] - self.raw[j])
-                X[j][i] = X[i][j]
-                Y[i][j] = np.linalg.norm(self.emb[i] - self.emb[j])
-                Y[j][i] = Y[i][j]
-        self.dist_max_x = np.max(X)
-        self.dist_max_y = np.max(Y)
+        result = dist_setup_helper(self.N, self.raw, self.emb)
 
-        print(self.dist_max_y)
-        for path in self.fimifpath_list:
-            path.add_max_dists(self.dist_max_x, self.dist_max_y)
-        X = X / self.dist_max_x
-        Y = Y / self.dist_max_y ## normalize
-        D = X - Y 
-        D_max = np.max(D)
-        D_min = np.min(D)
-        self.max_mu_compress = D_max
-        self.min_mu_compress = 0 if D_min < 0 else D_min
-        self.max_mu_stretch = -D_min
-        self.min_mu_stretch = 0 if D_max > 0 else -D_max
+        # X = np.zeros((self.N, self.N))
+        # Y = np.zeros((self.N, self.N))
+        # for i in range(self.N):
+        #     for j in range(i):
+        #         X[i][j] = np.linalg.norm(self.raw[i] - self.raw[j])
+        #         X[j][i] = X[i][j]
+        #         Y[i][j] = np.linalg.norm(self.emb[i] - self.emb[j])
+        #         Y[j][i] = Y[i][j]
+        self.dist_max_x = result[0]
+        self.dist_max_y = result[1]
+
+        # print(self.dist_max_y)
+        # for path in self.fimifpath_list:
+        #     path.add_max_dists(self.dist_max_x, self.dist_max_y)
+        # X = X / self.dist_max_x
+        # Y = Y / self.dist_max_y ## normalize
+        # D = X - Y 
+        # D_max = np.max(D)
+        # D_min = np.min(D)
+        self.max_mu_compress = result[2]
+        self.min_mu_compress = result[3]
+        self.max_mu_stretch = result[4]
+        self.min_mu_stretch = result[5]
         
     def optimize_path(self):
         
@@ -271,18 +276,84 @@ def test_file(file_name):
     data = json.load(file)
 
 
-    raw = np.array([datum["raw"] for datum in data])
-    emb = np.array([datum["emb"] for datum in data])
+    raw = np.array([np.array(datum["raw"]).astype(np.float64) for datum in data])
+    emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=500)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num=1000)
     # path_list = fimif.optimize_path()
     # with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
     #         json.dump(path_list, json_file, ensure_ascii=False, indent=4)
-    
-for p in [1, 5, 50, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000]:
-    test_file("mnist_test_" + str(p) + "_tsne")
 
+
+
+
+@numba.njit(
+    locals = {
+        "X": numba.types.float64[:, ::1],
+        "Y": numba.types.float64[:, ::1],
+    },
+    parallel=True,
+    fastmath=True
+)
+def dist_setup_helper(N, raw, emb):
+    X = np.zeros((N, N), dtype=np.float64)
+    Y = np.zeros((N, N), dtype=np.float64)
+    raw = raw.astype(np.float64)
+    emb = emb.astype(np.float64)
+    for i in numba.prange(N):
+        for j in numba.prange(i):
+            X[i][j] = np.dot(raw[i] - raw[j], raw[i] - raw[j])
+            X[i][j] = X[i][j] ** 0.5
+            X[j][i] = X[i][j]
+            # for idx in range(len(emb[i])):
+            #     Y[i][j] += (emb[i] - emb[j]) ** 2
+            Y[i][j] += (emb[i][0] - emb[j][0]) ** 2
+            Y[i][j] += (emb[i][1] - emb[j][1]) ** 2
+            Y[i][j] = Y[i][j] ** 0.5
+            Y[j][i] = Y[i][j]
+    dist_max_x = np.max(X)
+    dist_max_y = np.max(Y)
+
+    # print(self.dist_max_y)
+    # for path in self.fimifpath_list:
+    #     path.add_max_dists(self.dist_max_x, self.dist_max_y)
+    X = X / dist_max_x
+    Y = Y / dist_max_y ## normalize
+    D = X - Y 
+    D_max = np.max(D)
+    D_min = np.min(D)
+    max_mu_compress = D_max
+    min_mu_compress = 0 if D_min < 0 else D_min
+    max_mu_stretch = -D_min
+    min_mu_stretch = 0 if D_max > 0 else -D_max
+
+    return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
+
+
+## Mammoth
+'''
+for n in [3, 5, 10, 15, 20, 50, 100,200]:
+    for d in [0.0, 0.1, 0.25, 0.5, 0.8, 0.99]:
+        key_summary = str(n) + "_" + str(d)
+        test_file("mammoth_" + key_summary)
+'''
+## MNIST TSNE
+'''
+for i in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400]:
+    test_file("mnist_test_" + str(i) + "_tsne")
+'''
+## Spheres umap
+# for n in [20, 40, 60, 80, 120, 160, 200]:
+#     for d in [0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 0.99]:
+#         key_summary = str(n) + "_" + str(d)
+#         test_file("spheres_" + key_summary)
+
+for d in [0.2, 0.4]:
+    for n in [3, 10, 20, 30, 40, 50, 100, 150, 200, 400, 600, 800, 1000]:
+        key_summary = str(n) + "_" + str(d)
+        test_file("spheres_sampled_" + key_summary)
+# test_file("spheres_200_0.99")
 
 # test_file("sphere_tsne")
 # test_file("sphere_umap")
