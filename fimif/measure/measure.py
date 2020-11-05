@@ -6,7 +6,7 @@ import numba
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
-
+from fimif_map import FimifMap
 
 class Fimif:
     def __init__(
@@ -14,7 +14,7 @@ class Fimif:
                  raw,                      # raw data
                  emb,                      # emb data
                  iteration=1000,           # iteration number
-                 k=10,                      # for constructing knn graph
+                 k=5,                      # for constructing knn graph
                  walk_num=200,             # random walk number,
                  clustering="hdbscan",     # clustering methods for high dimensions
                  clustering_parameter={},  # clustering paramters for currnet clustering method
@@ -29,12 +29,6 @@ class Fimif:
         self.clustering = clustering
         self.clustering_parameter = clustering_parameter
         self.beta = beta
-
-
-        ## variables for FimifPath
-        self.fimifpath_list = []
-        for i in range(self.N):
-            self.fimifpath_list.append(FimifPath(self.emb[i][0], self.emb[i][1]))  ## one fimifPath class object per point 
 
         ## intermediate variables
         self.raw_neighbors = None
@@ -51,6 +45,18 @@ class Fimif:
         self.score_false = None
         self.score = None     
 
+        ## Distortion log
+        self.missing_log = [] 
+        for __ in range(self.N):
+            new_dict = { "value": [], "idx": [],}
+            self.missing_log.append(new_dict)
+        self.false_log = []
+        
+        for __ in range(self.N):
+            new_dict = {"value": [], "direction": [] }
+            self.false_log.append(new_dict)
+
+
         self.__initial_knn_graph_setup()
         self.__initial_dist_setup()
         self.__measure()
@@ -64,7 +70,7 @@ class Fimif:
             for i in range(self.iter):
                 ## for progress checking
                 if i % 100 == 0:
-                    # print(str(i) + "-th iteration completed")
+                    print(str(i) + "-th iteration completed")
                     pass
 
                 random_cluster = self.__random_cluster_selection(mode)
@@ -190,17 +196,41 @@ class Fimif:
                 if is_false:
                     mu_group = np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x - np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
                     distortion = (mu_group - self.min_mu_compress) / (self.max_mu_compress - self.min_mu_compress) if mu_group > 0 else 0               # discard if mu_group < 0 (not compressed)
-                    max_mu, min_mu = self.max_mu_compress, self.min_mu_compress
+                    # max_mu, min_mu = self.max_mu_compress, self.min_mu_compress
                 else:
                     mu_group = - np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x + np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
                     distortion = (mu_group - self.min_mu_stretch) / (self.max_mu_stretch - self.min_mu_stretch) if mu_group > 0 else 0                  # discard if mu_group < 0 (not stretched)
-                    max_mu, min_mu = self.max_mu_stretch, self.min_mu_stretch
+                    # max_mu, min_mu = self.max_mu_stretch, self.min_mu_stretch
                 weight = len(groups[i]) * len(groups[j])
                 distortion_weight_list.append((distortion, weight))
 
-                ND_dist = np.linalg.norm(group_x[i] - group_x[j])
-                # for point_idx in groups[i]:
-                #     self.fimifpath_list[point_idx].add_group(len(groups[i]), len(groups[j]), max_mu, min_mu, ND_dist, group_y[i], group_y[j], is_false)
+                weighted_distortion = distortion * weight
+                if weighted_distortion > 0:
+
+                    ## ADDING Distortion info to each points (to aggregate in the future)
+                    for idx in groups[i]:
+                        if is_false:
+                            point_y = self.emb[idx]
+                            direction = group_y[j] - point_y
+                            direction = direction / np.linalg.norm(direction)
+                            self.false_log[idx]["direction"].append(-direction)
+                            self.false_log[idx]["value"].append(distortion * weight)
+                        else:
+                            self.missing_log[idx]["value"].append(distortion * weight)
+                            self.missing_log[idx]["idx"].append(groups[j])
+
+                    
+
+                    for idx in groups[j]:
+                        if is_false:
+                            point_y = self.emb[idx]
+                            direction = group_y[i] - point_y
+                            direction = direction / np.linalg.norm(direction)
+                            self.false_log[idx]["direction"].append(-direction)
+                            self.false_log[idx]["value"].append(distortion * weight)
+                        else:
+                            self.missing_log[idx]["value"].append(distortion * weight)
+                            self.missing_log[idx]["idx"].append(groups[i])
                     
 
 
@@ -226,8 +256,6 @@ class Fimif:
         
         return path_list
         
-        
-
     
 
     def __initial_knn_graph_setup(self):
@@ -252,6 +280,8 @@ class Fimif:
 
 
 
+
+
 def test_file(file_name):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
@@ -261,11 +291,14 @@ def test_file(file_name):
     emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=1000)
+    fimif = Fimif(raw, emb, iteration=500, walk_num=300)
 
-    
-    # with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
-    #         json.dump(path_list, json_file, ensure_ascii=False, indent=4)
+    fimifmap = FimifMap(fimif)
+
+    # print(fimif.missing_log[4]["direction"][4:10])
+    # print(fimif.missing_log[4]["value"][4:1000])
+
+
 
 
 
@@ -288,8 +321,6 @@ def dist_setup_helper(N, raw, emb):
             X[i][j] = np.dot(raw[i] - raw[j], raw[i] - raw[j])
             X[i][j] = X[i][j] ** 0.5
             X[j][i] = X[i][j]
-            # for idx in range(len(emb[i])):
-            #     Y[i][j] += (emb[i] - emb[j]) ** 2
             Y[i][j] += (emb[i][0] - emb[j][0]) ** 2
             Y[i][j] += (emb[i][1] - emb[j][1]) ** 2
             Y[i][j] = Y[i][j] ** 0.5
@@ -310,6 +341,7 @@ def dist_setup_helper(N, raw, emb):
     return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
 
 
+test_file("swiss_roll_tsne")
 
 
 
