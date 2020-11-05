@@ -2,12 +2,10 @@ import numpy as np
 import random
 import json
 import hdbscan
-
 import numba
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
-from fimifpath import *
 
 
 class Fimif:
@@ -211,26 +209,9 @@ class Fimif:
     
     def __initial_dist_setup(self):
         result = dist_setup_helper(self.N, self.raw, self.emb)
-
-        # X = np.zeros((self.N, self.N))
-        # Y = np.zeros((self.N, self.N))
-        # for i in range(self.N):
-        #     for j in range(i):
-        #         X[i][j] = np.linalg.norm(self.raw[i] - self.raw[j])
-        #         X[j][i] = X[i][j]
-        #         Y[i][j] = np.linalg.norm(self.emb[i] - self.emb[j])
-        #         Y[j][i] = Y[i][j]
         self.dist_max_x = result[0]
         self.dist_max_y = result[1]
 
-        # print(self.dist_max_y)
-        # for path in self.fimifpath_list:
-        #     path.add_max_dists(self.dist_max_x, self.dist_max_y)
-        # X = X / self.dist_max_x
-        # Y = Y / self.dist_max_y ## normalize
-        # D = X - Y 
-        # D_max = np.max(D)
-        # D_min = np.min(D)
         self.max_mu_compress = result[2]
         self.min_mu_compress = result[3]
         self.max_mu_stretch = result[4]
@@ -281,7 +262,8 @@ def test_file(file_name):
 
     print("TEST for", file_name, "data")
     fimif = Fimif(raw, emb, iteration=1000, walk_num=1000)
-    # path_list = fimif.optimize_path()
+
+    
     # with open("./json/" + file_name + "_path.json", "w", encoding="utf-8") as json_file:
     #         json.dump(path_list, json_file, ensure_ascii=False, indent=4)
 
@@ -315,9 +297,6 @@ def dist_setup_helper(N, raw, emb):
     dist_max_x = np.max(X)
     dist_max_y = np.max(Y)
 
-    # print(self.dist_max_y)
-    # for path in self.fimifpath_list:
-    #     path.add_max_dists(self.dist_max_x, self.dist_max_y)
     X = X / dist_max_x
     Y = Y / dist_max_y ## normalize
     D = X - Y 
@@ -329,6 +308,9 @@ def dist_setup_helper(N, raw, emb):
     min_mu_stretch = 0 if D_max > 0 else -D_max
 
     return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
+
+
+
 
 
 ## Mammoth
@@ -349,10 +331,10 @@ for i in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 
 #         key_summary = str(n) + "_" + str(d)
 #         test_file("spheres_" + key_summary)
 
-for d in [0.2, 0.4]:
-    for n in [3, 10, 20, 30, 40, 50, 100, 150, 200, 400, 600, 800, 1000]:
-        key_summary = str(n) + "_" + str(d)
-        test_file("spheres_sampled_" + key_summary)
+# for d in [0.2, 0.4]:
+#     for n in [3, 10, 20, 30, 40, 50, 100, 150, 200, 400, 600, 800, 1000]:
+#         key_summary = str(n) + "_" + str(d)
+#         test_file("spheres_sampled_" + key_summary)
 # test_file("spheres_200_0.99")
 
 # test_file("sphere_tsne")
