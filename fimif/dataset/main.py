@@ -12,7 +12,7 @@ import csv
 import json
 
 PATH_TO_WEB = "../../web/src/json/"
-PATH_TO_MEASURE = "./../fimif_measure/json/"
+PATH_TO_MEASURE = "./../measure/json/"
 PATH = PATH_TO_MEASURE
 
 def sampling(original_list):
