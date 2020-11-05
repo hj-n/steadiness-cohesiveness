@@ -295,8 +295,11 @@ def test_file(file_name):
 
     fimifmap = FimifMap(fimif)
 
-    with open(PATH + file_name + key_summary + ".json", "w") as outfile:
-        json.dump(final_data, outfile)
+    with open("./map_json/" + file_name + "_false.json", "w") as outfile:
+        json.dump(fimifmap.false_log_aggregated, outfile)
+    
+    with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
+        json.dump(fimifmap.missing_log_aggregated, outfile)
 
 
 

@@ -19,7 +19,7 @@ class FimifMap:
             sum_list = np.array([.0,.0])
             for i, __ in enumerate(log["value"]):
                 sum_list += log["direction"][i] * log["value"][i] 
-            self.false_log_aggregated.append(sum_list)
+            self.false_log_aggregated.append(sum_list.tolist())
         
 
     def __missing_aggregation(self):
@@ -30,13 +30,14 @@ class FimifMap:
             for i, point_indices in enumerate(log["idx"]):
                 for point_idx in point_indices:
                     if point_idx in sum_dict:
-                        sum_dict[point_idx] += log["value"][i]
-                        num_dict[point_idx] += 1
+                        sum_dict[str(point_idx)] += log["value"][i]
+                        num_dict[str(point_idx)] += 1
                     else:
-                        sum_dict[point_idx] = log["value"][i]
-                        num_dict[point_idx] = 1
+                        sum_dict[str(point_idx)] = log["value"][i]
+                        num_dict[str(point_idx)] = 1
             
             for key in sum_dict:
                 sum_dict[key] /= num_dict[key]
+                sum_dict[key] = sum_dict[key].tolist()
             self.missing_log_aggregated.append(sum_dict)
 
