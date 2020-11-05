@@ -1,44 +1,42 @@
 import React from 'react';
-import { useRef, useEffect } from 'react'
-import * as d3 from 'd3';
-import { path } from 'd3';
+import { useEffect, useState, useRef } from 'react';
+import * as d3 from 'd3'
+import styled from 'styled-components'
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+
 
 function FimifMap(props) {
 
-
-    let jsonFileName = props.dataset + "_" + props.method + ".json";
-    let data = require("../json/" + jsonFileName);
+    let jsonFileName = props.dataset + "_" + props.method;
+    let data = require("../json/" + jsonFileName + ".json");
+    let missing_data = require("../json/" + jsonFileName + "_missing.json");
+    let false_data = require("../json/" + jsonFileName + "_false.json");
     const embeddedData = data.map((d, i) => {
-        if(d.emb.length === 2) d.emb.push(i);   // avoid double pushing (due to rendering issue)
-        return d.emb;
+        let embeddedDatum = {
+            "coor": d.emb,                      // 2D Coordinate
+            "idx": i,                           // Current Index
+            "missing_points": missing_data[i],  // Missing points dictionary
+            "false_value": false_data[i]        // Power / direction of false value
+        }
+        return embeddedDatum;
     });
 
-    let pathFileName = props.dataset + "_" + props.method + "_path.json";
-    console.log(jsonFileName)
-    console.log(pathFileName)
-    let pathData = require("../json/" + pathFileName);
-    console.log(pathData)
+    console.log(embeddedData)
+    // props.method = props.method.replace(".","")
 
     const xS = useRef();   // xScale
     const yS = useRef();   // yScale
     const cS = useRef();   // colorScale
 
-    useEffect(() => { 
-
+    useEffect(() => {
         const width = props.width;
         const height = props.height;
         const margin = { hor: props.width / 20, ver: props.height / 20 };
 
-        let [minX, maxX] = d3.extent(embeddedData, d => d[0]);
-        let [minY, maxY] = d3.extent(embeddedData, d => d[1]);
-
-        let x = 2
-
-        minX = x * minX;
-        maxX = x * maxX;
-        minY = x * minY;
-        maxY = x * maxY;
-
+        const [minX, maxX] = d3.extent(embeddedData, d => d.coor[0]);
+        const [minY, maxY] = d3.extent(embeddedData, d => d.coor[1]);
 
         const xScale = d3.scaleLinear()
                          .domain([minX, maxX])
@@ -49,7 +47,7 @@ function FimifMap(props) {
                          .range([0, height]);
 
         const colorDomain = [...Array(props.labelNum).keys()]
-        const colorRange = ["#4e79a7","#f28e2c","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#e15759","#5E4FA2"];
+        const colorRange = ["#bab0ab","#f28e2c","#4e79a7","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f", "#e15759","#5E4FA2"];
         const colorScale =  d3.scaleOrdinal()
             .domain(colorDomain)
             .range(colorRange);
@@ -58,15 +56,13 @@ function FimifMap(props) {
         xS.current = xScale;
         yS.current = yScale;
         
-        
-        const radius = 1.75;
+        const radius = 3.5;
 
-        // ANCHOR SVG width / height setting
         const svg = d3.select("#scatterplot" + props.dataset + props.method)
                       .attr("width", width + margin.hor * 2)
                       .attr("height", height + margin.ver * 2)
-                        .append("g")
-                        .attr("transform", "translate(" + margin.hor + ", " + margin.ver + ")");
+                      .append("g")
+                      .attr("transform", "translate(" + margin.hor + ", " + margin.ver + ")");
         
         // ANCHOR Scatterplot rending & interaction
         svg.selectAll("circle")
@@ -76,99 +72,50 @@ function FimifMap(props) {
                    enter.append("circle")
                         .attr("fill", d => {
                             if(props.isLabel) {
-                                return colorScale(data[d[2]].label);
+                                return colorScale(data[d.idx].label);
                             }   
                             else return "blue";
                         })
-                        .attr("cx", d => xScale(d[0]))
-                        .attr("cy", d => yScale(d[1]))
-                        .style("opacity", 1)
+                        .attr("cx", d => xScale(d.coor[0]))
+                        .attr("cy", d => yScale(d.coor[1]))
+                        .style("opacity", 0.5)
                         .attr("r", radius);
                }
            );
         
-        // svg.append("path")
-        //    .data([points])
-        //    .attr("d", d3.svg.line()
-        //    .tension(0) // Catmull–Rom
-        //    .interpolate("cardinal-closed"));
-        // let line = d3.line()
-        //             .x(d => d.x) // set the x values for the line generator
-        //             .y(d => d.y) // set the y values for the line generator 
-        //             .curve(d3.curveMonotoneX) // apply smoothing to the line
-
-        let line = d3.line(d => xScale(d.x), d => yScale(d.y))
-                                                             
-                     
+        svg.selectAll("circle")
+           .on("mouseover", function(){ d3.select(this).style("opacity", 1).attr("r", radius * 2); })
+           .on("mouseout" , function(){ d3.select(this).style("opacity", 0.5).attr("r", radius);   })
         
-        // console.log(pathData[0])
-        // // for (let i = 0; i < pathData.length; i++) {
-        //     // console.log(pathData[i])
-        //     console.log(pathData)
+        
 
-        for (let i = 0; i < pathData.length; i++) {
-            let test = pathData[i].map(d => {
-                return {
-                    x: d[0],
-                    y: d[1]
-                }
-            });
-            // console.log(test)
+        
 
-            let length = 250;
+    }, [])
 
-            svg.append("g")
-               .selectAll("path")
-               .data(test.slice(0, length))
-               .join(
-                   enter => enter.
-                    append("path")
-                    .attr("d", (d,i,nodes) => {
-                        return line([test[i], test[i+1]])
-                    })
-                    .attr("stroke", (d) => {
-                        if(props.isLabel) {
-                            return colorScale(data[embeddedData[i][2]].label);
-                        }   
-                        else return "blue";
-                    })
-                    .attr("stroke-width", (d, i) => {
-                        return 1.3 - 1.3 * (i / length);
-                    })
-                    .attr("fill", "none")
-                    .style("opacity", (d, i) => {
-                        return 1 - (i / length);
-                    })
-               )
 
-            // svg
-            //    .append("path")
-            //    .attr("d", line(test.slice(0,1000)))
-            //    .attr("stroke", "blue")
-            //    .attr("stroke-width", 1)
-            //    .attr("fill", "none")
-            //    .style("opacity", 0.2)
-            //    .style("opacity", (d,i) => {
-            //        console.log(d)
-            //        return 1 - (i / 100);
-            //    });
 
-            //    svg.append("path")
-            //    .attr("d", line(test.slice(40, 100)))
-            //    .attr("stroke", "blue")
-            //    .attr("stroke-width", 1)
-            //    .attr("fill", "none")
-            //    .style("opacity", 0.3);
-               
-        }
-    });
 
     return (
-        <div style={{width: props.width * 1.1, margin: 40}}>
+        <div style={{width: props.width * 1.1, margin: 5}}>
+            <H6>{props.dataset} dataset embedded by {props.method}</H6>
             <svg id={"scatterplot" + props.dataset + props.method}></svg>
         </div>
     )
-
 }
 
+const H6 = styled.h5`
+    margin: 3px;
+    font-size: 1.2em; 
+    text-align: center;
+`;
+
+const RadioWrapper = styled.div`
+    justify-content: center;
+    display: flex;
+    alignIterms: 'center';
+
+`
+
 export default FimifMap;
+

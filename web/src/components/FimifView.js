@@ -15,14 +15,9 @@ function FimifView(props) {
         if(d.emb.length === 2) d.emb.push(i);   // avoid double pushing (due to rendering issue)
         return d.emb;
     });
+    // props.method = props.method.replace(".","")
 
-    // circle brusing
-    const [cbx, setCbx]     = useState(0);
-    const [cby, setCby]     = useState(0);
-    const [bx, setBx]       = useState(0);     // current brushing position (x)
-    const [by, setBy]       = useState(0);     // current brushing position (x)
-    const [cbidx, setCbidx] = useState(0);     // circle index
-    const [isCb, setIsCb]   = useState(false); // is brushing?
+
 
     const [rMode, setRMode] = useState("2d") // true: use max 2D dist point, false: use max ND dist point
     const handleChange = (event) => {
@@ -55,7 +50,7 @@ function FimifView(props) {
 
         const colorDomain = [...Array(props.labelNum).keys()]
         console.log(colorDomain);
-        const colorRange = ["#4e79a7","#f28e2c","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#e15759","#5E4FA2"];
+        const colorRange = ["#bab0ab","#f28e2c","#4e79a7","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f", "#e15759","#5E4FA2"];
         // const colorRange = ["#3288BD", "#5E4FA2", "#66C2A5", "#ABDDA4", "#E6F598", "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"];
         const colorScale =  d3.scaleOrdinal()
             .domain(colorDomain)
@@ -64,7 +59,6 @@ function FimifView(props) {
 
         xS.current = xScale;
         yS.current = yScale;
-        
         
         const radius = 3;
 
@@ -89,7 +83,7 @@ function FimifView(props) {
                         })
                         .attr("cx", d => xScale(d[0]))
                         .attr("cy", d => yScale(d[1]))
-                        .style("opacity", 0.8)
+                        .style("opacity", 0.9)
                         .attr("r", radius);
                }
            );
@@ -97,25 +91,7 @@ function FimifView(props) {
         svg.selectAll("circle")
            .on("mouseover", function(){ d3.select(this).style("opacity", 1).attr("r", radius + 2); })
            .on("mouseout" , function(){ d3.select(this).style("opacity", 0.3).attr("r", radius);   })
-           .call(d3.drag()
-                   .on("start", function() { 
-                       let circleData = d3.select(this).data()[0];
-                       setIsCb(true); 
-                       setCbidx(circleData[2]);
-                       setCbx(xScale(circleData[0])); setBx(xScale(circleData[0]));
-                       setCby(yScale(circleData[1])); setBy(yScale(circleData[1]));
-                    })
-                   .on("drag", (event) => {
-                       setBx(event.x);
-                       setBy(event.y);
-                   })
-                   .on("end", () => {
-                       cbrush.current.style("opacity", 0.3);
-                       setIsCb(false);
-                       
-                   })
-           
-           );
+
 
            svg.on("click", () => {
                svg.selectAll("circle")
@@ -198,9 +174,6 @@ function FimifView(props) {
                .style("opacity", (d) => {
                    if(d === undefined) return 0.3
                    const dist = Math.sqrt(Math.pow((cbx - xS.current(d[0])),2) + Math.pow((cby - yS.current(d[1])),2));
-                   const curR =  Math.sqrt(Math.pow((cbx - bx),2) + Math.pow((cby - by),2))
-                
-                
                    // return opacity  
                    if(curR < dist) return 0.3;
                    else {
@@ -257,8 +230,9 @@ function FimifView(props) {
     }, [isCb, rMode])
 
     return (
-        <div style={{width: props.width * 1.1, margin: 40}}>
-            <H5>{props.dataset.toUpperCase()} dataset</H5>
+        <div style={{width: props.width * 1.1, margin: 5}}>
+            <H6>{props.dataset} dataset embedded by {props.method}</H6>
+
             {/* <RadioWrapper>
                 <RadioGroup row aria-label="gender" name="gender1" value={rMode} onChange={handleChange}>
                     <FormControlLabel value="2d" control={<Radio />} label="2D radius" />
@@ -270,9 +244,9 @@ function FimifView(props) {
     )
 }
 
-const H5 = styled.h5`
+const H6 = styled.h5`
     margin: 3px;
-    font-size: 1.1em; 
+    font-size: 1.2em; 
     text-align: center;
 `;
 
