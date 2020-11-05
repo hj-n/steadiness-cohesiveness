@@ -295,9 +295,8 @@ def test_file(file_name):
 
     fimifmap = FimifMap(fimif)
 
-    # print(fimif.missing_log[4]["direction"][4:10])
-    # print(fimif.missing_log[4]["value"][4:1000])
-
+    with open(PATH + file_name + key_summary + ".json", "w") as outfile:
+        json.dump(final_data, outfile)
 
 
 
