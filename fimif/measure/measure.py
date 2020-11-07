@@ -295,11 +295,11 @@ def test_file(file_name):
 
     fimifmap = FimifMap(fimif)
 
-    with open("./map_json/" + file_name + "_false.json", "w") as outfile:
-        json.dump(fimifmap.false_log_aggregated, outfile)
+    # with open("./map_json/" + file_name + "_false.json", "w") as outfile:
+    #     json.dump(fimifmap.false_log_aggregated, outfile)
     
-    with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
-        json.dump(fimifmap.missing_log_aggregated, outfile)
+    # with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
+    #     json.dump(fimifmap.missing_log_aggregated, outfile)
 
 
 
@@ -343,7 +343,7 @@ def dist_setup_helper(N, raw, emb):
     return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
 
 
-test_file("swiss_roll_tsne")
+test_file("mnist_sampled_10_tsne")
 
 
 
