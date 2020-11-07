@@ -16,7 +16,7 @@ function App() {
       <FimifWrapper>      
         <FimifMap
           method="tsne"
-          dataset="swiss_roll"
+          dataset="mnist_sampled"
           height={size}
           width={size}
           isLabel={false}
