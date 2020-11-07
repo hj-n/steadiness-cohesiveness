@@ -11,7 +11,7 @@ import clustering from 'density-clustering'
 import {Helmet} from "react-helmet";
 
 
-
+// Function for force edge bundling
 let ForceEdgeBundling = function () {
     var data_nodes = {}, // {'nodeid':{'x':,'y':},..}
         data_edges = [], // [{'source':'nodeid1', 'target':'nodeid2'},..]
@@ -640,7 +640,7 @@ function FimifMap(props) {
             });
 
             let dbscan = new clustering.DBSCAN();
-            let clusters = dbscan.run(missing_distortion_points_simplified, 3, 8);
+            let clusters = dbscan.run(missing_distortion_points_simplified, 1, 7);
             let cluster_indices = []
             for (let cluster_idx in clusters) {
                 let current_cluster_indices = [];
@@ -686,6 +686,8 @@ function FimifMap(props) {
                 cluster.forEach(idx => { idxToCluster[idx] = i;})
             })
 
+
+
             // forming the connections between cluster subset
             // cluster n and cluster m: dictionary key is n_m
             let clusterConnections = {}
@@ -701,37 +703,66 @@ function FimifMap(props) {
                                 let newClusterConnection = {}
                                 newClusterConnection[clusterIdx.toString()] = [i];
                                 newClusterConnection[otherClusterIdx.toString()] = [parseInt(j)];
+                                newClusterConnection["score"] = missingPointsDict[j];
+                                newClusterConnection["num"] = 1;
                                 clusterConnections[key] = newClusterConnection;
                             }
                             else {
                                 clusterConnections[key][clusterIdx.toString()].push(i);
                                 clusterConnections[key][otherClusterIdx.toString()].push(parseInt(j)); 
+                                clusterConnections[key]["score"] += missingPointsDict[j];
+                                clusterConnections[key]["num"] += 1;
                             }
                         }
                     })
                 })
             })
+
             // Remove repeatition
             Object.keys(clusterConnections).forEach(key => {
+                clusterConnections[key]["score"] /= clusterConnections[key]["num"]
                 let cluster = clusterConnections[key];
-                Object.keys(cluster).forEach(k => { cluster[k] = Array.from(new Set(cluster[k])); })
+                Object.keys(cluster).forEach(k => { 
+                    if (k !== "score" && k !=="num")
+                        cluster[k] = Array.from(new Set(cluster[k]));
+                })
             })
 
+            console.log(cluster_info, clusterConnections);
+
+
+            // data for connection weight visualization
+            let connectionsWeight = [];
+            let minWeight = Number.MAX_VALUE;
+            let maxWeight = Number.MIN_VALUE;
             // make connections
             Object.keys(clusterConnections).forEach(key => {
+                
                 let cluster = clusterConnections[key];
                 let clusterArr = Object.keys(cluster).map(k => cluster[k]);
                 let longerArr, shorterArr;
-                if(Object.keys(clusterArr).length === 2) { // 예외처리
+
+                let weight = clusterConnections[key].score;
+                minWeight = weight < minWeight ? weight : minWeight;
+                maxWeight = weight > maxWeight ? weight : maxWeight;
+                if(Object.keys(clusterArr).length === 4) { // 예외처리
                     let longerIdx = clusterArr[1].length > clusterArr[0].length ? 1 : 0;
                     longerArr = clusterArr[longerIdx];
                     shorterArr = clusterArr[(longerIdx + 1) % 2];
                     longerArr.forEach((d, i) => {
                         let j = i % shorterArr.length;
                         connections.push([d, shorterArr[j]]); 
+                        connectionsWeight.push(weight);
                     })
+                    
                 }
             })
+
+            console.log(connections);
+            console.log(connectionsWeight);
+            console.log(minWeight, maxWeight);
+
+            let pathOpacityScale = d3.scaleLinear().domain([minWeight, maxWeight]).range([0, 1]);
 
 
             let node_data = {}
@@ -757,14 +788,12 @@ function FimifMap(props) {
 
 
             let fbundling = ForceEdgeBundling().step_size(0.1)
-                                               .compatibility_threshold(0.88)
+                                               .compatibility_threshold(0.85)
                                                .nodes(node_data).edges(edge_data)
             let results = fbundling();
             console.log(results)
 
 
-            
-            
             svg.selectAll(".connection")
                .data(results)
                .enter()
@@ -772,20 +801,17 @@ function FimifMap(props) {
                .attr("class", "connection")
                .attr("fill", "none")
                .attr("stroke-width", 1)
-               .attr("opacity", 0.02)
+               .attr("opacity", (d, i) => pathOpacityScale(connectionsWeight[i]) * 0.05 )
+            //    .attr("opacity", 0.02)
                .attr("stroke", "red")
                .attr("d",  datum => d3.line()
                     .x(d => xScale(d.x))
                     .y(d => yScale(d.y))
                     .curve(d3.curveMonotoneX)
                     (datum)
-               
                )      
         }
-        
     }, [rMode])
-
-
 
 
     return (

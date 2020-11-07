@@ -8,7 +8,7 @@ import FimifMap from "./components/FimifMap"
 
 function App() {
 
-  const size = 1000;
+  const size = 600;
 
   return (
     <div>
@@ -16,7 +16,7 @@ function App() {
       <FimifWrapper>      
         <FimifMap
           method="tsne"
-          dataset="mnist_sampled"
+          dataset="mnist_sampled_10"
           height={size}
           width={size}
           isLabel={false}
