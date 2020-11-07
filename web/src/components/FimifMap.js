@@ -10,6 +10,8 @@ import hull from 'hull.js'
 import clustering from 'density-clustering'
 import {Helmet} from "react-helmet";
 
+
+
 let ForceEdgeBundling = function () {
     var data_nodes = {}, // {'nodeid':{'x':,'y':},..}
         data_edges = [], // [{'source':'nodeid1', 'target':'nodeid2'},..]
@@ -673,7 +675,6 @@ function FimifMap(props) {
                .attr("d", datum => d3.line()
                                 .x(d => xScale(d[0]))
                                 .y(d => yScale(d[1]))
-                                // .curve(d3.curveMonotoneX)
                                 .curve(d3.curveCatmullRom)
                                 (datum.contour)
                )
@@ -684,7 +685,6 @@ function FimifMap(props) {
                 let cluster = d.indices;
                 cluster.forEach(idx => { idxToCluster[idx] = i;})
             })
-
 
             // forming the connections between cluster subset
             // cluster n and cluster m: dictionary key is n_m
@@ -780,13 +780,9 @@ function FimifMap(props) {
                     .curve(d3.curveMonotoneX)
                     (datum)
                
-               )
-
-      
+               )      
         }
         
-
-
     }, [rMode])
 
 
