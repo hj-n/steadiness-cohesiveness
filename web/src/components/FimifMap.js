@@ -585,7 +585,7 @@ function FimifMap(props) {
 
 
         
-        const radius = 3.5;
+        const radius = 3;
         
 
         svg = d3.select("#scatterplot_g" + props.dataset + props.method);
@@ -655,7 +655,20 @@ function FimifMap(props) {
                 let cluster_coor = cluster.map(i => {
                     return embeddedData[i].coor;
                 })
-                let contour = hull(cluster_coor, 20);
+                let rawContour = hull(cluster_coor, 20);
+                let contour = rawContour.reduce((acc, d) => {
+                    console.log(d);
+                    let contourMargin = 0.2;
+                    let surrounders = [[d[0] + contourMargin, d[1] + contourMargin],
+                                       [d[0] - contourMargin, d[1] + contourMargin],
+                                       [d[0] + contourMargin, d[1] - contourMargin],
+                                       [d[0] - contourMargin, d[1] - contourMargin]]
+                    return acc.concat(surrounders);
+                }, [])
+                contour = hull(contour, 20);
+                console.log(contour);
+
+                
                 contour.push(contour[0]);
                 cluster_info.push({
                     indices: cluster,
@@ -670,8 +683,8 @@ function FimifMap(props) {
                .append("path")
                .attr("class", "contour")
                .attr("fill", "none")
-               .attr("stroke-width", 3)
-               .attr("stroke", "black")
+               .attr("stroke-width", 1.5)
+               .attr("stroke", "blue")
                .attr("d", datum => d3.line()
                                 .x(d => xScale(d[0]))
                                 .y(d => yScale(d[1]))
@@ -758,10 +771,6 @@ function FimifMap(props) {
                 }
             })
 
-            console.log(connections);
-            console.log(connectionsWeight);
-            console.log(minWeight, maxWeight);
-
             let pathOpacityScale = d3.scaleLinear().domain([minWeight, maxWeight]).range([0, 1]);
 
 
@@ -787,29 +796,27 @@ function FimifMap(props) {
             })
 
 
-            let fbundling = ForceEdgeBundling().step_size(0.1)
-                                               .compatibility_threshold(0.85)
-                                               .nodes(node_data).edges(edge_data)
-            let results = fbundling();
-            console.log(results)
+            // let fbundling = ForceEdgeBundling().step_size(0.1)
+            //                                    .compatibility_threshold(0.85)
+            //                                    .nodes(node_data).edges(edge_data)
+            // let results = fbundling();
 
 
-            svg.selectAll(".connection")
-               .data(results)
-               .enter()
-               .append("path")
-               .attr("class", "connection")
-               .attr("fill", "none")
-               .attr("stroke-width", 1)
-               .attr("opacity", (d, i) => pathOpacityScale(connectionsWeight[i]) * 0.05 )
-            //    .attr("opacity", 0.02)
-               .attr("stroke", "red")
-               .attr("d",  datum => d3.line()
-                    .x(d => xScale(d.x))
-                    .y(d => yScale(d.y))
-                    .curve(d3.curveMonotoneX)
-                    (datum)
-               )      
+            // svg.selectAll(".connection")
+            //    .data(results)
+            //    .enter()
+            //    .append("path")
+            //    .attr("class", "connection")
+            //    .attr("fill", "none")
+            //    .attr("stroke-width", 1)
+            //    .attr("opacity", (d, i) => pathOpacityScale(connectionsWeight[i]) * 0.05 )
+            //    .attr("stroke", "red")
+            //    .attr("d",  datum => d3.line()
+            //         .x(d => xScale(d.x))
+            //         .y(d => yScale(d.y))
+            //         .curve(d3.curveMonotoneX)
+            //         (datum)
+            //    )      
         }
     }, [rMode])
 
