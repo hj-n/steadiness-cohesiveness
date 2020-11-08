@@ -647,6 +647,9 @@ function FimifMap(props) {
             return acc;
         }, [])
 
+        
+        console.log(knn_data);
+
 
         // mg case
         // similarity * power between edges: the sum of (the average point of overlapping missing points)
@@ -660,11 +663,11 @@ function FimifMap(props) {
             }, 0)
         })
 
+
+
         knnArr = knnArr.filter((d, i) => knnArrVal[i] > 0);
         knnArrVal = knnArrVal.filter((d, i) => d > 0);
 
-        console.log(knnArr);
-        console.log(knnArrVal);
 
         let knnDomain = [Math.min(...knnArrVal), Math.max(...knnArrVal)];
         let knnScale = d3.scaleLinear().domain(knnDomain).range([0, 1]);

@@ -3,18 +3,27 @@ import styled from 'styled-components'
 
 import Header from "./components/Header"
 import FimifMap from "./components/FimifMap"
+import FimifMapFalse from "./components/FimifMapFalse"
 
 
 
 function App() {
 
-  const size = 600;
+  const size = 800;
 
   return (
     <div>
       <Header/>
       <FimifWrapper>      
-        <FimifMap
+        {/* <FimifMap
+          method="tsne"
+          dataset="mnist_sampled_10"
+          height={size}
+          width={size}
+          isLabel={false}
+          metric = "euclidean"
+        /> */}
+        <FimifMapFalse
           method="tsne"
           dataset="mnist_sampled_10"
           height={size}
@@ -22,6 +31,7 @@ function App() {
           isLabel={false}
           metric = "euclidean"
         />
+
       </FimifWrapper>
     </div>
   );
