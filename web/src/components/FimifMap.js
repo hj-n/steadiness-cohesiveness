@@ -5,10 +5,8 @@ import styled from 'styled-components'
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { orange } from '@material-ui/core/colors';
 import hull from 'hull.js'
 import clustering from 'density-clustering'
-import {Helmet} from "react-helmet";
 
 
 // Function for force edge bundling
@@ -468,6 +466,8 @@ function FimifMap(props) {
     let data = require("../json/" + jsonFileName + ".json");
     let missing_data = require("../json/" + jsonFileName + "_missing.json");
     let false_data = require("../json/" + jsonFileName + "_false.json");
+    let knn_data = require("../json/" + jsonFileName + "_knn.json");
+
     const embeddedData = data.map((d, i) => {
         let embeddedDatum = {
             "coor": d.emb,                      // 2D Coordinate
@@ -506,19 +506,25 @@ function FimifMap(props) {
             Object.keys(d.missing_points).forEach(key => {
                 sum += d.missing_points[key];
             });
-            if (sum > 0)
-                sum /= Object.keys(d.missing_points).length;
+            // if (sum > 0)
+            //     sum /= Object.keys(d.missing_points).length;
             power = sum * 2 + maxVal;
         }
         return colorScale(power)
     }
 
+
     let svg;
+    let svgForCircle;
+    let svgForPath;
+    let svgForEdge;
 
     const width = props.width;
     const height = props.height;
     const margin = { hor: props.width / 20, ver: props.height / 20 };
 
+
+    // OnMount
     useEffect(() => {
 
             
@@ -528,6 +534,13 @@ function FimifMap(props) {
                     .append("g")
                     .attr("id", "scatterplot_g" + props.dataset + props.method)
                     .attr("transform", "translate(" + margin.hor + ", " + margin.ver + ")");
+
+        svgForCircle = svg.append("g")
+                          .attr("id", "circle_g" + props.dataset + props.method);
+        svgForEdge = svg.append("g")
+                        .attr("id", "edge_g" + props.dataset + props.method);
+        svgForPath = svg.append("g")
+                        .attr("id", "path_g" + props.dataset + props.method);
 
     }, [])
 
@@ -568,7 +581,7 @@ function FimifMap(props) {
                     sum += d.missing_points[key];
                 });
                 if (sum > 0)
-                    return sum / Object.keys(d.missing_points).length;
+                    return sum // / Object.keys(d.missing_points).length;
                 else return 0;
             });
             maxVal = Math.max(...powList)
@@ -589,39 +602,89 @@ function FimifMap(props) {
         
 
         svg = d3.select("#scatterplot_g" + props.dataset + props.method);
-        
+        svgForCircle = d3.select("#circle_g" + props.dataset + props.method);
+        svgForPath = d3.select("#path_g" + props.dataset + props.method);
+        svgForEdge = d3.select("#edge_g" + props.dataset + props.method);
+
         // ANCHOR Scatterplot rending & interaction
-        svg.selectAll("circle")
-           .data(embeddedData)
-           .join(
-               enter => {
-                   enter.append("circle")
-                        .attr("class", d => "circle" + d.idx.toString())
-                        .attr("fill", d => getColor(rMode, d, colorScale, thresholdVal, maxVal) )
-                        .attr("cx", d => xScale(d.coor[0]))
-                        .attr("cy", d => yScale(d.coor[1]))
-                        .style("opacity", 0.8)
-                        .attr("r", radius)
-                        .on("mouseover", function(event, d) {
-                            Object.keys(d.missing_points).forEach(key => {
-                                svg.select(".circle" + key)
-                                   .attr("fill", "red")
-                            })
-                            d3.select(this).style("opacity", 1).attr("r", radius * 2);
+        svgForCircle.selectAll("circle")
+        .data(embeddedData)
+        .join(
+            enter => {
+                enter.append("circle")
+                    .attr("class", d => "circle" + d.idx.toString())
+                    .attr("fill", d => getColor(rMode, d, colorScale, thresholdVal, maxVal) )
+                    .attr("cx", d => xScale(d.coor[0]))
+                    .attr("cy", d => yScale(d.coor[1]))
+                    .style("opacity", 0.8)
+                    .attr("r", radius)
+                    .on("mouseenter", function(event, d) {
+                        d3.select(this).style("opacity", 1).attr("r", radius * 2);
+                        Object.keys(d.missing_points).forEach(key => {
+                            svgForCircle.select(".circle" + key)
+                                .attr("fill", "red")
                         })
-                        .on("mouseout", function(event, d) {
-                            d3.select(this).style("opacity", 0.8).attr("r", radius); 
-                            Object.keys(d.missing_points).forEach(key => {
-                                svg.select(".circle" + key)
-                                   .attr("fill", d => getColor(rMode, d, colorScale, thresholdVal, maxVal) )
-                            })
-                            
+                    })
+                    .on("mouseleave", function(event, d) {
+                        d3.select(this).style("opacity", 0.8).attr("r", radius); 
+                        Object.keys(d.missing_points).forEach(key => {
+                            svgForCircle.select(".circle" + key)
+                                .attr("fill", d => getColor(rMode, d, colorScale, thresholdVal, maxVal) )
                         })
-               },
-               update => {
-                   update.attr("fill", d => getColor(rMode, d, colorScale, thresholdVal, maxVal))
-               }
-           );
+                        
+                    })
+            },
+            update => {
+                update.attr("fill", d => getColor(rMode, d, colorScale, thresholdVal, maxVal))
+            }
+        );
+
+
+        console.log(knn_data);
+
+        let knnArr = knn_data.reduce(function(acc, d, i) {
+            d.forEach(e => { if (i < e) acc.push([i, e]); });
+            return acc;
+        }, [])
+
+
+        // mg case
+        // similarity * power between edges: the sum of (the average point of overlapping missing points)
+        let knnArrVal = knnArr.map(edge => {
+            let leftSet  = Object.keys(embeddedData[edge[0]].missing_points);
+            let rightSet = new Set(Object.keys(embeddedData[edge[1]].missing_points));
+            let intersection = leftSet.filter(d => rightSet.has(d));
+            return intersection.reduce(function(acc, d) {
+                acc += (embeddedData[edge[0]].missing_points[d] + embeddedData[edge[1]].missing_points[d]) / 2;
+                return acc;
+            }, 0)
+        })
+
+        knnArr = knnArr.filter((d, i) => knnArrVal[i] > 0);
+        knnArrVal = knnArrVal.filter((d, i) => d > 0);
+
+        console.log(knnArr);
+        console.log(knnArrVal);
+
+        let knnDomain = [Math.min(...knnArrVal), Math.max(...knnArrVal)];
+        let knnScale = d3.scaleLinear().domain(knnDomain).range([0, 1]);
+
+        svgForEdge.selectAll("path")
+                  .data(knnArr)
+                  .enter()
+                  .append("path")
+                  .attr("fill", "none")
+                  .attr("stroke-width", 1)
+                  .attr("opacity", (d, i) => knnScale(knnArrVal[i]))
+                  .attr("stroke", "black")
+                  .attr("d",  datum => d3.line()
+                    .x(d => xScale(embeddedData[d].coor[0]))
+                    .y(d => yScale(embeddedData[d].coor[1]))
+                        (datum)
+                  );
+
+
+
 
         let cluster_info = []
 
@@ -640,7 +703,7 @@ function FimifMap(props) {
             });
 
             let dbscan = new clustering.DBSCAN();
-            let clusters = dbscan.run(missing_distortion_points_simplified, 1, 7);
+            let clusters = dbscan.run(missing_distortion_points_simplified, 0.9, 4);
             let cluster_indices = []
             for (let cluster_idx in clusters) {
                 let current_cluster_indices = [];
@@ -651,13 +714,25 @@ function FimifMap(props) {
                 cluster_indices.push(current_cluster_indices);
             }
 
+            // console.log(clusters, cluster_indices)
+            // console.log(missing_distortion_points_index)
+            let missingIndexSet = new Set(missing_distortion_points_index);
+            cluster_indices.forEach(cluster => {
+                cluster.forEach(idx => {
+                    missingIndexSet.delete(idx);
+                })
+            })
+            console.log(missingIndexSet);
+            missingIndexSet.forEach(idx => {
+                cluster_indices.push([idx])
+            })
+
             cluster_indices.forEach(cluster => {
                 let cluster_coor = cluster.map(i => {
                     return embeddedData[i].coor;
                 })
-                let rawContour = hull(cluster_coor, 20);
+                let rawContour = hull(cluster_coor, 1.5);
                 let contour = rawContour.reduce((acc, d) => {
-                    console.log(d);
                     let contourMargin = 0.2;
                     let surrounders = [[d[0] + contourMargin, d[1] + contourMargin],
                                        [d[0] - contourMargin, d[1] + contourMargin],
@@ -665,11 +740,8 @@ function FimifMap(props) {
                                        [d[0] - contourMargin, d[1] - contourMargin]]
                     return acc.concat(surrounders);
                 }, [])
-                contour = hull(contour, 20);
-                console.log(contour);
-
+                contour = hull(contour, 1.5);
                 
-                contour.push(contour[0]);
                 cluster_info.push({
                     indices: cluster,
                     contour: contour
@@ -677,20 +749,21 @@ function FimifMap(props) {
             })
             
 
-            svg.selectAll(".contour")
-               .data(cluster_info)
-               .enter()
-               .append("path")
-               .attr("class", "contour")
-               .attr("fill", "none")
-               .attr("stroke-width", 1.5)
-               .attr("stroke", "blue")
-               .attr("d", datum => d3.line()
-                                .x(d => xScale(d[0]))
-                                .y(d => yScale(d[1]))
-                                .curve(d3.curveCatmullRom)
-                                (datum.contour)
-               )
+            // svg.selectAll(".contour")
+            //    .data(cluster_info.filter(d => { return d.contour.length > 3;}))
+            //    .enter()
+            //    .append("path")
+            //    .attr("class", "contour")
+            //    .attr("fill", "none")
+            //    .attr("stroke-width", 1.5)
+            //    .attr("stroke", "blue")
+            //    .attr("d", datum => d3.line()
+            //                     .x(d => xScale(d[0]))
+            //                     .y(d => yScale(d[1]))
+            //                     .curve(d3.curveCatmullRom)
+            //                     (datum.contour)
+            //    )
+
 
             let connections = []
             let idxToCluster = {}
@@ -795,28 +868,33 @@ function FimifMap(props) {
                 }
             })
 
+            console.log(edge_data)
 
-            // let fbundling = ForceEdgeBundling().step_size(0.1)
-            //                                    .compatibility_threshold(0.85)
-            //                                    .nodes(node_data).edges(edge_data)
-            // let results = fbundling();
+            let fbundling = ForceEdgeBundling().step_size(0.1)
+                                               .compatibility_threshold(0.9)
+                                               .nodes(node_data).edges(edge_data)
+            let results = fbundling();
+
+            
+            svgForPath.selectAll(".connection")
+               .data(results)
+               .enter()
+               .append("path")
+               .attr("class", "connection")
+               .attr("fill", "none")
+               .attr("stroke-width", 0.7)
+               .attr("opacity", (d, i) => pathOpacityScale(connectionsWeight[i]) * 0.05 )
+               .attr("stroke", "red")
+               .attr("d",  datum => d3.line()
+                    .x(d => xScale(d.x))
+                    .y(d => yScale(d.y))
+                    .curve(d3.curveMonotoneX)
+                    (datum)
+               )      
 
 
-            // svg.selectAll(".connection")
-            //    .data(results)
-            //    .enter()
-            //    .append("path")
-            //    .attr("class", "connection")
-            //    .attr("fill", "none")
-            //    .attr("stroke-width", 1)
-            //    .attr("opacity", (d, i) => pathOpacityScale(connectionsWeight[i]) * 0.05 )
-            //    .attr("stroke", "red")
-            //    .attr("d",  datum => d3.line()
-            //         .x(d => xScale(d.x))
-            //         .y(d => yScale(d.y))
-            //         .curve(d3.curveMonotoneX)
-            //         (datum)
-            //    )      
+            
+            
         }
     }, [rMode])
 
