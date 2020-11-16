@@ -6,7 +6,7 @@ import numba
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
-from fimif_map import FimifMap
+from lod_record import FimifMap
 
 class Fimif:
     def __init__(
