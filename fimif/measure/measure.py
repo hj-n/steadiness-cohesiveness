@@ -53,7 +53,7 @@ class Fimif:
         self.false_log = []
         
         for __ in range(self.N):
-            new_dict = {"value": [], "direction": [] }
+            new_dict = {"value": [], "direction": [], "idx": [] }
             self.false_log.append(new_dict)
 
 
@@ -128,7 +128,7 @@ class Fimif:
 
         if is_false: 
             if self.clustering == "hdbscan":
-                clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
+                clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, allow_single_cluster=True)
                 clusterer.fit(self.raw[random_cluster_list])
                 clusters_idx = {}
                 for (i,label) in enumerate(clusterer.labels_):
@@ -215,6 +215,7 @@ class Fimif:
                             direction = direction / np.linalg.norm(direction)
                             self.false_log[idx]["direction"].append(-direction)
                             self.false_log[idx]["value"].append(distortion * weight)
+                            self.false_log[idx]["idx"].append(groups[j])
                         else:
                             self.missing_log[idx]["value"].append(distortion * weight)
                             self.missing_log[idx]["idx"].append(groups[j])
@@ -228,6 +229,7 @@ class Fimif:
                             direction = direction / np.linalg.norm(direction)
                             self.false_log[idx]["direction"].append(-direction)
                             self.false_log[idx]["value"].append(distortion * weight)
+                            self.false_log[idx]["idx"].append(groups[i])
                         else:
                             self.missing_log[idx]["value"].append(distortion * weight)
                             self.missing_log[idx]["idx"].append(groups[i])
@@ -290,17 +292,27 @@ def test_file(file_name):
     raw = np.array([np.array(datum["raw"]).astype(np.float64) for datum in data])
     emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
+
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=500, walk_num=300)
+    fimif = Fimif(raw, emb, iteration=500, walk_num=1500)
+
+
 
     fimifmap = FimifMap(fimif)
 
-    # with open("./map_json/" + file_name + "_false.json", "w") as outfile:
-    #     json.dump(fimifmap.false_log_aggregated, outfile)
+    emb_tree = KDTree(emb)
+    neighbors = emb_tree.query(emb, 9, return_distance=False)
+    emb_neighbors = neighbors[:, 1:].tolist()
     
-    # with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
-    #     json.dump(fimifmap.missing_log_aggregated, outfile)
 
+    with open("./map_json/" + file_name + "_false.json", "w") as outfile:
+        json.dump(fimifmap.false_log_aggregated, outfile)
+    
+    with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
+        json.dump(fimifmap.missing_log_aggregated, outfile)
+
+    with open("./map_json/" + file_name + "_knn.json", "w") as outfile:
+        json.dump(emb_neighbors, outfile)
 
 
 
@@ -343,8 +355,11 @@ def dist_setup_helper(N, raw, emb):
     return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
 
 
-test_file("mnist_sampled_10_tsne")
+test_file("mnist_sampled_10_pca")
 
+
+# for i in range(0, 15):
+#     test_file("multiclass_swissroll_half_" + str(i) + "_none")
 
 
 ## Mammoth

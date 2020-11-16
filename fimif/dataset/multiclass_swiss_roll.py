@@ -10,7 +10,7 @@ import pandas as pd
 import csv
 
 PATH_TO_WEB = "../../web/src/json/"
-PATH_TO_MEASURE = "./../fimif_measure/json/"
+PATH_TO_MEASURE = "./../measure/json/"
 PATH = PATH_TO_MEASURE
 
 preswissroll = [i.strip().split() for i in open("./raw_data/multiclass_swiss_roll/preswissroll.dat").readlines()]
@@ -60,7 +60,40 @@ def mss_missing_generator(move):
                 json.dump(multiclass_swissroll_data, json_file, ensure_ascii=False, indent=4)
                 
 
+def mss_half_generator(move):
+    multiclass_swissroll_data = []
+    for i in range(1600):
+        datum = {
+            "raw": [float(idx) for idx in swissroll[i]],
+            "emb": [float(idx) for idx in preswissroll[i]],
+            "label": i // 400 + 1
+        }
+        centroid = {
+            0: [7.5, 7.5], 1: [7.5, 12.5], 2: [12.5, 7.5], 3: [12.5, 12.5]
+        }[i // 400]
+        centroid_num = i // 400
+        original_x = datum["emb"][0]
+        
+        if centroid_num == 0 or centroid_num == 1:
+            datum["emb"][0] += move * 0.5
+            if original_x <= 7.5:
+                multiclass_swissroll_data.append(datum)
+        else:
+            datum["emb"][0] -= move * 0.5
+            if original_x >= 12.5:
+                multiclass_swissroll_data.append(datum)
+    
+
+
+    with open(PATH + "multiclass_swissroll_half_"+ str(move) + "_none.json", "w", encoding="utf-8") as json_file:
+                json.dump(multiclass_swissroll_data, json_file, ensure_ascii=False, indent=4)
             
+
+
+for i in range(0, 15):
+    mss_half_generator(i)
+
+
 
 # mss_missing_generator(0)
 # mss_missing_generator(1)

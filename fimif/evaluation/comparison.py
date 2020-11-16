@@ -70,10 +70,12 @@ if __name__ == "__main__":
     if args.algo == "ss":  ## swiss roll
         ALGO_LIST = []
         ## multiclass swissroll
-        for i in range(-7, 8):
-            ALGO_LIST.append("multiclass_swissroll_" + str(i) + "_none")
-        for i in range(0, 14):
-            ALGO_LIST.append("multiclass_swissroll_oneside_" + str(i) + "_none")
+        # for i in range(-7, 8):
+        #     ALGO_LIST.append("multiclass_swissroll_" + str(i) + "_none")
+        # for i in range(0, 14):
+        #     ALGO_LIST.append("multiclass_swissroll_oneside_" + str(i) + "_none")
+        for i in range(0, 15):
+            ALGO_LIST.append("multiclass_swissroll_half_" + str(i) + "_none")
     
     if args.algo == "mnist":
         ALGO_LIST = []
@@ -101,7 +103,7 @@ if __name__ == "__main__":
 
         # read data & embedding result
         # x, z, label = read_data(args.data, alg)
-        json_file = open("../fimif_measure/json/" + alg + ".json", "r") 
+        json_file = open("../measure/json/" + alg + ".json", "r") 
         json_data = json.load(json_file)
         x = np.array([datum["raw"] for datum in json_data]).astype(np.float64)
         z = np.array([datum["emb"] for datum in json_data]).astype(np.float64)
