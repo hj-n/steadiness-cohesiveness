@@ -212,8 +212,8 @@ class Fimif:
                         if is_false:
                             point_y = self.emb[idx]
                             direction = group_y[j] - point_y
-                            direction = direction / np.linalg.norm(direction)
-                            self.false_log[idx]["direction"].append(-direction)
+                            # direction = direction / np.linalg.norm(direction)
+                            # self.false_log[idx]["direction"].append(-direction)
                             self.false_log[idx]["value"].append(distortion * weight)
                             self.false_log[idx]["idx"].append(groups[j])
                         else:
@@ -226,8 +226,8 @@ class Fimif:
                         if is_false:
                             point_y = self.emb[idx]
                             direction = group_y[i] - point_y
-                            direction = direction / np.linalg.norm(direction)
-                            self.false_log[idx]["direction"].append(-direction)
+                            # direction = direction / np.linalg.norm(direction)
+                            # self.false_log[idx]["direction"].append(-direction)
                             self.false_log[idx]["value"].append(distortion * weight)
                             self.false_log[idx]["idx"].append(groups[i])
                         else:
@@ -294,7 +294,7 @@ def test_file(file_name):
 
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=300, walk_num=1000)
+    fimif = Fimif(raw, emb, iteration=500, walk_num=2000, k=10)
 
 
 
@@ -355,8 +355,8 @@ def dist_setup_helper(N, raw, emb):
     return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
 
 
-test_file("mnist_sampled_2_umap")
-test_file("mnist_sampled_2_pca")
+# test_file("mnist_sampled_2_umap")
+# test_file("mnist_sampled_2_pca")
 
 
 # for i in range(0, 15):
@@ -364,12 +364,10 @@ test_file("mnist_sampled_2_pca")
 
 
 ## Mammoth
-'''
 for n in [3, 5, 10, 15, 20, 50, 100,200]:
     for d in [0.0, 0.1, 0.25, 0.5, 0.8, 0.99]:
         key_summary = str(n) + "_" + str(d)
         test_file("mammoth_" + key_summary)
-'''
 ## MNIST TSNE
 '''
 for i in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400]:
