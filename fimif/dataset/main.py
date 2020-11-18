@@ -13,6 +13,7 @@ import json
 
 PATH_TO_WEB = "../../web/src/json/"
 PATH_TO_MEASURE = "./../measure/json/"
+PATH_TO_MEASURE_MAP = "./../measure/map_json/"
 PATH = PATH_TO_MEASURE
 
 def sampling(original_list):
@@ -24,11 +25,12 @@ data = np.array(sampling(data))
 label = np.array(sampling(label))
 
 start = time.time()
-# emb_tsne = TsneEmbedding("mnist_sampled_10", data, label=label, metric="euclidean", perplexity=200)
-emb_pca = PcaEmbedding("mnist_sampled_10", data, label=label)
+# emb_tsne = UmapEmbedding("mnist_sampled_2", data, label=label)
+emb_pca = PcaEmbedding("mnist_sampled_2", data, label=label)
 end   = time.time()
 hp.print_time_spent(start, end, emb_pca.get_info())
 emb_pca.print_file(path=PATH)
+emb_pca.print_file(path=PATH_TO_MEASURE_MAP)
 
 
 '''

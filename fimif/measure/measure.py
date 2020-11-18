@@ -6,7 +6,7 @@ import numba
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
-from lod_record import FimifMap
+from log_record import FimifMap
 
 class Fimif:
     def __init__(
@@ -128,7 +128,7 @@ class Fimif:
 
         if is_false: 
             if self.clustering == "hdbscan":
-                clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, allow_single_cluster=True)
+                clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)#, '''allow_single_cluster=True''')
                 clusterer.fit(self.raw[random_cluster_list])
                 clusters_idx = {}
                 for (i,label) in enumerate(clusterer.labels_):
@@ -294,7 +294,7 @@ def test_file(file_name):
 
 
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=500, walk_num=1500)
+    fimif = Fimif(raw, emb, iteration=300, walk_num=1000)
 
 
 
@@ -305,14 +305,14 @@ def test_file(file_name):
     emb_neighbors = neighbors[:, 1:].tolist()
     
 
-    with open("./map_json/" + file_name + "_false.json", "w") as outfile:
-        json.dump(fimifmap.false_log_aggregated, outfile)
+    # with open("./map_json/" + file_name + "_false.json", "w") as outfile:
+    #     json.dump(fimifmap.false_log_aggregated, outfile)
     
-    with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
-        json.dump(fimifmap.missing_log_aggregated, outfile)
+    # with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
+    #     json.dump(fimifmap.missing_log_aggregated, outfile)
 
-    with open("./map_json/" + file_name + "_knn.json", "w") as outfile:
-        json.dump(emb_neighbors, outfile)
+    # with open("./map_json/" + file_name + "_knn.json", "w") as outfile:
+    #     json.dump(emb_neighbors, outfile)
 
 
 
@@ -355,7 +355,8 @@ def dist_setup_helper(N, raw, emb):
     return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
 
 
-test_file("mnist_sampled_10_pca")
+test_file("mnist_sampled_2_umap")
+test_file("mnist_sampled_2_pca")
 
 
 # for i in range(0, 15):

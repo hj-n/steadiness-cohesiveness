@@ -66,7 +66,6 @@ class PcaEmbedding(Embedding):
         Embedding.__init__(self, data_name)
         pca = PCA(n_components=2)
         embedded = pca.fit_transform(hd_data)
-        print(pca.components_)
 
         label = label.tolist()
         for idx, datum in enumerate(hd_data):

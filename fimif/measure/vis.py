@@ -1,4 +1,5 @@
 import json
+import numpy as np
 
 
 def get_edges_info(edges,data):
@@ -28,7 +29,8 @@ def get_points_info(data):
         return [{"coor": datum["emb"]} for datum in data]
 
 
-def visualization(file_name):
+
+def visualization(file_name, save_missing_edges):
     file = open("./map_json/" + file_name + ".json", "r") 
     data = json.load(file)
     file = open("./map_json/" + file_name + "_false.json", "r")
@@ -61,10 +63,28 @@ def visualization(file_name):
     point_vis_infos = get_points_info(data)
 
     
+
+    # missing_edges = get_missing_edges(missing_data, point_vis_infos)
+    # print(len(missing_edges))
+    max_missing_val = 0
+    for missing_datum in missing_data:
+        for key in missing_datum:
+            max_missing_val = max_missing_val if missing_datum[key] < max_missing_val else missing_datum[key]
+    
+    for missing_datum in missing_data:
+        for key in missing_datum:
+            missing_datum[key] /= max_missing_val
+    
     with open("./vis/" + file_name + "_edges.json", "w") as outfile:
         json.dump(edge_vis_infos, outfile)
     with open("./vis/" + file_name + "_points.json", "w") as outfile:
         json.dump(point_vis_infos, outfile)
+    with open("./vis/" + file_name + "_missing_points.json", "w") as outfile:
+        json.dump(missing_data, outfile)
+    # if save_missing_edges:
+    #     with open("./vis/" + file_name + "_missing_edges.json", "w") as outfile:
+    #         json.dump(missing_edges, outfile)
+
     
 
-visualization("mnist_sampled_10_pca")
+visualization("mnist_sampled_2_pca", True)
