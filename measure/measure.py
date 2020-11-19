@@ -291,7 +291,7 @@ result_aggregate = []
 
 
 
-def test_file(file_name, num, k, n, m, walk):
+def test_file(file_name, k, n, p, walk):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
 
