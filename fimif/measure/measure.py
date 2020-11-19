@@ -61,6 +61,12 @@ class Fimif:
         self.__initial_dist_setup()
         self.__measure()
 
+    def result(self):
+        return {
+            "steadiness" : self.score_false,
+            "cohesiveness" : self.score_missing,
+            "f1" : self.score
+        }
 
     def __measure(self):
         x = True
@@ -96,9 +102,9 @@ class Fimif:
 
 
         self.score = (1 + self.beta * self.beta) * ((self.score_false * self.score_missing) / (self.beta * self.beta * self.score_false + self.score_missing))
-        print("False Score (Precision):", self.score_false)
-        print("Missing Score  (Recall):",self.score_missing)
-        print("F_beta Score:", self.score)
+        # print("False Score (Precision):", self.score_false)
+        # print("Missing Score  (Recall):",self.score_missing)
+        # print("F_beta Score:", self.score)
         
 
 
@@ -280,11 +286,12 @@ class Fimif:
 
 
 
+result_aggregate = {}
 
 
 
 
-def test_file(file_name):
+def test_file(file_name, num):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
 
@@ -293,26 +300,34 @@ def test_file(file_name):
     emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
 
+
     print("TEST for", file_name, "data")
-    fimif = Fimif(raw, emb, iteration=500, walk_num=2000, k=10)
+    fimif = Fimif(raw, emb, iteration=500, walk_num=3000, k=20)
 
-
+    
 
     fimifmap = FimifMap(fimif)
+    result = fimif.result()
+    print("steadiness:", result["steadiness"])
+    print("cohesivness:", result["cohesiveness"])
+    print("f1:",result["f1"])
 
+    result_aggregate[num] = [result["steadiness"], result["cohesiveness"], result["f1"]]
+
+    # for knn
     emb_tree = KDTree(emb)
     neighbors = emb_tree.query(emb, 9, return_distance=False)
     emb_neighbors = neighbors[:, 1:].tolist()
     
 
-    # with open("./map_json/" + file_name + "_false.json", "w") as outfile:
-    #     json.dump(fimifmap.false_log_aggregated, outfile)
+    with open("./map_json/" + file_name + "_false.json", "w") as outfile:
+        json.dump(fimifmap.false_log_aggregated, outfile)
     
-    # with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
-    #     json.dump(fimifmap.missing_log_aggregated, outfile)
+    with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
+        json.dump(fimifmap.missing_log_aggregated, outfile)
 
-    # with open("./map_json/" + file_name + "_knn.json", "w") as outfile:
-    #     json.dump(emb_neighbors, outfile)
+    with open("./map_json/" + file_name + "_knn.json", "w") as outfile:
+        json.dump(emb_neighbors, outfile)
 
 
 
@@ -363,11 +378,26 @@ def dist_setup_helper(N, raw, emb):
 #     test_file("multiclass_swissroll_half_" + str(i) + "_none")
 
 
-## Mammoth
-for n in [3, 5, 10, 15, 20, 50, 100,200]:
-    for d in [0.0, 0.1, 0.25, 0.5, 0.8, 0.99]:
-        key_summary = str(n) + "_" + str(d)
-        test_file("mammoth_" + key_summary)
+## Mammoth umap
+# for n in [3, 5, 10, 15, 20, 50, 100,200]:
+#     for d in [0.0, 0.1, 0.25, 0.5, 0.8, 0.99]:
+#         key_summary = str(n) + "_" + str(d)
+#         test_file("mammoth_" + key_summary)
+
+## Mammoth t-sne
+for n in [3, 5, 10, 15, 20, 50, 100, 200]:
+    test_file("mammoth_" + str(n) + "_0.1_umap", n)
+for n in [3, 5, 10, 15, 20, 50, 100, 200]:
+    print(result_aggregate[n])
+## Mammoth t-sne
+# for n in [20, 50, 100, 200]:
+#     test_file("mammoth_" + str(n) + "_0.25_umap", n)
+# for n in [20, 50, 100, 200]:
+#     print(result_aggregate[n])
+# for n in [5, 10]:
+#     test_file("mammoth_" + str(n) + "_tsne", n)
+# for n in [5, 10]:
+#     print(result_aggregate[n])
 ## MNIST TSNE
 '''
 for i in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400]:
