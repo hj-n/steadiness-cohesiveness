@@ -87,7 +87,7 @@ with open('./raw_data/mammoth/mammoth_umap.json') as json_file:
                 datum = {}
                 datum["raw"] = mammoth_raw_data[i].tolist()
                 datum["emb"] = mammoth_emb_data[i].tolist()
-                datum["label"] = mammoth_label[i]
+                datum["label"] = int(mammoth_label.tolist()[i])
                 final_data.append(datum)
             print("UMAP for", "mammoth", key_summary, "finished!!")
             with open(PATH + "mammoth_" + key_summary + "_umap.json", "w") as outfile:
