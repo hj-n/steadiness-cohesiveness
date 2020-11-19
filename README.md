@@ -1,6 +1,6 @@
-## FiMiF
+## Steadiness & Cohesivenss
 
-Metric for the evaluation of Dimensionality Embedding, which focuses on **Fi**nding **Mi**ssing **F**amily
+Metric for the evaluation of Multidiemensional Projections, which focuses on Cluster Reliability
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38465539/94182412-ed416400-fedb-11ea-82af-b85ea3621916.png" width="40%">
