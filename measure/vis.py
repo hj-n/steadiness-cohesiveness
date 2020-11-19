@@ -1,5 +1,6 @@
 import json
 import numpy as np
+from sklearn.neighbors import KDTree
 
 
 def get_edges_info(edges,data):
@@ -23,11 +24,47 @@ def get_edges_info(edges,data):
     return edges_info
 
 def get_points_info(data):
+    # for checkviz visualization
+    score = knn_based_measure(data, 20)
+    
     if "label" in data[0]:
-        return [{"coor": datum["emb"], "label": datum["label"]} for datum in data]
+        return [{"coor": datum["emb"], "label": datum["label"], "cont": score[i][0], "trust": score[i][1]} for (i,datum)in enumerate(data)]
     else:
-        return [{"coor": datum["emb"]} for datum in data]
+        return [{"coor": datum["emb"], "cont": score[i][0], "trust": score[i][1]} for (i,datum)in enumerate(data)] 
 
+
+# for checkviz visualization
+# show trustworthiness / continuity score per point
+def knn_based_measure(data, k):
+    raw = []
+    emb = []
+    for datum in data:
+        raw.append(datum["raw"])
+        emb.append(datum["emb"])
+    raw_tree = KDTree(np.array(raw))
+    raw_neighbors = raw_tree.query(raw, k + 1, return_distance=False)
+    raw_neighbors = raw_neighbors[:, 1:]
+    emb_tree = KDTree(np.array(emb))
+    emb_neighbors = emb_tree.query(emb, k + 1, return_distance=False)
+    emb_neighbors = emb_neighbors[:, 1:]
+    score = []
+    k_sum = (k * (k+1)) / 2
+    for i, _ in enumerate(raw_neighbors):
+        raw_n_set = set(raw_neighbors[i].tolist())
+        emb_n_set = set(emb_neighbors[i].tolist())
+        cont_num = k_sum
+        for (i, idx) in enumerate(raw_neighbors[i].tolist()):
+            if idx not in emb_n_set:
+                cont_num += (i + 1 - k)
+        trust_num = k_sum
+        for (i, idx) in enumerate(emb_neighbors[i].tolist()):
+            if idx not in raw_n_set:
+                trust_num += (i + 1 - k)
+        ## push [cont, trust]
+        score.append([cont_num / k_sum, trust_num / k_sum])
+    return score
+                
+    
 
 
 def visualization(file_name, save_missing_edges):
@@ -85,6 +122,5 @@ def visualization(file_name, save_missing_edges):
     #     with open("./vis/" + file_name + "_missing_edges.json", "w") as outfile:
     #         json.dump(missing_edges, outfile)
 
-    
 
 visualization("mnist_sampled_2_pca", True)
