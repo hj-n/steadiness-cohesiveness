@@ -47,25 +47,25 @@ for p in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 
 '''
 
 ## Spheres data generation for final test data extraction (umap)
-spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
-spheres_raw_data = np.array([datum[:-1] for datum in spheres_data])
-spheres_label = np.array([datum[-1] for datum in spheres_data])
+# spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
+# spheres_raw_data = np.array([datum[:-1] for datum in spheres_data])
+# spheres_label = np.array([datum[-1] for datum in spheres_data])
 
-for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
-    for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
-        final_data = [] 
-        key_summary = str(n) + "_" + str(int(p * 100))
-        umap_instance = umap.UMAP(n_neighbors=n, min_dist=p)
-        spheres_emb_data =umap_instance.fit_transform(spheres_raw_data)
-        for (i, _) in enumerate(spheres_emb_data):
-            datum = {}
-            datum["raw"] = spheres_raw_data[i].tolist()
-            datum["emb"] = spheres_emb_data[i].tolist()
-            datum["label"] = spheres_label[i]
-            final_data.append(datum)
-        print("UMAP for", "spheres", key_summary, "finished!!")
-        with open(PATH + "spheres_" + key_summary + "_umap.json", "w") as outfile:
-            json.dump(final_data, outfile)
+# for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
+#     for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
+#         final_data = [] 
+#         key_summary = str(n) + "_" + str(int(p * 100))
+#         umap_instance = umap.UMAP(n_neighbors=n, min_dist=p)
+#         spheres_emb_data =umap_instance.fit_transform(spheres_raw_data)
+#         for (i, _) in enumerate(spheres_emb_data):
+#             datum = {}
+#             datum["raw"] = spheres_raw_data[i].tolist()
+#             datum["emb"] = spheres_emb_data[i].tolist()
+#             datum["label"] = spheres_label[i]
+#             final_data.append(datum)
+#         print("UMAP for", "spheres", key_summary, "finished!!")
+#         with open(PATH + "spheres_" + key_summary + "_umap.json", "w") as outfile:
+#             json.dump(final_data, outfile)
 
 
 
@@ -82,7 +82,7 @@ with open('./raw_data/mammoth/mammoth_umap.json') as json_file:
             final_data = [] 
             key_summary = str(n) + "_" + str(int(p * 100))
             umap_instance = umap.UMAP(n_neighbors=n, min_dist=p)
-            mammoth_emb_data = umap_instance.fit_transform(raw_data)
+            mammoth_emb_data = umap_instance.fit_transform(mammoth_raw_data)
             for (i, _) in enumerate(mammoth_emb_data):
                 datum = {}
                 datum["raw"] = mammoth_raw_data[i].tolist()
