@@ -81,9 +81,9 @@ class PcaEmbedding(Embedding):
 
 ## Generates UMAP Embedding with given data
 class UmapEmbedding(Embedding):
-    def __init__(self, data_name, hd_data, label=np.array([])):
+    def __init__(self, data_name, hd_data, label=np.array([]), n=15, d=2):
         Embedding.__init__(self, data_name)
-        embedded = umap.UMAP().fit_transform(hd_data)
+        embedded = umap.UMAP(n_neighbors=n, min_dist=d).fit_transform(hd_data)
         
 
         label = label.tolist()

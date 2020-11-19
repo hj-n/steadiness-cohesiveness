@@ -33,6 +33,7 @@ def sampling(original_list):
 # emb_pca.print_file(path=PATH_TO_MEASURE_MAP)
 
 
+
 '''
 image, label = mnist_test()
 data = [np.array(datum).flatten() for datum in image]
@@ -45,47 +46,52 @@ for p in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 
     emb_tsne.print_file(path=PATH)
 '''
 
-# spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
-# spheres_raw_data = np.array(sampling([datum[:-1] for datum in spheres_data]))
-# spheres_label = np.array(sampling([datum[-1] for datum in spheres_data]))
+## Spheres data generation for final test data extraction (umap)
+spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
+spheres_raw_data = np.array([datum[:-1] for datum in spheres_data])
+spheres_label = np.array([datum[-1] for datum in spheres_data])
+
+for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]
+    for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+        final_data = [] 
+        key_summary = str(n) + "_" + str(int(p * 100))[]
+        umap_instance = umap.UMAP(n_neighbors=n, min_dist=p)
+        spheres_emb_data =umap_instance.fit_transform(spheres_raw_data)
+        for (i, _) in enumerate(spheres_emb_data):
+            datum = {}
+            datum["raw"] = spheres_raw_data[i].tolist()
+            datum["emb"] = spheres_emb_data[i].tolist()
+            datum["label"] = spheres_label[i]
+            final_data.append(datum)
+        print("UMAP for", "spheres", key_summary, "finished!!")
+        with open(PATH + "spheres_" + key_summary + "_umap.json", "w") as outfile:
+            json.dump(final_data, outfile)
 
 
-# for p in [0.2, 0.4]:
-#     for n in [3, 10, 20, 30, 40, 50, 100, 150, 200, 400, 600, 800, 1000]:
-#         final_data = [] 
-#         key_summary = str(n) + "_" + str(p)
-#         umap_instance = umap.UMAP(n_neighbors=n, min_dist=p)
-#         spheres_emb_data =umap_instance.fit_transform(spheres_raw_data)
-#         for (i, _) in enumerate(spheres_emb_data):
-#             datum = {}
-#             datum["raw"] = spheres_raw_data[i].tolist()
-#             datum["emb"] = spheres_emb_data[i].tolist()
-#             datum["label"] = spheres_label[i]
-#             final_data.append(datum)
-#         print("UMAP for", "spheres", key_summary, "finished!!")
-#         with open(PATH + "spheres_sampled_" + key_summary + ".json", "w") as outfile:
-#             json.dump(final_data, outfile)
-        
 
 
-## Mammoth UMAP dataset
+
+## Mammoth data generation for final test data extraction (umap)
+
 with open('./raw_data/mammoth/mammoth_umap.json') as json_file:
     json_data = json.load(json_file)
-    projections = json_data["projections"]
-    raw_data = json_data["3d"]
-    labels = json_data["labels"]
-    for key in projections.keys():
-        final_data = []
-        key_summary = key.replace("n=","").replace("d=","").replace(",", "_").replace("_0.0","")
-        projection = projections[key]
-        for (i, _) in projection:
+    mammoth_raw_data = np.array(json_data["3d"])
+    mammoth_label = np.array(json_data["labels"])
+    for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]
+        for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+        final_data = [] 
+        key_summary = str(n) + "_" + str(int(p * 100))[]
+        umap_instance = umap.UMAP(n_neighbors=n, min_dist=p)
+        mammoth_emb_data = umap_instance.fit_transform(raw_data)
+        for (i, _) in enumerate(mammoth_emb_data):
             datum = {}
-            datum["raw"] = raw_data[i]
-            datum["emb"] = projection[i]
-            datum["label"] = projection[i]
+            datum["raw"] = mammoth_raw_data[i].tolist()
+            datum["emb"] = mammoth_emb_data[i].tolist()
+            datum["label"] = mammoth_label[i]
             final_data.append(datum)
         with open(PATH + "mammoth_" + key_summary + "_umap.json", "w") as outfile:
             json.dump(final_data, outfile)
+
             
 ## Mammoth t-SNE dataset
 # file_path = "./raw_data/mammoth/mammoth_"
