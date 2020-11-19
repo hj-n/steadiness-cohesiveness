@@ -291,7 +291,7 @@ result_aggregate = []
 
 
 
-def test_file(file_name, num, k, n, m):
+def test_file(file_name, num, k, n, m, walk):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
 
@@ -300,7 +300,7 @@ def test_file(file_name, num, k, n, m):
     emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
     print("TEST for", file_name, "data with K=", k)
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=3000, k=k)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num=walk, k=k)
 
     
 
@@ -388,12 +388,23 @@ def dist_setup_helper(N, raw, emb):
 # for n in [3, 5, 10, 15, 20, 50, 100, 200]:
 #     print(result_aggregate[n])
     
+result_aggregate = []
+for k in [5, 10, 15, 20, 25, 30, 35, 40]:
+    for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
+        for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
+            test_file("spheres_" + str(n) + "_" + str(int(p * 100)) + "_umap", k, n, p, 2000)    
+
+print("SPHERES UMAP")
+for i in range(len(result_aggregate)):
+    print(result_aggregate[i])  
     
+     
+result_aggregate = []
 ## Final measure for mammoth-umap
 for k in [5, 10, 15, 20, 25, 30, 35, 40]:
     for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
         for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
-            test_file("mammoth_" + str(n) + "_" + str(int(p * 100)) + "_umap", k, n, p)    
+            test_file("mammoth_" + str(n) + "_" + str(int(p * 100)) + "_umap", k, n, p, 4000)    
 
 print("MAMMOTH UMAP")
 for i in range(len(result_aggregate)):
@@ -402,15 +413,7 @@ for i in range(len(result_aggregate)):
 ## reinitialize result_aggregate
 result_aggregate = []
 
-for k in [5, 10, 15, 20, 25, 30, 35, 40]:
-    for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
-        for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
-            test_file("spheres_" + str(n) + "_" + str(int(p * 100)) + "_umap", k, n, p)    
 
-print("SPHERES UMAP")
-for i in range(len(result_aggregate)):
-    print(result_aggregate[i])
-result_aggregate = []
 ## Mammoth t-sne
 # for n in [20, 50, 100, 200]:
 #     test_file("mammoth_" + str(n) + "_0.25_umap", n)
