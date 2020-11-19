@@ -1,4 +1,4 @@
-## Steadiness & Cohesivenss
+## Steadiness & Cohesiveness
 
 Metric for the evaluation of Multidiemensional Projections, which focuses on Cluster Reliability
 
