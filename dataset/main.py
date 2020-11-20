@@ -8,13 +8,15 @@ import helper as hp
 import numpy as np
 import pandas as pd
 import csv
+import os
+from sklearn.decomposition import PCA
 
 import json
 
 PATH_TO_WEB = "../../web/src/json/"
 PATH_TO_MEASURE = "./../measure/json/"
 PATH_TO_MEASURE_MAP = "./../measure/map_json/"
-PATH = PATH_TO_MEASURE
+PATH = PATH_TO_MEASURE_MAP
 
 def sampling(original_list):
     return [datum for (i, datum) in enumerate(original_list) if i % 2 == 0]
@@ -34,17 +36,43 @@ def sampling(original_list):
 
 
 
-'''
-image, label = mnist_test()
+
+image, label = fashion_mnist_test()
 data = [np.array(datum).flatten() for datum in image]
 data = np.array(sampling(data))
-for p in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400]:
-    start = time.time()
-    emb_tsne = TsneEmbedding("mnist_test_" + str(p), data, label=label, metric="cosine", perplexity=p)
-    end   = time.time()
-    hp.print_time_spent(start, end, emb_tsne.get_info())
-    emb_tsne.print_file(path=PATH)
-'''
+start = time.time()
+emb_tsne = PcaEmbedding("fmnist_sampled_2", data, label=label)
+end   = time.time()
+hp.print_time_spent(start, end, emb_tsne.get_info())
+emb_tsne.print_file(path=PATH)
+
+
+def load_kmnist(path, dtype="kmnist", kind='test'):
+    images_path = os.path.join(path, f'{dtype}-{kind}-imgs.npz')
+    labels_path = os.path.join(path, f'{dtype}-{kind}-labels.npz')
+    images = np.load(images_path)
+    images = images.f.arr_0
+    images = images.reshape(images.shape[0], -1)
+    labels = np.load(labels_path)
+    labels = labels.f.arr_0
+    labels = labels.reshape(-1)
+    return images, labels
+
+# images, labels = load_kmnist("./raw_data/kmnist_test")
+# data = [np.array(datum).flatten() for datum in images]
+# data = np.array(sampling(data))
+# labels = np.array(sampling(labels))
+# start = time.time()
+# emb_tsne = PcaEmbedding("kmnist_sampled_2", data, label=labels)
+# end   = time.time()
+# hp.print_time_spent(start, end, emb_tsne.get_info())
+# emb_tsne.print_file(path=PATH)
+
+
+## for test
+pca = PCA(n_components=2)
+pca.fit_transform(data)
+print(pca.explained_variance_ratio_)
 
 ## Spheres data generation for final test data extraction (umap)
 # spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
@@ -70,7 +98,7 @@ for p in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 
 
 
 
-
+'''
 ## Mammoth data generation for final test data extraction (umap)
 
 with open('./raw_data/mammoth/mammoth_umap.json') as json_file:
@@ -93,7 +121,9 @@ with open('./raw_data/mammoth/mammoth_umap.json') as json_file:
             with open(PATH + "mammoth_" + key_summary + "_umap.json", "w") as outfile:
                 json.dump(final_data, outfile)
 
-            
+
+'''
+
 ## Mammoth t-SNE dataset
 # file_path = "./raw_data/mammoth/mammoth_"
 # with open(file_path + 'tsne.json') as tsne_file, open(file_path + '3d.json') as raw_file, open(file_path + 'umap.json') as umap_file:

@@ -69,11 +69,6 @@ if __name__ == "__main__":
         
     if args.algo == "ss":  ## swiss roll
         ALGO_LIST = []
-        ## multiclass swissroll
-        # for i in range(-7, 8):
-        #     ALGO_LIST.append("multiclass_swissroll_" + str(i) + "_none")
-        # for i in range(0, 14):
-        #     ALGO_LIST.append("multiclass_swissroll_oneside_" + str(i) + "_none")
         for i in range(0, 15):
             ALGO_LIST.append("multiclass_swissroll_half_" + str(i) + "_none")
     
@@ -84,18 +79,18 @@ if __name__ == "__main__":
     
     if args.algo == "mammoth":
         ALGO_LIST = [] 
-        for n in [3, 5, 10, 15, 20, 50, 100,200]:
-            for d in [0.0, 0.1, 0.25, 0.5, 0.8, 0.99]:
-                key_summary = str(n) + "_" + str(d)
-                ALGO_LIST.append("mammoth_" + key_summary)
+        for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
+            for d in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
+                key_summary = str(n) + "_" + str(int(d*100))
+                ALGO_LIST.append("mammoth_" + key_summary +"_umap")
 
     if args.algo == "spheres":
         ALGO_LIST = []
         ALGO_LIST = [] 
-        for n in [3, 10, 20, 30, 40, 50, 100, 150, 200, 400, 600, 800, 1000]:
-            for d in [0.0, 0.2, 0.4, 0.5, 0.99]:
-                key_summary = str(n) + "_" + str(d)
-                ALGO_LIST.append("spheres_sampled_" + key_summary)
+        for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
+            for d in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
+                key_summary = str(n) + "_" + str(int(d*100))
+                ALGO_LIST.append("spheres_" + key_summary + "_umap")
 
     for alg in ALGO_LIST:
 

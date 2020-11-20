@@ -25,7 +25,7 @@ def get_edges_info(edges,data):
 
 def get_points_info(data):
     # for checkviz visualization
-    score = knn_based_measure(data, 20)
+    score = knn_based_measure(data, 30)
     
     if "label" in data[0]:
         return [{"coor": datum["emb"], "label": datum["label"], "cont": score[i][0], "trust": score[i][1]} for (i,datum)in enumerate(data)]
@@ -123,4 +123,5 @@ def visualization(file_name, save_missing_edges):
     #         json.dump(missing_edges, outfile)
 
 
-visualization("mnist_sampled_2_pca", True)
+visualization("kmnist_sampled_2_pca", True)
+visualization("fmnist_sampled_2_pca", True)

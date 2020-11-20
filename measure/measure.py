@@ -3,6 +3,7 @@ import random
 import json
 import hdbscan
 import numba
+import sys
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
@@ -300,7 +301,7 @@ def test_file(file_name, k, n, p, walk):
     emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
     print("TEST for", file_name, "data with K=", k)
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=walk, k=k)
+    fimif = Fimif(raw, emb, iteration=500, walk_num=walk, k=k)
 
     
 
@@ -310,7 +311,7 @@ def test_file(file_name, k, n, p, walk):
     print("cohesivness:", result["cohesiveness"])
     print("f1:",result["f1"])
 
-    result_aggregate.append = [k, n, p, result["steadiness"], result["cohesiveness"], result["f1"]]
+    result_aggregate.append([k, n, p, result["steadiness"], result["cohesiveness"], result["f1"]])
 
     # for knn
     emb_tree = KDTree(emb)
@@ -387,7 +388,40 @@ def dist_setup_helper(N, raw, emb):
 #     test_file("mammoth_" + str(n) + "_0.1_umap", n)
 # for n in [3, 5, 10, 15, 20, 50, 100, 200]:
 #     print(result_aggregate[n])
+
+
+args = sys.argv
+data = args[1]
+k    = int(args[2])
+n    = int(args[3])
+
+result_aggregate = []
+if data == "spheres":
+    for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
+        test_file("spheres_" + str(n) + "_" + str(int(p * 100)) + "_umap", k, n, p, 2000)    
+
+    print("SPHERES UMAP, k=", k, ", n=", n)
+    for i in range(len(result_aggregate)):
+        print(result_aggregate[i])  
+elif data == "mammoth":
+    p = n
+    for nn in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
+        test_file("mammoth_" + str(nn) + "_" + str(p) + "_umap", k, nn, p, 4000)    
+
+    print("MAMMOTH UMAP, k=", k, ", n=", nn)
+    for i in range(len(result_aggregate)):
+        print(result_aggregate[i])
+elif data == "fmnist":
+    test_file("fmnist_sampled_2_pca", 5, 0, 0, 2000)
+elif data == "kmnist":
+    test_file("kmnist_sampled_2_pca", 5, 0, 0, 2000)
     
+else:
+    print("No such dataset!!")
+
+
+
+'''
 result_aggregate = []
 for k in [5, 10, 15, 20, 25, 30, 35, 40]:
     for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
@@ -397,8 +431,8 @@ for k in [5, 10, 15, 20, 25, 30, 35, 40]:
 print("SPHERES UMAP")
 for i in range(len(result_aggregate)):
     print(result_aggregate[i])  
-    
-     
+'''    
+'''
 result_aggregate = []
 ## Final measure for mammoth-umap
 for k in [5, 10, 15, 20, 25, 30, 35, 40]:
@@ -413,7 +447,7 @@ for i in range(len(result_aggregate)):
 ## reinitialize result_aggregate
 result_aggregate = []
 
-
+'''
 ## Mammoth t-sne
 # for n in [20, 50, 100, 200]:
 #     test_file("mammoth_" + str(n) + "_0.25_umap", n)
@@ -427,6 +461,7 @@ result_aggregate = []
 '''
 for i in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400]:
     test_file("mnist_test_" + str(i) + "_tsne")
+
 '''
 ## Spheres umap
 # for n in [20, 40, 60, 80, 120, 160, 200]:
