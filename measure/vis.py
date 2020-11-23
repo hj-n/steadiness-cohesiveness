@@ -123,5 +123,15 @@ def visualization(file_name, save_missing_edges):
     #         json.dump(missing_edges, outfile)
 
 
-visualization("kmnist_sampled_2_pca", True)
-visualization("fmnist_sampled_2_pca", True)
+# visualization("kmnist_sampled_2_pca", True)
+# visualization("fmnist_sampled_2_pca", True)
+
+# visualization("spheres_pca", True)
+visualization("mnist_sampled_2_pca", True)
+visualization("mnist_sampled_2_tsne", True)
+visualization("mnist_sampled_2_umap", True)
+visualization("mnist_sampled_2_isomap", True)
+# visualization("spheres_topoae", True)
+# visualization("spheres_tsne", True)
+# visualization("spheres_umato", True)
+# visualization("spheres_umap", True)

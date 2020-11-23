@@ -1,6 +1,7 @@
 import numpy as np
 import json
 from sklearn.manifold import TSNE
+from sklearn.manifold import Isomap
 from sklearn.decomposition import PCA
 import umap
 
@@ -60,6 +61,26 @@ class TsneEmbedding(Embedding):
         self.size = hd_data.shape[0]
         self.method_name = "tsne"
 
+## Generates Isomap Embedding with given data
+class IsomapEmbedding(Embedding):
+    def __init__(self, data_name, hd_data, label=np.array([])):
+        Embedding.__init__(self, data_name)
+        embedded = Isomap().fit_transform(hd_data)
+
+        label = label.tolist()
+        for idx, datum in enumerate(hd_data):
+            datum_set = {}
+            datum_set["raw"] = datum.tolist()
+            datum_set["emb"] = embedded[idx].tolist()
+            if(len(label) != 0):
+                datum_set["label"] = label[idx]
+            self.data.append(datum_set)
+        
+        self.size = hd_data.shape[0]
+        self.method_name = "isomap"
+
+
+
 ## Generates TSNE Embedding with given data
 class PcaEmbedding(Embedding):
     def __init__(self, data_name, hd_data, label=np.array([])):
@@ -81,9 +102,9 @@ class PcaEmbedding(Embedding):
 
 ## Generates UMAP Embedding with given data
 class UmapEmbedding(Embedding):
-    def __init__(self, data_name, hd_data, label=np.array([]), n=15, d=2):
+    def __init__(self, data_name, hd_data, label=np.array([])):
         Embedding.__init__(self, data_name)
-        embedded = umap.UMAP(n_neighbors=n, min_dist=d).fit_transform(hd_data)
+        embedded = umap.UMAP().fit_transform(hd_data)
         
 
         label = label.tolist()

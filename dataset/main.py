@@ -16,47 +16,87 @@ import json
 PATH_TO_WEB = "../../web/src/json/"
 PATH_TO_MEASURE = "./../measure/json/"
 PATH_TO_MEASURE_MAP = "./../measure/map_json/"
-PATH = PATH_TO_MEASURE_MAP
+PATH = PATH_TO_MEASURE
 
 def sampling(original_list):
     return [datum for (i, datum) in enumerate(original_list) if i % 2 == 0]
 
-# image, label = mnist_test()
-# data = [np.array(datum).flatten() for datum in image]
-# data = np.array(sampling(data))
-# label = np.array(sampling(label))
-
-# start = time.time()
-# # emb_tsne = UmapEmbedding("mnist_sampled_2", data, label=label)
-# emb_pca = PcaEmbedding("mnist_sampled_2", data, label=label)
-# end   = time.time()
-# hp.print_time_spent(start, end, emb_pca.get_info())
-# emb_pca.print_file(path=PATH)
-# emb_pca.print_file(path=PATH_TO_MEASURE_MAP)
-
-
-
-
-image, label = fashion_mnist_test()
+image, label = mnist_test()
 data = [np.array(datum).flatten() for datum in image]
 data = np.array(sampling(data))
+label = np.array(sampling(label))
+
 start = time.time()
-emb_tsne = PcaEmbedding("fmnist_sampled_2", data, label=label)
+# emb_tsne = IsomapEmbedding("mnist_sampled_2", data, label=label)
+emb_tsne = PcaEmbedding("mnist_sampled_2", data, label=label)
 end   = time.time()
 hp.print_time_spent(start, end, emb_tsne.get_info())
 emb_tsne.print_file(path=PATH)
+emb_tsne.print_file(path=PATH_TO_MEASURE_MAP)
+'''
+######################
+#### spheres data #### (different to tadaset sphere) 
+raw_spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
+
+### AtSNE with spheres data ### 
+atsne_spheres_data = list(csv.reader(open("./raw_data/spheres/atsne.csv")))[1:]
+spheres_atsne = SpheresEmbedding("spheres", raw_spheres_data, atsne_spheres_data, "atsne")
+spheres_atsne.print_file(path=PATH)
+print("SPHERES dataset with AtSNE generated")
+
+### PCA with spheres data ###
+pca_spheres_data = list(csv.reader(open("./raw_data/spheres/pca.csv")))[1:]
+spheres_pca = SpheresEmbedding("spheres", raw_spheres_data, pca_spheres_data, "pca")
+spheres_pca.print_file(path=PATH)
+print("SPHERES dataset with PCA generated")
+
+### Topoae with spheres data ### 
+topoae_spheres_data = list(csv.reader(open("./raw_data/spheres/topoae.csv")))[1:]
+spheres_topoae = SpheresEmbedding("spheres", raw_spheres_data, topoae_spheres_data, "topoae")
+spheres_topoae.print_file(path=PATH)
+print("SPHERES dataset with topoae generated")
+
+### TSNE with spheres data ###
+tsne_spheres_data = list(csv.reader(open("./raw_data/spheres/tsne.csv")))[1:]
+spheres_tsne = SpheresEmbedding("spheres", raw_spheres_data, tsne_spheres_data, "tsne")
+spheres_tsne.print_file(path=PATH)
+print("SPHERES dataset with tsne generated")
+
+### UMAP with spheres data ###
+umap_spheres_data = list(csv.reader(open("./raw_data/spheres/umap.csv")))[1:]
+spheres_umap = SpheresEmbedding("spheres", raw_spheres_data, umap_spheres_data, "umap")
+spheres_umap.print_file(path=PATH)
+print("SPHERES dataset with umap generated")
+
+### UMATO with spheres data ###
+umato_spheres_data = list(csv.reader(open("./raw_data/spheres/umato.csv")))[1:]
+spheres_umato = SpheresEmbedding("spheres", raw_spheres_data, umato_spheres_data, "umato")
+spheres_umato.print_file(path=PATH)
+print("SPHERES dataset with umato generated")
+
+#####################
+'''
+
+# image, label = fashion_mnist_test()
+# data = [np.array(datum).flatten() for datum in image]
+# data = np.array(sampling(data))
+# start = time.time()
+# emb_tsne = PcaEmbedding("fmnist_sampled_2", data, label=label)
+# end   = time.time()
+# hp.print_time_spent(start, end, emb_tsne.get_info())
+# emb_tsne.print_file(path=PATH)
 
 
-def load_kmnist(path, dtype="kmnist", kind='test'):
-    images_path = os.path.join(path, f'{dtype}-{kind}-imgs.npz')
-    labels_path = os.path.join(path, f'{dtype}-{kind}-labels.npz')
-    images = np.load(images_path)
-    images = images.f.arr_0
-    images = images.reshape(images.shape[0], -1)
-    labels = np.load(labels_path)
-    labels = labels.f.arr_0
-    labels = labels.reshape(-1)
-    return images, labels
+# def load_kmnist(path, dtype="kmnist", kind='test'):
+#     images_path = os.path.join(path, f'{dtype}-{kind}-imgs.npz')
+#     labels_path = os.path.join(path, f'{dtype}-{kind}-labels.npz')
+#     images = np.load(images_path)
+#     images = images.f.arr_0
+#     images = images.reshape(images.shape[0], -1)
+#     labels = np.load(labels_path)
+#     labels = labels.f.arr_0
+#     labels = labels.reshape(-1)
+#     return images, labels
 
 # images, labels = load_kmnist("./raw_data/kmnist_test")
 # data = [np.array(datum).flatten() for datum in images]
@@ -69,10 +109,10 @@ def load_kmnist(path, dtype="kmnist", kind='test'):
 # emb_tsne.print_file(path=PATH)
 
 
-## for test
-pca = PCA(n_components=2)
-pca.fit_transform(data)
-print(pca.explained_variance_ratio_)
+## for pca test
+# pca = PCA(n_components=2)
+# pca.fit_transform(data)
+# print(pca.explained_variance_ratio_)
 
 ## Spheres data generation for final test data extraction (umap)
 # spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
