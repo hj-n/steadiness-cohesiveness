@@ -16,7 +16,7 @@ import json
 PATH_TO_WEB = "../../web/src/json/"
 PATH_TO_MEASURE = "./../measure/json/"
 PATH_TO_MEASURE_MAP = "./../measure/map_json/"
-PATH = PATH_TO_MEASURE_MAP
+PATH = PATH_TO_MEASURE
 
 def sampling(original_list, ratio):
     return [datum for (i, datum) in enumerate(original_list) if i % ratio == 0]

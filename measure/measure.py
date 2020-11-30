@@ -301,7 +301,7 @@ def test_file(file_name, k, n, p, walk):
     emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
     print("TEST for", file_name, "data with K=", k)
-    fimif = Fimif(raw, emb, iteration=500, walk_num=walk, k=k)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num=walk, k=k)
 
     
 
@@ -416,7 +416,19 @@ elif data == "fmnist":
 elif data == "kmnist":
     test_file("kmnist_sampled_2_pca", 5, 0, 0, 2000)
 elif data == "mnist":
-    test_file("mnist_sampled_10_tsne", 5, 0, 0, 400)
+    test_file("mnist_sampled_2_pca", 5, 0, 0, 2000)
+    test_file("mnist_sampled_2_tsne", 5, 0, 0, 2000)
+    test_file("mnist_sampled_2_umap", 5, 0, 0, 2000)
+    test_file("mnist_sampled_2_isomap", 5, 0, 0, 2000)
+elif data == "spheres_all":
+    test_file("spheres_pca", 5, 0, 0, 2000)
+    test_file("spheres_atsne", 5, 0, 0, 2000)
+    test_file("spheres_topoae", 5, 0, 0, 2000)
+    test_file("spheres_tsne", 5, 0, 0, 2000)
+    test_file("spheres_umap", 5, 0, 0, 2000)
+    test_file("spheres_umato", 5, 0, 0, 2000)
+
+    
 else:
     print("No such dataset!!")
 
