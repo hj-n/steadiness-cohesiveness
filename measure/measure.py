@@ -415,7 +415,8 @@ elif data == "fmnist":
     test_file("fmnist_sampled_2_pca", 5, 0, 0, 2000)
 elif data == "kmnist":
     test_file("kmnist_sampled_2_pca", 5, 0, 0, 2000)
-    
+elif data == "mnist":
+    test_file("mnist_sampled_10_tsne", 5, 0, 0, 400)
 else:
     print("No such dataset!!")
 

@@ -18,45 +18,47 @@ PATH_TO_MEASURE = "./../measure/json/"
 PATH_TO_MEASURE_MAP = "./../measure/map_json/"
 PATH = PATH_TO_MEASURE_MAP
 
-def sampling(original_list):
-    return [datum for (i, datum) in enumerate(original_list) if i % 2 == 0]
+def sampling(original_list, ratio):
+    return [datum for (i, datum) in enumerate(original_list) if i % ratio == 0]
 
-# image, label = mnist_test()
+
+for ratio in [100, 50, 25, 20, 10, 5, 4, 2, 1]:
+    image, label = mnist_test()
+    data = [np.array(datum).flatten() for datum in image]
+    data = np.array(sampling(data, ratio))
+    label = np.array(sampling(label, ratio))
+
+    start = time.time()
+    # emb_tsne = UmapEmbedding("mnist_sampled_2", data, label=label)
+    emb_pca = PcaEmbedding("mnist_sampled_" + str(ratio), data, label=label)
+    end   = time.time()
+    hp.print_time_spent(start, end, emb_pca.get_info())
+    emb_pca.print_file(path=PATH)
+    emb_pca.print_file(path=PATH_TO_MEASURE_MAP)
+
+
+
+
+# image, label = fashion_mnist_test()
 # data = [np.array(datum).flatten() for datum in image]
 # data = np.array(sampling(data))
-# label = np.array(sampling(label))
-
 # start = time.time()
-# # emb_tsne = UmapEmbedding("mnist_sampled_2", data, label=label)
-# emb_pca = PcaEmbedding("mnist_sampled_2", data, label=label)
+# emb_tsne = PcaEmbedding("fmnist_sampled_2", data, label=label)
 # end   = time.time()
-# hp.print_time_spent(start, end, emb_pca.get_info())
-# emb_pca.print_file(path=PATH)
-# emb_pca.print_file(path=PATH_TO_MEASURE_MAP)
+# hp.print_time_spent(start, end, emb_tsne.get_info())
+# emb_tsne.print_file(path=PATH)
 
 
-
-
-image, label = fashion_mnist_test()
-data = [np.array(datum).flatten() for datum in image]
-data = np.array(sampling(data))
-start = time.time()
-emb_tsne = PcaEmbedding("fmnist_sampled_2", data, label=label)
-end   = time.time()
-hp.print_time_spent(start, end, emb_tsne.get_info())
-emb_tsne.print_file(path=PATH)
-
-
-def load_kmnist(path, dtype="kmnist", kind='test'):
-    images_path = os.path.join(path, f'{dtype}-{kind}-imgs.npz')
-    labels_path = os.path.join(path, f'{dtype}-{kind}-labels.npz')
-    images = np.load(images_path)
-    images = images.f.arr_0
-    images = images.reshape(images.shape[0], -1)
-    labels = np.load(labels_path)
-    labels = labels.f.arr_0
-    labels = labels.reshape(-1)
-    return images, labels
+# def load_kmnist(path, dtype="kmnist", kind='test'):
+#     images_path = os.path.join(path, f'{dtype}-{kind}-imgs.npz')
+#     labels_path = os.path.join(path, f'{dtype}-{kind}-labels.npz')
+#     images = np.load(images_path)
+#     images = images.f.arr_0
+#     images = images.reshape(images.shape[0], -1)
+#     labels = np.load(labels_path)
+#     labels = labels.f.arr_0
+#     labels = labels.reshape(-1)
+#     return images, labels
 
 # images, labels = load_kmnist("./raw_data/kmnist_test")
 # data = [np.array(datum).flatten() for datum in images]
@@ -70,9 +72,9 @@ def load_kmnist(path, dtype="kmnist", kind='test'):
 
 
 ## for test
-pca = PCA(n_components=2)
-pca.fit_transform(data)
-print(pca.explained_variance_ratio_)
+# pca = PCA(n_components=2)
+# pca.fit_transform(data)
+# print(pca.explained_variance_ratio_)
 
 ## Spheres data generation for final test data extraction (umap)
 # spheres_data = list(csv.reader(open("./raw_data/spheres/raw.csv")))[1:]
