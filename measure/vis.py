@@ -1,6 +1,7 @@
 import json
 import numpy as np
 from sklearn.neighbors import KDTree
+import math
 
 
 def get_edges_info(edges,data):
@@ -25,7 +26,7 @@ def get_edges_info(edges,data):
 
 def get_points_info(data):
     # for checkviz visualization
-    score = knn_based_measure(data, 30)
+    score = knn_based_measure(data, 5)
     
     if "label" in data[0]:
         return [{"coor": datum["emb"], "label": datum["label"], "cont": score[i][0], "trust": score[i][1]} for (i,datum)in enumerate(data)]
@@ -53,13 +54,13 @@ def knn_based_measure(data, k):
         raw_n_set = set(raw_neighbors[i].tolist())
         emb_n_set = set(emb_neighbors[i].tolist())
         cont_num = k_sum
-        for (i, idx) in enumerate(raw_neighbors[i].tolist()):
+        for (ii, idx) in enumerate(raw_neighbors[i].tolist()):
             if idx not in emb_n_set:
-                cont_num += (i + 1 - k)
+                cont_num += (ii + 1 - k)
         trust_num = k_sum
-        for (i, idx) in enumerate(emb_neighbors[i].tolist()):
+        for (ii, idx) in enumerate(emb_neighbors[i].tolist()):
             if idx not in raw_n_set:
-                trust_num += (i + 1 - k)
+                trust_num += (ii + 1 - k)
         ## push [cont, trust]
         score.append([cont_num / k_sum, trust_num / k_sum])
     return score
@@ -68,6 +69,9 @@ def knn_based_measure(data, k):
 
 
 def visualization(file_name, save_missing_edges):
+
+    shepard_diagram(file_name)
+
     file = open("./map_json/" + file_name + ".json", "r") 
     data = json.load(file)
     file = open("./map_json/" + file_name + "_false.json", "r")
@@ -123,15 +127,65 @@ def visualization(file_name, save_missing_edges):
     #         json.dump(missing_edges, outfile)
 
 
+def shepard_diagram(file_name):
+    file = open("./map_json/" + file_name + ".json", "r") 
+    data = json.load(file)
+
+    raw = []
+    emb = []
+    for datum in data:
+        raw.append(datum["raw"])
+        emb.append(datum["emb"])
+
+    result = {}
+    raw_max = -1
+    emb_max = -1
+    for i in range(len(raw)):
+        for j in range(i):
+            raw_dist = np.linalg.norm(np.array(raw[i]) - np.array(raw[j]))
+            raw_max = raw_max if raw_max > raw_dist else raw_dist
+            emb_dist = np.linalg.norm(np.array(emb[i]) - np.array(emb[j]))
+            emb_max = emb_max if emb_max > emb_dist else emb_dist
+            result[str(i) + "_" + str(j)] = [emb_dist, raw_dist]
+
+    shepard = {}
+    for i in range(20):
+        for j in range(20):
+            shepard[str(i) +"_" + str(j)] = 0
+            
+
+    for i in range(len(raw)):
+        for j in range(i):
+            result[str(i) + "_" + str(j)] = [result[str(i) + "_" + str(j)][0] / emb_max, result[str(i) + "_" + str(j)][1] / raw_max]
+            shepard_emb_idx = math.floor(result[str(i) + "_" + str(j)][0] * 20)
+            shepard_raw_idx = math.floor(result[str(i) + "_" + str(j)][1] * 20)
+            if shepard_emb_idx >= 20:
+                shepard_emb_idx -= 1
+            if shepard_raw_idx >= 20:
+                shepard_raw_idx -= 1
+            shepard[str(shepard_emb_idx) + "_" + str(shepard_raw_idx)] += 1
+    
+    with open("./vis/" + file_name + "_shepard.json", "w") as outfile:
+        json.dump(shepard, outfile)
+
+
+
+
 # visualization("kmnist_sampled_2_pca", True)
 # visualization("fmnist_sampled_2_pca", True)
-
+# visualization("open_cubic_pca", True)
 # visualization("spheres_pca", True)
-visualization("mnist_sampled_2_pca", True)
-visualization("mnist_sampled_2_tsne", True)
-visualization("mnist_sampled_2_umap", True)
-visualization("mnist_sampled_2_isomap", True)
+for ratio in [10]:
+    visualization("mnist_sampled_" + str(ratio) + "_pca", True)
+    visualization("mnist_sampled_" + str(ratio) + "_tsne", True)
+    visualization("mnist_sampled_" + str(ratio) + "_umap", True)
+    visualization("mnist_sampled_" + str(ratio) + "_isomap", True)
+# visualization("mnist_sampled_2_pca", True)
+# visualization("mnist_sampled_2_tsne", True)
+# visualization("mnist_sampled_2_umap", True)
+# visualization("mnist_sampled_2_isomap", True)
 # visualization("spheres_topoae", True)
 # visualization("spheres_tsne", True)
 # visualization("spheres_umato", True)
 # visualization("spheres_umap", True)
+        # test_file("mnist_sampled_" + str(ratio) + "_tsne", 5, 0, 0, 0.4)

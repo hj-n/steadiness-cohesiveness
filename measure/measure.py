@@ -16,7 +16,7 @@ class Fimif:
                  emb,                      # emb data
                  iteration=1000,           # iteration number
                  k=5,                      # for constructing knn graph
-                 walk_num=200,             # random walk number,
+                 walk_num_ratio=0.4,             # random walk number,
                  clustering="hdbscan",     # clustering methods for high dimensions
                  clustering_parameter={},  # clustering paramters for currnet clustering method
                  beta=1                    # beta for F_beta score calculation
@@ -26,7 +26,7 @@ class Fimif:
         self.N   = len(raw)    # number of points
         self.iter = iteration
         self.k   = k
-        self.walk_num = walk_num
+        self.walk_num = int(self.N * walk_num_ratio)
         self.clustering = clustering
         self.clustering_parameter = clustering_parameter
         self.beta = beta
@@ -292,7 +292,7 @@ result_aggregate = []
 
 
 
-def test_file(file_name, k, n, p, walk):
+def test_file(file_name, k, n, p, walk_ratio):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
 
@@ -301,7 +301,7 @@ def test_file(file_name, k, n, p, walk):
     emb = np.array([np.array(datum["emb"]).astype(np.float64) for datum in data])
 
     print("TEST for", file_name, "data with K=", k)
-    fimif = Fimif(raw, emb, iteration=1000, walk_num=walk, k=k)
+    fimif = Fimif(raw, emb, iteration=1000, walk_num_ratio=walk_ratio, k=k)
 
     
 
@@ -398,28 +398,31 @@ n    = int(args[3])
 result_aggregate = []
 if data == "spheres":
     for p in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
-        test_file("spheres_" + str(n) + "_" + str(int(p * 100)) + "_umap", k, n, p, 2000)    
+        test_file("spheres_" + str(n) + "_" + str(int(p * 100)) + "_umap", k, n, p, 0.4)    
 
     print("SPHERES UMAP, k=", k, ", n=", n)
     for i in range(len(result_aggregate)):
         print(result_aggregate[i])  
+elif data == "mammoth_50k":
+    for p in [0.0, 0.5, 1, 1.5, 2, 2.5, 3]:
+        test_file("mammoth_50k_15_" + str(int(p * 100)) + "_umap", 20, 15, p, 0.4)
 elif data == "mammoth":
-    p = n
-    for nn in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
-        test_file("mammoth_" + str(nn) + "_" + str(p) + "_umap", k, nn, p, 4000)    
-
+    for p in [0, 10, 25, 50,  80, 99]:
+        test_file("mammoth_" + str(n) + "_" + str(p) + "_umap", k, n, p, 0.4)    
     print("MAMMOTH UMAP, k=", k, ", n=", nn)
     for i in range(len(result_aggregate)):
         print(result_aggregate[i])
 elif data == "fmnist":
-    test_file("fmnist_sampled_2_pca", 5, 0, 0, 2000)
+    test_file("fmnist_sampled_2_pca", 5, 0, 0, 0.4)
 elif data == "kmnist":
-    test_file("kmnist_sampled_2_pca", 5, 0, 0, 2000)
+    test_file("kmnist_sampled_2_pca", 5, 0, 0, 0.4)
 elif data == "mnist":
-    test_file("mnist_sampled_2_pca", 5, 0, 0, 2000)
-    test_file("mnist_sampled_2_tsne", 5, 0, 0, 2000)
-    test_file("mnist_sampled_2_umap", 5, 0, 0, 2000)
-    test_file("mnist_sampled_2_isomap", 5, 0, 0, 2000)
+    for ratio in [10]:
+        test_file("mnist_sampled_" + str(ratio) + "_pca", 5, 0, 0, 0.4)
+        test_file("mnist_sampled_" + str(ratio) + "_tsne", 5, 0, 0, 0.4)
+        test_file("mnist_sampled_" + str(ratio) + "_umap", 5, 0, 0, 0.4)
+        test_file("mnist_sampled_" + str(ratio) + "_isomap", 5, 0, 0, 0.4)
+    
 elif data == "spheres_all":
     test_file("spheres_pca", 5, 0, 0, 2000)
     test_file("spheres_atsne", 5, 0, 0, 2000)
@@ -427,6 +430,8 @@ elif data == "spheres_all":
     test_file("spheres_tsne", 5, 0, 0, 2000)
     test_file("spheres_umap", 5, 0, 0, 2000)
     test_file("spheres_umato", 5, 0, 0, 2000)
+elif data == "cubic":
+    test_file("open_cubic_pca", 5, 0, 0, 0.4)
 
     
 else:

@@ -79,15 +79,15 @@ if __name__ == "__main__":
     
     if args.algo == "mammoth":
         ALGO_LIST = [] 
-        for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
-            for d in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
+        for n in [15]:
+            # for d in [0.8]:
+            for d in [0.0, 0.1, 0.25, 0.5,  0.8, 0.99]:
                 key_summary = str(n) + "_" + str(int(d*100))
                 ALGO_LIST.append("mammoth_" + key_summary +"_umap")
 
     if args.algo == "spheres":
         ALGO_LIST = []
-        ALGO_LIST = [] 
-        for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
+        for n in [3, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
             for d in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]:
                 key_summary = str(n) + "_" + str(int(d*100))
                 ALGO_LIST.append("spheres_" + key_summary + "_umap")
@@ -159,8 +159,8 @@ if __name__ == "__main__":
         result = pd.DataFrame(
             {"measure": measures, "algorithm": algorithms, "values": values}
         )
-        result = result.pivot(index="measure", columns="algorithm", values="values").fillna(
-            "NA"
-        )
-        result.to_csv("./results/result.csv")
+        # result = result.pivot(index="measure", columns="algorithm", values="values").fillna(
+        #     "NA"
+        # )
+        result.to_csv("./results/result20.csv")
         print(f"{result}\n")
