@@ -8,6 +8,7 @@ import sys
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
 from sncvis import SNCVis
+from acceleration import dist_matrix_gpu
 
 class SNC:
     def __init__(
@@ -20,8 +21,8 @@ class SNC:
                  clustering="hdbscan",     # clustering methods for high dimensions
                  clustering_parameter={},  # clustering paramters for currnet clustering method
                 ):
-        self.raw = raw
-        self.emb = emb
+        self.raw = np.array(raw, dtype=np.float64)
+        self.emb = np.array(emb, dtype=np.float64)
         self.N   = len(raw)    # number of points
         self.iter = iteration
         self.k   = k
@@ -54,15 +55,37 @@ class SNC:
             new_dict = {"value": [], "direction": [], "idx": [] }
             self.false_log.append(new_dict)
 
-    
-        # self.__initial_knn_graph_setup()
-        # self.__initial_dist_setup()
-        # self.__measure()
 
-    def fit():
+    def fit(self):
+
+        ## distance matrix
+        self.raw_dist_matrix = dist_matrix_gpu(self.raw)
+        self.emb_dist_matrix = dist_matrix_gpu(self.emb)
+
+        ## normalizing
+        self.raw_dist_max = np.max(self.raw_dist_matrix)
+        self.emb_dist_max = np.max(self.emb_dist_matrix)
         
-    
+        self.raw_dist_matrix /= self.raw_dist_max
+        self.emb_dist_matrix /= self.emb_dist_max 
 
+        ## Calculate Important values for the measuring
+        dissimlarity_matrix = self.raw_dist_matrix - self.emb_dist_matrix
+        dissimilarity_max = np.max(dissimlarity_matrix)
+        dissimilarity_min = np.min(dissimlarity_matrix)
+
+        self.max_compress = dissimilarity_max if dissimilarity_max > 0 else 0
+        self.min_compress = dissimilarity_min if dissimilarity_min > 0 else 0
+        self.max_stretch  = - dissimilarity_min if dissimilarity_min < 0 else 0
+        self.min_stretch  = - dissimilarity_max if dissimilarity_max < 0 else 0
+
+    def steadiness(self):
+        # TODO
+        pass
+    
+    def cohesiveness(self):
+        # TODO
+        pass
 
 
 
@@ -287,7 +310,7 @@ class SNC:
 
 
 
-
+'''
 
 
 @numba.njit(
@@ -328,7 +351,7 @@ def dist_setup_helper(N, raw, emb):
     return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
 
 
-'''
+
 
 
 

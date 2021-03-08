@@ -3,6 +3,10 @@ import numpy as np
 import math
 import time
 
+'''
+Distance Matrix Calculation Accelerated by GPGPU
+'''
+
 @cuda.jit
 def dist_matrix_kernel(vectors, sizes, dist_matrix):
     ## Input 1: the list of vectors
@@ -62,3 +66,9 @@ def dist_matrix_cpu(vectors):
             dist_matrix[j, i] = dist_matrix[i, j]
 
     return dist_matrix
+
+'''
+k-nearest neighbor implementation with 
+the further acceleration acheived by preprocessed distance matrix
+'''
+
