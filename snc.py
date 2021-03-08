@@ -7,9 +7,9 @@ import sys
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
-from log_record import FimifMap
+from sncvis import SNCVis
 
-class Fimif:
+class SNC:
     def __init__(
                  self,
                  raw,                      # raw data
@@ -44,7 +44,6 @@ class Fimif:
         ## target score
         self.score_missing = None
         self.score_false = None
-        self.score = None     
 
         ## Distortion log
         self.missing_log = [] 
@@ -66,7 +65,6 @@ class Fimif:
         return {
             "steadiness" : self.score_false,
             "cohesiveness" : self.score_missing,
-            "f1" : self.score
         }
 
     def __measure(self):
@@ -102,10 +100,6 @@ class Fimif:
         self.score_missing = 1 - missing_distortion_sum / missing_weight_sum 
 
 
-        self.score = (1 + self.beta * self.beta) * ((self.score_false * self.score_missing) / (self.beta * self.beta * self.score_false + self.score_missing))
-        # print("False Score (Precision):", self.score_false)
-        # print("Missing Score  (Recall):",self.score_missing)
-        # print("F_beta Score:", self.score)
         
 
 
@@ -287,10 +281,6 @@ class Fimif:
 
 
 
-result_aggregate = []
-
-
-
 
 
 @numba.njit(
@@ -348,7 +338,7 @@ def test_file(file_name, k, n, p, walk_ratio):
 
     
 
-    fimifmap = FimifMap(fimif)
+    SNCVis = SNCVis(fimif)
     result = fimif.result()
     print("steadiness:", result["steadiness"])
     print("cohesivness:", result["cohesiveness"])
@@ -363,10 +353,10 @@ def test_file(file_name, k, n, p, walk_ratio):
     
 
     with open("./map_json/" + file_name + "_false.json", "w") as outfile:
-        json.dump(fimifmap.false_log_aggregated, outfile)
+        json.dump(SNCVis.false_log_aggregated, outfile)
     
     with open("./map_json/" + file_name + "_missing.json", "w") as outfile:
-        json.dump(fimifmap.missing_log_aggregated, outfile)
+        json.dump(SNCVis.missing_log_aggregated, outfile)
 
     with open("./map_json/" + file_name + "_knn.json", "w") as outfile:
         json.dump(emb_neighbors, outfile)

@@ -4,7 +4,7 @@
 
 import numpy as np
 
-class FimifMap:
+class SNCVis:
 
     def __init__(self, fimif):
         self.missing_log = fimif.missing_log
