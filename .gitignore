@@ -4,3 +4,4 @@
 ./fimif/*.json
 
 *.json
+*ipynb_checkpoints
