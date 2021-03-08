@@ -19,7 +19,6 @@ class SNC:
                  walk_num_ratio=0.4,             # random walk number,
                  clustering="hdbscan",     # clustering methods for high dimensions
                  clustering_parameter={},  # clustering paramters for currnet clustering method
-                 beta=1                    # beta for F_beta score calculation
                 ):
         self.raw = raw
         self.emb = emb
@@ -29,7 +28,6 @@ class SNC:
         self.walk_num = int(self.N * walk_num_ratio)
         self.clustering = clustering
         self.clustering_parameter = clustering_parameter
-        self.beta = beta
 
         ## intermediate variables
         self.raw_neighbors = None
@@ -42,8 +40,8 @@ class SNC:
         self.min_mu_compress = None 
 
         ## target score
-        self.score_missing = None
-        self.score_false = None
+        self.cohev_score = None
+        self.stead_score = None
 
         ## Distortion log
         self.missing_log = [] 
@@ -56,15 +54,24 @@ class SNC:
             new_dict = {"value": [], "direction": [], "idx": [] }
             self.false_log.append(new_dict)
 
+    
+        # self.__initial_knn_graph_setup()
+        # self.__initial_dist_setup()
+        # self.__measure()
 
-        self.__initial_knn_graph_setup()
-        self.__initial_dist_setup()
-        self.__measure()
+    def fit():
+        
+    
+
+
+
+
+
 
     def result(self):
         return {
-            "steadiness" : self.score_false,
-            "cohesiveness" : self.score_missing,
+            "steadiness" : self.stead_score,
+            "cohesiveness" : self.cohev_score,
         }
 
     def __measure(self):
@@ -91,13 +98,13 @@ class SNC:
         for (distortion, weight) in false_distortion_weight_list:
             false_distortion_sum += distortion * weight
             false_weight_sum += weight
-        self.score_false = 1 - false_distortion_sum / false_weight_sum 
+        self.stead_score = 1 - false_distortion_sum / false_weight_sum 
         missing_weight_sum = 0
         missing_distortion_sum = 0
         for (distortion, weight) in missing_distortion_weight_list:
             missing_distortion_sum += distortion *  weight
             missing_weight_sum += weight
-        self.score_missing = 1 - missing_distortion_sum / missing_weight_sum 
+        self.cohev_score = 1 - missing_distortion_sum / missing_weight_sum 
 
 
         
