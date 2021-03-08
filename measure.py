@@ -292,6 +292,49 @@ result_aggregate = []
 
 
 
+
+@numba.njit(
+    locals = {
+        "X": numba.types.float64[:, ::1],
+        "Y": numba.types.float64[:, ::1],
+    },
+    parallel=True,
+    fastmath=True
+)
+def dist_setup_helper(N, raw, emb):
+    X = np.zeros((N, N), dtype=np.float64)
+    Y = np.zeros((N, N), dtype=np.float64)
+    raw = raw.astype(np.float64)
+    emb = emb.astype(np.float64)
+    for i in numba.prange(N):
+        for j in numba.prange(i):
+            X[i][j] = np.dot(raw[i] - raw[j], raw[i] - raw[j])
+            X[i][j] = X[i][j] ** 0.5
+            X[j][i] = X[i][j]
+            Y[i][j] += (emb[i][0] - emb[j][0]) ** 2
+            Y[i][j] += (emb[i][1] - emb[j][1]) ** 2
+            Y[i][j] = Y[i][j] ** 0.5
+            Y[j][i] = Y[i][j]
+    dist_max_x = np.max(X)
+    dist_max_y = np.max(Y)
+
+    X = X / dist_max_x
+    Y = Y / dist_max_y ## normalize
+    D = X - Y 
+    D_max = np.max(D)
+    D_min = np.min(D)
+    max_mu_compress = D_max
+    min_mu_compress = 0 if D_min < 0 else D_min
+    max_mu_stretch = -D_min
+    min_mu_stretch = 0 if D_max > 0 else -D_max
+
+    return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
+
+
+'''
+
+
+
 def test_file(file_name, k, n, p, walk_ratio):
     file = open("./json/" + file_name + ".json", "r") 
     data = json.load(file)
@@ -331,42 +374,6 @@ def test_file(file_name, k, n, p, walk_ratio):
 
 
 
-@numba.njit(
-    locals = {
-        "X": numba.types.float64[:, ::1],
-        "Y": numba.types.float64[:, ::1],
-    },
-    parallel=True,
-    fastmath=True
-)
-def dist_setup_helper(N, raw, emb):
-    X = np.zeros((N, N), dtype=np.float64)
-    Y = np.zeros((N, N), dtype=np.float64)
-    raw = raw.astype(np.float64)
-    emb = emb.astype(np.float64)
-    for i in numba.prange(N):
-        for j in numba.prange(i):
-            X[i][j] = np.dot(raw[i] - raw[j], raw[i] - raw[j])
-            X[i][j] = X[i][j] ** 0.5
-            X[j][i] = X[i][j]
-            Y[i][j] += (emb[i][0] - emb[j][0]) ** 2
-            Y[i][j] += (emb[i][1] - emb[j][1]) ** 2
-            Y[i][j] = Y[i][j] ** 0.5
-            Y[j][i] = Y[i][j]
-    dist_max_x = np.max(X)
-    dist_max_y = np.max(Y)
-
-    X = X / dist_max_x
-    Y = Y / dist_max_y ## normalize
-    D = X - Y 
-    D_max = np.max(D)
-    D_min = np.min(D)
-    max_mu_compress = D_max
-    min_mu_compress = 0 if D_min < 0 else D_min
-    max_mu_stretch = -D_min
-    min_mu_stretch = 0 if D_max > 0 else -D_max
-
-    return dist_max_x, dist_max_y, max_mu_compress, min_mu_compress, max_mu_stretch, min_mu_stretch
 
 
 # test_file("mnist_sampled_2_umap")
@@ -439,7 +446,6 @@ else:
 
 
 
-'''
 result_aggregate = []
 for k in [5, 10, 15, 20, 25, 30, 35, 40]:
     for n in [3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200]:
@@ -465,7 +471,7 @@ for i in range(len(result_aggregate)):
 ## reinitialize result_aggregate
 result_aggregate = []
 
-'''
+
 ## Mammoth t-sne
 # for n in [20, 50, 100, 200]:
 #     test_file("mammoth_" + str(n) + "_0.25_umap", n)
@@ -476,11 +482,11 @@ result_aggregate = []
 # for n in [5, 10]:
 #     print(result_aggregate[n])
 ## MNIST TSNE
-'''
+
 for i in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400]:
     test_file("mnist_test_" + str(i) + "_tsne")
 
-'''
+
 ## Spheres umap
 # for n in [20, 40, 60, 80, 120, 160, 200]:
 #     for d in [0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 0.99]:
@@ -516,3 +522,4 @@ for i in [1, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 
 # test_file("spheres_umap")
 # test_file("spheres_umato")
 
+'''

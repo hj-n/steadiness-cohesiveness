@@ -2,3 +2,5 @@
 *.vscode/
 *.DS_Store
 ./fimif/*.json
+
+*.json
