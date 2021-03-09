@@ -8,7 +8,8 @@ import sys
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
 from sncvis import SNCVis
-from acceleration import dist_matrix_gpu
+from helpers import distance_matrix as dm
+from helpers import cluster_strategy as cs
 
 class SNC:
     def __init__(
@@ -18,7 +19,7 @@ class SNC:
                  iteration=1000,           # iteration number
                  k=5,                      # for constructing knn graph
                  walk_num_ratio=0.4,             # random walk number,
-                 clustering="hdbscan",     # clustering methods for high dimensions
+                 cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
                  clustering_parameter={},  # clustering paramters for currnet clustering method
                 ):
         self.raw = np.array(raw, dtype=np.float64)
@@ -27,7 +28,7 @@ class SNC:
         self.iter = iteration
         self.k   = k
         self.walk_num = int(self.N * walk_num_ratio)
-        self.clustering = clustering
+        self.cluster_strategy = cluster_strategy
         self.clustering_parameter = clustering_parameter
 
         ## intermediate variables
@@ -59,8 +60,9 @@ class SNC:
     def fit(self):
 
         ## distance matrix
-        self.raw_dist_matrix = dist_matrix_gpu(self.raw)
-        self.emb_dist_matrix = dist_matrix_gpu(self.emb)
+        self.raw_dist_matrix = dm.dist_matrix_gpu(self.raw)
+        self.emb_dist_matrix = dm.dist_matrix_gpu(self.emb)
+
 
         ## normalizing
         self.raw_dist_max = np.max(self.raw_dist_matrix)
@@ -78,6 +80,8 @@ class SNC:
         self.min_compress = dissimilarity_min if dissimilarity_min > 0 else 0
         self.max_stretch  = - dissimilarity_min if dissimilarity_min < 0 else 0
         self.min_stretch  = - dissimilarity_max if dissimilarity_max < 0 else 0
+
+        self.cstrat = cs.preprocessing(self.cluster_strategy, self.raw, self.emb)
 
     def steadiness(self):
         # TODO
