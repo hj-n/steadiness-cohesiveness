@@ -1,20 +1,24 @@
 from abc import ABC, abstractmethod
+from . import snn_knn as sk
 
-def preprocessing(strategy : str, raw_data, emb_data):
+def preprocessing(strategy : str, parameter, raw_dist_matrix, emb_dist_matrix):
     cstrat = {
-        "snn" : SNNCS(raw_data, emb_data)
-    }
+        "snn" : SNNCS(parameter, raw_dist_matrix, emb_dist_matrix)
+    }["snn"]
+    cstrat.preprocessing()
     return cstrat
-    pass
 
 def extract_cluster(strategy : str):
     pass
 
 class ClusterStrategy(ABC):
 
-    def __init__(self, raw_data, emb_data):
-        self.raw = raw_data
-        self.emb = emb_data
+    '''
+    Saving distance matrix info and setting parameter
+    '''
+    def __init__(self, raw_dist_matrix, emb_dist_matrix):
+        self.raw_dist_matrix = raw_dist_matrix
+        self.emb_dist_matrix = emb_dist_matrix
 
     @abstractmethod
     def preprocessing(self):
@@ -35,8 +39,15 @@ class ClusterStrategy(ABC):
 
 class SNNCS(ClusterStrategy):
 
+    def __init__(self, parameter, raw_dist_matrix, emb_dist_matrix):
+        super().__init__(raw_dist_matrix, emb_dist_matrix)
+        self.k = parameter["k"]
+
     def preprocessing(self):
-        
+        # raw_knn_info = knn_info
+        raw_knn_info = sk.knn_info(self.raw_dist_matrix, self.k)
+        emb_knn_info = sk.knn_info(self.emb_dist_matrix, self.k)
+        pass
 
     def extract_cluster(self):
         pass

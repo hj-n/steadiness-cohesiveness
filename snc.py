@@ -17,19 +17,17 @@ class SNC:
                  raw,                      # raw data
                  emb,                      # emb data
                  iteration=1000,           # iteration number
-                 k=5,                      # for constructing knn graph
                  walk_num_ratio=0.4,             # random walk number,
                  cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
-                 clustering_parameter={},  # clustering paramters for currnet clustering method
+                 cluster_parameter={},  # clustering paramters for current clustering method / cluster extraction
                 ):
         self.raw = np.array(raw, dtype=np.float64)
         self.emb = np.array(emb, dtype=np.float64)
         self.N   = len(raw)    # number of points
         self.iter = iteration
-        self.k   = k
         self.walk_num = int(self.N * walk_num_ratio)
         self.cluster_strategy = cluster_strategy
-        self.clustering_parameter = clustering_parameter
+        self.cluster_parameter = cluster_parameter
 
         ## intermediate variables
         self.raw_neighbors = None
@@ -81,7 +79,8 @@ class SNC:
         self.max_stretch  = - dissimilarity_min if dissimilarity_min < 0 else 0
         self.min_stretch  = - dissimilarity_max if dissimilarity_max < 0 else 0
 
-        self.cstrat = cs.preprocessing(self.cluster_strategy, self.raw, self.emb)
+        self.cstrat = cs.preprocessing(self.cluster_strategy, self.cluster_parameter, 
+                                       self.raw_dist_matrix, self.emb_dist_matrix)
 
     def steadiness(self):
         # TODO
