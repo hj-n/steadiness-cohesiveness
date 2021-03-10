@@ -17,7 +17,7 @@ class SNC:
                  raw,                      # raw data
                  emb,                      # emb data
                  iteration=1000,           # iteration number
-                 walk_num_ratio=0.4,             # random walk number,
+                 walk_num_ratio=1,             # random walk number,
                  cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
                  cluster_parameter={},  # clustering paramters for current clustering method / cluster extraction
                 ):
@@ -84,6 +84,7 @@ class SNC:
 
     def steadiness(self):
         # TODO
+        cluster_indices = self.cstrat.extract_cluster("steadiness", self.walk_num)
         pass
     
     def cohesiveness(self):

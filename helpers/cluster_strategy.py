@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from . import snn_knn as sk
 
+import numpy as np
+
 def preprocessing(strategy : str, parameter, raw_dist_matrix, emb_dist_matrix):
     cstrat = {
         "snn" : SNNCS(parameter, raw_dist_matrix, emb_dist_matrix)
@@ -19,6 +21,7 @@ class ClusterStrategy(ABC):
     def __init__(self, raw_dist_matrix, emb_dist_matrix):
         self.raw_dist_matrix = raw_dist_matrix
         self.emb_dist_matrix = emb_dist_matrix
+        self.length = len(raw_dist_matrix)
 
     @abstractmethod
     def preprocessing(self):
@@ -45,17 +48,32 @@ class SNNCS(ClusterStrategy):
 
     def preprocessing(self):
         # Compute knn infos
-        raw_knn_info = sk.knn_info(self.raw_dist_matrix, self.k)
-        emb_knn_info = sk.knn_info(self.emb_dist_matrix, self.k)
+        self.raw_knn_info = sk.knn_info(self.raw_dist_matrix, self.k)
+        self.emb_knn_info = sk.knn_info(self.emb_dist_matrix, self.k)
         
         # Compute snn matrix
-        length = len(raw_knn_info)
-        self.raw_snn_matrix = sk.snn_gpu(raw_knn_info, length, self.k)
-        self.emb_snn_matrix = sk.snn_gpu(emb_knn_info, length, self.k)
+        self.raw_snn_matrix = sk.snn_gpu(self.raw_knn_info, self.length, self.k)
+        self.emb_snn_matrix = sk.snn_gpu(self.emb_knn_info, self.length, self.k)
+        self.raw_snn_max    = np.max(self.raw_snn_matrix)
+        self.emb_snn_max    = np.max(self.emb_snn_matrix)
+        
 
-        pass
+    def extract_cluster(self, mode, walk_num):
+        # Seed selection
+        if mode == "steadiness":   ## extract from the embedded (projected) space
+            knn_info   = self.emb_knn_info
+            snn_matrix = self.emb_snn_matrix
+            snn_max    = self.emb_snn_max
+        if mode == "cohesiveness": ## extract from the original space
+            knn_info   = self.raw_knn_info
+            snn_matrix = self.raw_snn_matrix
+            snn_max    = self.raw_snn_max
+        seed_idx = np.random.randint(self.length)
+        print(seed_idx)
+        sk.snn_based_cluster_extraction(knn_info, snn_matrix, snn_max, seed_idx, walk_num)
 
-    def extract_cluster(self):
+
+
         pass
 
     def clustering(self):

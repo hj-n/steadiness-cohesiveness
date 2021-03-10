@@ -1,11 +1,13 @@
-from numba import cuda
+from numba import cuda, njit, prange
 from sklearn.neighbors import NearestNeighbors
+from collections import deque
 
 import numpy as np
 import math
 
-## GPU Acceleration for snn matrix Construction
-
+'''
+GPU Acceleration for snn matrix Construction
+'''
 @cuda.jit
 def snn_kernel(knn_info, param_arr, snn_matrix):
     ## Input: raw_knn (knn info)
@@ -44,9 +46,38 @@ def snn_gpu(knn_info, length, k):
     snn_matrix = snn_matrix_global_mem.copy_to_host()
 
     return snn_matrix
-
+'''
+Compute KNN with precomputed distance matrix
+'''
 def knn_info(dist_matrix, k):
     neighbors_instance = NearestNeighbors(n_neighbors=k, metric="precomputed")
     neighbors_instance.fit(dist_matrix)
     knn_info = neighbors_instance.kneighbors(return_distance=False)
     return knn_info
+
+'''
+random cluster extraction along knn bfs with snn probability
+'''
+
+def snn_based_cluster_extraction(knn_info, snn_matrix, snn_max, seed_idx, walk_num):
+
+    cluster_member = set()
+    current_queue = deque([seed_idx])
+    
+    visit_num = 0
+    while visit_num < walk_num:
+        i = current_queue.popleft()
+        knns = knn_info[i]
+        for j in knns:
+            probability = 1 - snn_matrix[i, j] / snn_max
+            dice = np.random.rand()
+            if (dice > probability):
+                current_queue.append(j)
+                cluster_member.add(j)
+                visit_num += 1
+                
+
+    cluster_member = list(cluster_member)
+    print(len(cluster_member))
+     
+    return cluster_member
