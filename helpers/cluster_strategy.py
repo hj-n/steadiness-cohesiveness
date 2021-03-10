@@ -44,9 +44,15 @@ class SNNCS(ClusterStrategy):
         self.k = parameter["k"]
 
     def preprocessing(self):
-        # raw_knn_info = knn_info
+        # Compute knn infos
         raw_knn_info = sk.knn_info(self.raw_dist_matrix, self.k)
         emb_knn_info = sk.knn_info(self.emb_dist_matrix, self.k)
+        
+        # Compute snn matrix
+        length = len(raw_knn_info)
+        self.raw_snn_matrix = sk.snn_gpu(raw_knn_info, length, self.k)
+        self.emb_snn_matrix = sk.snn_gpu(emb_knn_info, length, self.k)
+
         pass
 
     def extract_cluster(self):

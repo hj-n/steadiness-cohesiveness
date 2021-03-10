@@ -2,21 +2,23 @@ from numba import cuda
 from sklearn.neighbors import NearestNeighbors
 
 import numpy as np
+import math
 
 ## GPU Acceleration for snn matrix Construction
 
 @cuda.jit
-def snn_kernel(knn_info, length_arr, snn_matrix):
+def snn_kernel(knn_info, param_arr, snn_matrix):
     ## Input: raw_knn (knn info)
     ## Output: snn_matrix (snn info)
     i = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
     j = cuda.threadIdx.y + cuda.blockIdx.y * cuda.blockDim.y
 
-    length = length_arr[0]
+    length = param_arr[0]
+    k      = param_arr[1]
     if i >= length or j >= length:
         return
     if i == j:
-        snn_strength[i, j] = 0
+        snn_matrix[i, j] = 0
         return
     c = 0
     for m in range(k):
@@ -26,10 +28,10 @@ def snn_kernel(knn_info, length_arr, snn_matrix):
 
     snn_matrix[i, j] = c
 
-def snn_gpu(knn_info, length):
+def snn_gpu(knn_info, length, k):
     ## INPUT
     knn_info_global_mem = cuda.to_device(knn_info)
-    length_arr_global_mem = cuda.to_divice(np.array([length]))
+    param_arr_global_mem = cuda.to_device(np.array([length, k]))
     ## OUTPUT
     snn_matrix_global_mem = cuda.device_array((length, length))
 
@@ -37,7 +39,7 @@ def snn_gpu(knn_info, length):
     tpb = (TPB, TPB)
     bpg = ((math.ceil(length / TPB), math.ceil(length / TPB)))
 
-    snn_kernel[bpg, tpb](knn_info_global_mem, length_arr_global_mem, snn_matrix_global_mem)
+    snn_kernel[bpg, tpb](knn_info_global_mem, param_arr_global_mem, snn_matrix_global_mem)
 
     snn_matrix = snn_matrix_global_mem.copy_to_host()
 
