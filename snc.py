@@ -85,10 +85,18 @@ class SNC:
     def steadiness(self):
         # TODO
         cluster_indices = self.cstrat.extract_cluster("steadiness", self.walk_num)
-        pass
+        
+        self.cstrat.clustering("steadiness", cluster_indices)
+        
+
+        return cluster_indices
+        # pass
     
     def cohesiveness(self):
         # TODO
+        cluster_indices = self.cstrat.extract_cluster("cohesiveness", self.walk_num)
+        
+        self.cstrat.clustering("cohesiveness", cluster_indices)
         pass
 
 

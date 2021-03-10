@@ -46,6 +46,8 @@ def snn_gpu(knn_info, length, k):
     snn_matrix = snn_matrix_global_mem.copy_to_host()
 
     return snn_matrix
+
+
 '''
 Compute KNN with precomputed distance matrix
 '''
@@ -60,7 +62,7 @@ random cluster extraction along knn bfs with snn probability
 '''
 
 def snn_based_cluster_extraction(knn_info, snn_matrix, snn_max, seed_idx, walk_num):
-
+    
     cluster_member = set()
     current_queue = deque([seed_idx])
     
@@ -75,9 +77,5 @@ def snn_based_cluster_extraction(knn_info, snn_matrix, snn_max, seed_idx, walk_n
                 current_queue.append(j)
                 cluster_member.add(j)
                 visit_num += 1
-                
 
-    cluster_member = list(cluster_member)
-    print(len(cluster_member))
-     
-    return cluster_member
+    return np.array(list(cluster_member))
