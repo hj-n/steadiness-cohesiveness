@@ -37,7 +37,7 @@ def snn_gpu(knn_info, length, k):
     ## OUTPUT
     snn_matrix_global_mem = cuda.device_array((length, length))
 
-    TPB = 16
+    TPB = 32
     tpb = (TPB, TPB)
     bpg = ((math.ceil(length / TPB), math.ceil(length / TPB)))
 

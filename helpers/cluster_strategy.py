@@ -108,11 +108,9 @@ class SNNCS(ClusterStrategy):
             snn_dist_matrix = self.raw_snn_dist_matrix
         if mode == "cohesiveness":
             snn_dist_matrix = self.emb_snn_dist_matrix
-        # cluster_snn_matrix = (snn_matrix[indices].T)[indices] 
 
         cluster_snn_dist_matrix = (snn_dist_matrix[indices].T)[indices] 
 
-        # cluster_snn_dist_matrix = 1 / (cluster_snn_matrix + self.a)
         np.fill_diagonal(cluster_snn_dist_matrix, 0)
 
         clusterer = hdbscan.HDBSCAN(metric="precomputed")
@@ -131,13 +129,9 @@ class SNNCS(ClusterStrategy):
         raw_similarity = np.sum((self.raw_snn_matrix[cluster_a].T)[cluster_b]) / pair_num
         emb_similarity = np.sum((self.emb_snn_matrix[cluster_b].T)[cluster_a]) / pair_num
 
-
         raw_dist = (1 / (raw_similarity + self.a) - 0.5) * 2
         emb_dist = (1 / (emb_similarity + self.a) - 0.5) * 2
 
-        # print("similarity:",emb_similarity, raw_similarity)
-        # print("dist:", emb_dist, raw_dist)
-        # print("")
         return raw_dist, emb_dist
     
     def __get_centroid(self, cluster, snn_matrix):
