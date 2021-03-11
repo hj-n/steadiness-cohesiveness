@@ -19,7 +19,7 @@ class SNC:
                  raw,                      # raw data
                  emb,                      # emb data
                  iteration=100,           # iteration number
-                 walk_num_ratio=1,             # random walk number,
+                 walk_num_ratio=0.5,             # random walk number,
                  cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
                  cluster_parameter={},  # clustering paramters for current clustering method / cluster extraction
                 ):
