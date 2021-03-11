@@ -29,16 +29,6 @@ class SNC:
         self.cluster_strategy = cluster_strategy
         self.cluster_parameter = cluster_parameter
 
-        ## intermediate variables
-        self.raw_neighbors = None
-        self.emb_neighbors = None 
-        self.dist_max_x = None    # raw space
-        self.dist_max_y = None    # emb space
-        self.max_mu_stretch = None
-        self.min_mu_stretch = None
-        self.max_mu_compress = None
-        self.min_mu_compress = None 
-
         ## target score
         self.cohev_score = None
         self.stead_score = None
@@ -60,7 +50,6 @@ class SNC:
         ## distance matrix
         self.raw_dist_matrix = dm.dist_matrix_gpu(self.raw)
         self.emb_dist_matrix = dm.dist_matrix_gpu(self.emb)
-
 
         ## normalizing
         self.raw_dist_max = np.max(self.raw_dist_matrix)
@@ -84,17 +73,58 @@ class SNC:
 
     def steadiness(self):
         # TODO
-        cluster_indices = self.cstrat.extract_cluster("steadiness", self.walk_num)
+        cluster_indices = self.cstrat.extract_cluster("steadiness", self.walk_num)        
+        clustering_result = self.cstrat.clustering("steadiness", cluster_indices)
+        separated_clusters = self.__separate_cluster_labels(cluster_indices, clustering_result)
+        for i in range(len(separated_clusters)):
+            for j in range(i):
+                raw_dist, emb_dist = self.cstrat.compute_distance("steadiness", np.array(separated_clusters[i]), 
+                                                             np.array(separated_clusters[j]))
+                raw
+                weight = separated_clusters[i].size * separated_clusters[j].size  
+
         
-        self.cstrat.clustering("steadiness", cluster_indices)
         
 
     
     def cohesiveness(self):
         # TODO
         cluster_indices = self.cstrat.extract_cluster("cohesiveness", self.walk_num)
+        clustering_result = self.cstrat.clustering("cohesiveness", cluster_indices)
+        separated_clusters = self.__separate_cluster_labels(cluster_indices, clustering_result)
+        for i in range(len(separated_clusters)):
+            for j in range(i):
+                raw_dist, emb_dist = self.cstrat.compute_distance("cohesiveness", np.array(separated_clusters[i]), 
+                                                             np.array(separated_clusters[j]))
+                dist = raw_dist - emb_dist
+                if(dist < 0):
+                    continue
+                # distortion = 
+                weight = separated_clusters[i].size * separated_clusters[j].size        
+
+
+
+
+
+
+    def __separate_cluster_labels(self, cluster_indices, clustering_result):
+        cluster_num = np.max(clustering_result) + 1
+        clusters = []
+        for _ in range(cluster_num):
+            clusters.append([])
+        for idx, cluster_idx in enumerate(clustering_result):
+            if cluster_idx >= 0:
+                clusters[cluster_idx].append(cluster_indices[idx])
+            else:
+                clusters.append([cluster_indices[idx]])
         
-        self.cstrat.clustering("cohesiveness", cluster_indices)
+        return clusters
+
+
+
+
+
+
 
 
 
