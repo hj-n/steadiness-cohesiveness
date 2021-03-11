@@ -4,15 +4,12 @@ from . import snn_knn as sk
 import numpy as np
 import hdbscan
 
-def preprocessing(strategy : str, parameter, raw_dist_matrix, emb_dist_matrix):
+def install_strategy(strategy : str, parameter, raw_dist_matrix, emb_dist_matrix):
     cstrat = {
         "snn" : SNNCS(parameter, raw_dist_matrix, emb_dist_matrix)
     }["snn"]
-    cstrat.preprocessing()
     return cstrat
 
-def extract_cluster(strategy : str):
-    pass
 
 class ClusterStrategy(ABC):
 
@@ -70,8 +67,26 @@ class SNNCS(ClusterStrategy):
         # Compute snn matrix
         self.raw_snn_matrix = sk.snn_gpu(self.raw_knn_info, self.length, self.k)
         self.emb_snn_matrix = sk.snn_gpu(self.emb_knn_info, self.length, self.k)
-        self.raw_snn_max    = np.max(self.raw_snn_matrix)
-        self.emb_snn_max    = np.max(self.emb_snn_matrix)
+        raw_snn_max    = np.max(self.raw_snn_matrix)
+        emb_snn_max    = np.max(self.emb_snn_matrix)
+
+        # Normalize snn matrix
+        self.raw_snn_matrix /= raw_snn_max
+        self.emb_snn_matrix /= emb_snn_max
+
+        # Compute dist matrix 
+        self.raw_snn_dist_matrix =  (1 / (self.raw_snn_matrix + self.a) - 0.5) * 2
+        self.emb_snn_dist_matrix =  (1 / (self.emb_snn_matrix + self.a) - 0.5) * 2
+
+        dissimilarity_matrix = self.raw_snn_dist_matrix - self.emb_snn_dist_matrix
+        dissimilarity_max = np.max(dissimilarity_matrix)
+        dissimilarity_min = np.min(dissimilarity_matrix)
+
+        max_compress = dissimilarity_max if dissimilarity_max > 0 else 0
+        min_compress = dissimilarity_min if dissimilarity_min > 0 else 0
+        max_stretch  = - dissimilarity_min if dissimilarity_min < 0 else 0
+        min_stretch  = - dissimilarity_max if dissimilarity_max < 0 else 0
+        return max_compress, min_compress, max_stretch, min_stretch
         
 
     def extract_cluster(self, mode, walk_num):
@@ -79,27 +94,25 @@ class SNNCS(ClusterStrategy):
         if mode == "steadiness":   ## extract from the embedded (projected) space
             knn_info   = self.emb_knn_info
             snn_matrix = self.emb_snn_matrix
-            snn_max    = self.emb_snn_max
         if mode == "cohesiveness": ## extract from the original space
             knn_info   = self.raw_knn_info
             snn_matrix = self.raw_snn_matrix
-            snn_max    = self.raw_snn_max
         seed_idx = np.random.randint(self.length)
-        return sk.snn_based_cluster_extraction(knn_info, snn_matrix, snn_max, seed_idx, walk_num)
+        return sk.snn_based_cluster_extraction(knn_info, snn_matrix, seed_idx, walk_num)
 
 
 
     ## HDBSCAN with precomputed distance based on snn
     def clustering(self, mode, indices):
         if mode == "steadiness":
-            snn_matrix = self.raw_snn_matrix
-            snn_max    = self.raw_snn_max
+            snn_dist_matrix = self.raw_snn_dist_matrix
         if mode == "cohesiveness":
-            snn_matrix = self.emb_snn_matrix
-            snn_max    = self.emb_snn_max
-        cluster_snn_matrix = (snn_matrix[indices].T)[indices] / snn_max
+            snn_dist_matrix = self.emb_snn_dist_matrix
+        # cluster_snn_matrix = (snn_matrix[indices].T)[indices] 
 
-        cluster_snn_dist_matrix = 1 / (cluster_snn_matrix + self.a)
+        cluster_snn_dist_matrix = (snn_dist_matrix[indices].T)[indices] 
+
+        # cluster_snn_dist_matrix = 1 / (cluster_snn_matrix + self.a)
         np.fill_diagonal(cluster_snn_dist_matrix, 0)
 
         clusterer = hdbscan.HDBSCAN(metric="precomputed")
@@ -110,15 +123,6 @@ class SNNCS(ClusterStrategy):
 
     def compute_distance(self, mode, cluster_a, cluster_b):
 
-        # cluster_a_raw_centroid = self.__get_centroid(cluster_a, self.raw_snn_matrix)
-        # cluster_b_raw_centroid = self.__get_centroid(cluster_b, self.raw_snn_matrix)
-
-        # cluster_a_emb_centroid = self.__get_centroid(cluster_a, self.emb_snn_matrix)
-        # cluster_b_emb_centroid = self.__get_centroid(cluster_b, self.emb_snn_matrix)
-
-        # raw_similarity = self.raw_snn_matrix[cluster_a_raw_centroid, cluster_b_raw_centroid]
-        # emb_similarity = self.emb_snn_matrix[cluster_a_emb_centroid, cluster_b_emb_centroid]
-
         pair_num = cluster_a.size * cluster_b.size
         if(cluster_a.size == 1):
             cluster_a = cluster_a[0]
@@ -126,11 +130,10 @@ class SNNCS(ClusterStrategy):
             cluster_b = cluster_b[0]
         raw_similarity = np.sum((self.raw_snn_matrix[cluster_a].T)[cluster_b]) / pair_num
         emb_similarity = np.sum((self.emb_snn_matrix[cluster_b].T)[cluster_a]) / pair_num
-    
-        
 
-        raw_dist = 1 / (raw_similarity + self.a)
-        emb_dist = 1 / (emb_similarity + self.a)
+
+        raw_dist = (1 / (raw_similarity + self.a) - 0.5) * 2
+        emb_dist = (1 / (emb_similarity + self.a) - 0.5) * 2
 
         # print("similarity:",emb_similarity, raw_similarity)
         # print("dist:", emb_dist, raw_dist)

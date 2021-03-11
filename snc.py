@@ -16,7 +16,7 @@ class SNC:
                  self,
                  raw,                      # raw data
                  emb,                      # emb data
-                 iteration=1000,           # iteration number
+                 iteration=100,           # iteration number
                  walk_num_ratio=1,             # random walk number,
                  cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
                  cluster_parameter={},  # clustering paramters for current clustering method / cluster extraction
@@ -58,50 +58,51 @@ class SNC:
         self.raw_dist_matrix /= self.raw_dist_max
         self.emb_dist_matrix /= self.emb_dist_max 
 
-        ## Calculate Important values for the measuring
-        dissimlarity_matrix = self.raw_dist_matrix - self.emb_dist_matrix
-        dissimilarity_max = np.max(dissimlarity_matrix)
-        dissimilarity_min = np.min(dissimlarity_matrix)
 
-        self.max_compress = dissimilarity_max if dissimilarity_max > 0 else 0
-        self.min_compress = dissimilarity_min if dissimilarity_min > 0 else 0
-        self.max_stretch  = - dissimilarity_min if dissimilarity_min < 0 else 0
-        self.min_stretch  = - dissimilarity_max if dissimilarity_max < 0 else 0
+        self.max_compress = None
+        self.min_compress = None
+        self.max_stretch  = None
+        self.min_stretch  = None
 
-        self.cstrat = cs.preprocessing(self.cluster_strategy, self.cluster_parameter, 
-                                       self.raw_dist_matrix, self.emb_dist_matrix)
+        self.cstrat = cs.install_strategy(self.cluster_strategy, self.cluster_parameter, 
+                                          self.raw_dist_matrix, self.emb_dist_matrix)
+        
+        self.max_compress, self.min_compress, self.max_stretch, self.min_stretch = self.cstrat.preprocessing()
+        
 
     def steadiness(self):
-        # TODO
-        cluster_indices = self.cstrat.extract_cluster("steadiness", self.walk_num)        
-        clustering_result = self.cstrat.clustering("steadiness", cluster_indices)
-        separated_clusters = self.__separate_cluster_labels(cluster_indices, clustering_result)
-        for i in range(len(separated_clusters)):
-            for j in range(i):
-                raw_dist, emb_dist = self.cstrat.compute_distance("steadiness", np.array(separated_clusters[i]), 
-                                                             np.array(separated_clusters[j]))
-                raw
-                weight = separated_clusters[i].size * separated_clusters[j].size  
-
-        
-        
+        self.stead_score = self.__measure("steadiness", self.max_compress, self.min_compress)
+        return self.stead_score
 
     
     def cohesiveness(self):
-        # TODO
-        cluster_indices = self.cstrat.extract_cluster("cohesiveness", self.walk_num)
-        clustering_result = self.cstrat.clustering("cohesiveness", cluster_indices)
-        separated_clusters = self.__separate_cluster_labels(cluster_indices, clustering_result)
-        for i in range(len(separated_clusters)):
-            for j in range(i):
-                raw_dist, emb_dist = self.cstrat.compute_distance("cohesiveness", np.array(separated_clusters[i]), 
-                                                             np.array(separated_clusters[j]))
-                dist = raw_dist - emb_dist
-                if(dist < 0):
-                    continue
-                # distortion = 
-                weight = separated_clusters[i].size * separated_clusters[j].size        
+        self.cohev_score = self.__measure("cohesiveness", self.max_stretch, self.min_stretch)
+        return self.cohev_score   
 
+    def __measure(self, mode, max_val, min_val):
+        distortion_sum = 0
+        weight_sum = 0
+        for _ in range(self.iter):
+            cluster_indices = self.cstrat.extract_cluster(mode, self.walk_num)        
+            clustering_result = self.cstrat.clustering(mode, cluster_indices)
+            separated_clusters = self.__separate_cluster_labels(cluster_indices, clustering_result)
+
+            for i in range(len(separated_clusters)):
+                for j in range(i):
+                    raw_dist, emb_dist = self.cstrat.compute_distance(mode, np.array(separated_clusters[i]), 
+                                                                np.array(separated_clusters[j]))
+                    distance = raw_dist - emb_dist
+                    if(distance <= 0):
+                        continue
+                    distortion = (distance - min_val) / (max_val - min_val)
+                    weight = len(separated_clusters[i]) * len(separated_clusters[j])
+                    distortion_sum += distortion * weight
+                    weight_sum += weight
+        
+        
+        
+        score = 1 - distortion_sum / weight_sum
+        return score
 
 
 
@@ -130,43 +131,49 @@ class SNC:
 
 
 
-    def result(self):
-        return {
-            "steadiness" : self.stead_score,
-            "cohesiveness" : self.cohev_score,
-        }
 
-    def __measure(self):
-        x = True
-        false_distortion_weight_list = []
-        missing_distortion_weight_list = []
-        for mode in [True, False]:
-            for i in range(self.iter):
-                ## for progress checking
-                if i % 100 == 0:
-                    print(str(i) + "-th iteration completed")
-                    pass
 
-                random_cluster = self.__random_cluster_selection(mode)
-                clusters = self.__find_groups(random_cluster, mode)
-                current_list = self.__compute_distortion(clusters, mode)
-                if mode:
-                    false_distortion_weight_list += current_list
-                else:
-                    missing_distortion_weight_list += current_list
 
-        false_weight_sum = 0
-        false_distortion_sum = 0
-        for (distortion, weight) in false_distortion_weight_list:
-            false_distortion_sum += distortion * weight
-            false_weight_sum += weight
-        self.stead_score = 1 - false_distortion_sum / false_weight_sum 
-        missing_weight_sum = 0
-        missing_distortion_sum = 0
-        for (distortion, weight) in missing_distortion_weight_list:
-            missing_distortion_sum += distortion *  weight
-            missing_weight_sum += weight
-        self.cohev_score = 1 - missing_distortion_sum / missing_weight_sum 
+
+
+
+    # def result(self):
+    #     return {
+    #         "steadiness" : self.stead_score,
+    #         "cohesiveness" : self.cohev_score,
+    #     }
+
+    # def __measure(self):
+    #     x = True
+    #     false_distortion_weight_list = []
+    #     missing_distortion_weight_list = []
+    #     for mode in [True, False]:
+    #         for i in range(self.iter):
+    #             ## for progress checking
+    #             if i % 100 == 0:
+    #                 print(str(i) + "-th iteration completed")
+    #                 pass
+
+    #             random_cluster = self.__random_cluster_selection(mode)
+    #             clusters = self.__find_groups(random_cluster, mode)
+    #             current_list = self.__compute_distortion(clusters, mode)
+    #             if mode:
+    #                 false_distortion_weight_list += current_list
+    #             else:
+    #                 missing_distortion_weight_list += current_list
+
+    #     false_weight_sum = 0
+    #     false_distortion_sum = 0
+    #     for (distortion, weight) in false_distortion_weight_list:
+    #         false_distortion_sum += distortion * weight
+    #         false_weight_sum += weight
+    #     self.stead_score = 1 - false_distortion_sum / false_weight_sum 
+    #     missing_weight_sum = 0
+    #     missing_distortion_sum = 0
+    #     for (distortion, weight) in missing_distortion_weight_list:
+    #         missing_distortion_sum += distortion *  weight
+    #         missing_weight_sum += weight
+    #     self.cohev_score = 1 - missing_distortion_sum / missing_weight_sum 
 
 
         

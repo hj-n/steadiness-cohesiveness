@@ -61,7 +61,7 @@ def knn_info(dist_matrix, k):
 random cluster extraction along knn bfs with snn probability
 '''
 
-def snn_based_cluster_extraction(knn_info, snn_matrix, snn_max, seed_idx, walk_num):
+def snn_based_cluster_extraction(knn_info, snn_matrix, seed_idx, walk_num):
     
     cluster_member = set()
     current_queue = deque([seed_idx])
@@ -71,7 +71,7 @@ def snn_based_cluster_extraction(knn_info, snn_matrix, snn_max, seed_idx, walk_n
         i = current_queue.popleft()
         knns = knn_info[i]
         for j in knns:
-            probability = 1 - snn_matrix[i, j] / snn_max
+            probability = 1 - snn_matrix[i, j]
             dice = np.random.rand()
             if (dice > probability):
                 current_queue.append(j)
