@@ -98,7 +98,12 @@ class SNNCS(ClusterStrategy):
             knn_info   = self.raw_knn_info
             snn_matrix = self.raw_snn_matrix
         seed_idx = np.random.randint(self.length)
-        return sk.snn_based_cluster_extraction(knn_info, snn_matrix, seed_idx, walk_num)
+        extracted_cluster = []
+        while len(extracted_cluster) == 0:
+            cluster_candidate = sk.snn_based_cluster_extraction(knn_info, snn_matrix, seed_idx, walk_num)
+            if cluster_candidate.size > 1:
+                extracted_cluster = cluster_candidate
+        return extracted_cluster
 
 
 
