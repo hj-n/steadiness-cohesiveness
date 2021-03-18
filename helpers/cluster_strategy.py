@@ -57,7 +57,7 @@ class SNNCS(ClusterStrategy):
     def __init__(self, parameter, raw_dist_matrix, emb_dist_matrix):
         super().__init__(raw_dist_matrix, emb_dist_matrix)
         self.k = parameter["k"]
-        self.a = 1    # parameter for similairty => distance = 1 / 1 + similarity
+        self.a = 0.01    # parameter for similairty => distance = 1 / 1 + similarity
 
     def preprocessing(self):
         # Compute knn infos
@@ -75,8 +75,11 @@ class SNNCS(ClusterStrategy):
         self.emb_snn_matrix /= emb_snn_max
 
         # Compute dist matrix 
-        self.raw_snn_dist_matrix =  (1 / (self.raw_snn_matrix + self.a) - 0.5) * 2
-        self.emb_snn_dist_matrix =  (1 / (self.emb_snn_matrix + self.a) - 0.5) * 2
+        # self.raw_snn_dist_matrix =  (1 / (self.raw_snn_matrix + self.a) - 0.5) * 2
+        # self.emb_snn_dist_matrix =  (1 / (self.emb_snn_matrix + self.a) - 0.5) * 2
+
+        self.raw_snn_dist_matrix = (1 / (self.raw_snn_matrix + self.a)) - 1
+        self.emb_snn_dist_matrix = (1 / (self.emb_snn_matrix + self.a)) - 1
 
         dissimilarity_matrix = self.raw_snn_dist_matrix - self.emb_snn_dist_matrix
         dissimilarity_max = np.max(dissimilarity_matrix)
@@ -134,8 +137,11 @@ class SNNCS(ClusterStrategy):
         raw_similarity = np.sum((self.raw_snn_matrix[cluster_a].T)[cluster_b]) / pair_num
         emb_similarity = np.sum((self.emb_snn_matrix[cluster_b].T)[cluster_a]) / pair_num
 
-        raw_dist = (1 / (raw_similarity + self.a) - 0.5) * 2
-        emb_dist = (1 / (emb_similarity + self.a) - 0.5) * 2
+        # raw_dist = (1 / (raw_similarity + self.a) - 0.5) * 2
+        # emb_dist = (1 / (emb_similarity + self.a) - 0.5) * 2
+
+        raw_dist = 1 / (raw_similarity + self.a) - 1
+        emb_dist = 1 / (emb_similarity + self.a) - 1
 
         return raw_dist, emb_dist
     
