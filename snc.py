@@ -22,6 +22,7 @@ class SNC:
                  walk_num_ratio=0.5,             # random walk number,
                  cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
                  cluster_parameter={},  # clustering paramters for current clustering method / cluster extraction
+                 record=False,   # record underlying distortion data for the visualization
                 ):
         self.raw = np.array(raw, dtype=np.float64)
         self.emb = np.array(emb, dtype=np.float64)
@@ -30,21 +31,21 @@ class SNC:
         self.walk_num = int(self.N * walk_num_ratio)
         self.cluster_strategy = cluster_strategy
         self.cluster_parameter = cluster_parameter
+        self.record = record
 
         ## target score
         self.cohev_score = None
         self.stead_score = None
 
         ## Distortion log
-        self.missing_log = [] 
+        self.stead_log = [] 
         for __ in range(self.N):
-            new_dict = { "value": [], "idx": [],}
-            self.missing_log.append(new_dict)
-        self.false_log = []
-        
+            new_dict = { }
+            self.stead_log.append(new_dict)
+        self.cohev_log = []
         for __ in range(self.N):
-            new_dict = {"value": [], "direction": [], "idx": [] }
-            self.false_log.append(new_dict)
+            new_dict = { }
+            self.cohev_log.append(new_dict)
 
 
     def fit(self):
@@ -70,6 +71,7 @@ class SNC:
                                           self.raw_dist_matrix, self.emb_dist_matrix)
         
         self.max_compress, self.min_compress, self.max_stretch, self.min_stretch = self.cstrat.preprocessing()
+
         
 
     def steadiness(self):
@@ -80,6 +82,18 @@ class SNC:
     def cohesiveness(self):
         self.cohev_score = self.__measure("cohesiveness", self.max_stretch, self.min_stretch)
         return self.cohev_score   
+
+    def record_result(self):
+        if self.record:
+            for datum_log in self.stead_log:
+                for key_idx in datum_log:
+                    datum_log[key_idx] = datum_log[key_idx][0] / datum_log[key_idx][1]
+            for datum_log in self.cohev_log:
+                for key_idx in datum_log:
+                    datum_log[key_idx] = datum_log[key_idx][0] / datum_log[key_idx][1]
+            return self.stead_log, self.cohev_log
+        else:
+            return None, None
 
     def __measure(self, mode, max_val, min_val):
         distortion_sum = 0
@@ -101,13 +115,23 @@ class SNC:
             for j in range(i):
                 raw_dist, emb_dist = self.cstrat.compute_distance(mode, np.array(separated_clusters[i]), 
                                                             np.array(separated_clusters[j]))
-                distance = raw_dist - emb_dist
+                distance = None
+                if mode == "steadiness":
+                    distance = raw_dist - emb_dist
+                else:
+                    distance = emb_dist - raw_dist 
                 if(distance <= 0):
                     continue
+
                 distortion = (distance - min_val) / (max_val - min_val)
                 weight = len(separated_clusters[i]) * len(separated_clusters[j])
                 partial_distortion_sum += distortion * weight
                 partial_weight_sum += weight
+
+                if self.record == True:
+                    self.__record_log(mode, distortion, weight, separated_clusters[i], separated_clusters[j])
+
+
 
         return partial_distortion_sum, partial_weight_sum
 
@@ -126,8 +150,24 @@ class SNC:
                 clusters.append([cluster_indices[idx]])
         return clusters
 
-
-
+    def __record_log(self, mode, distortion, weight, cluster_a, cluster_b):
+        log = None
+        if mode == "steadiness":
+            log = self.stead_log
+        else:   ## if cohesiveness
+            log = self.cohev_log
+        
+        for i in cluster_a:
+            for j in cluster_b: 
+                if j not in log[i]:
+                    log[i][j] = [distortion, 1]
+                else:
+                    log[i][j] = [log[i][j][0] + distortion, log[i][j][1] + 1]
+                
+                if i not in log[j]:
+                    log[j][i] = [distortion, 1]
+                else:
+                    log[j][i] = [log[j][i][0] + distortion, log[j][i][1] + 1]
     # Legacy code reference for the visualization
     # def __compute_distortion(self, groups, is_false):
     #     group_num = len(groups)

@@ -57,7 +57,7 @@ class SNNCS(ClusterStrategy):
     def __init__(self, parameter, raw_dist_matrix, emb_dist_matrix):
         super().__init__(raw_dist_matrix, emb_dist_matrix)
         self.k = parameter["k"]
-        self.a = 0.01    # parameter for similairty => distance = 1 / 1 + similarity
+        self.a = 0.1    # parameter for similairty => distance = 1 / 1 + similarity
 
     def preprocessing(self):
         # Compute knn infos
@@ -121,7 +121,7 @@ class SNNCS(ClusterStrategy):
 
         np.fill_diagonal(cluster_snn_dist_matrix, 0)
 
-        clusterer = hdbscan.HDBSCAN(metric="precomputed")
+        clusterer = hdbscan.HDBSCAN(metric="precomputed", allow_single_cluster=True)
         clusterer.fit(cluster_snn_dist_matrix)
         
         return clusterer.labels_
@@ -135,7 +135,7 @@ class SNNCS(ClusterStrategy):
         if(cluster_b.size == 1):
             cluster_b = cluster_b[0]
         raw_similarity = np.sum((self.raw_snn_matrix[cluster_a].T)[cluster_b]) / pair_num
-        emb_similarity = np.sum((self.emb_snn_matrix[cluster_b].T)[cluster_a]) / pair_num
+        emb_similarity = np.sum((self.emb_snn_matrix[cluster_a].T)[cluster_b]) / pair_num
 
         # raw_dist = (1 / (raw_similarity + self.a) - 0.5) * 2
         # emb_dist = (1 / (emb_similarity + self.a) - 0.5) * 2
