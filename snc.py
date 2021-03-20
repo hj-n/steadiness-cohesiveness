@@ -7,7 +7,6 @@ import sys
 
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
-from sncvis import SNCVis
 from helpers import distance_matrix as dm
 from helpers import cluster_strategy as cs
 from concurrent.futures import ThreadPoolExecutor
@@ -168,66 +167,6 @@ class SNC:
                     log[j][i] = [distortion, 1]
                 else:
                     log[j][i] = [log[j][i][0] + distortion, log[j][i][1] + 1]
-    # Legacy code reference for the visualization
-    # def __compute_distortion(self, groups, is_false):
-    #     group_num = len(groups)
-    #     group_x = [] # ND centroid of groups
-    #     group_y = [] # 2D centroid of groups
-    #     for i in range(group_num):
-    #         group_x.append(np.average(self.raw[groups[i]], axis=0))
-    #         group_y.append(np.average(self.emb[groups[i]], axis=0))
-
-
-    #     distortion_weight_list = []
-
-    #     for i in range(group_num):
-    #         for j in range(i):
-    #             distortion = None
-    #             max_mu = None
-    #             min_mu = None
-    #             if is_false:
-    #                 mu_group = np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x - np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
-    #                 distortion = (mu_group - self.min_mu_compress) / (self.max_mu_compress - self.min_mu_compress) if mu_group > 0 else 0               # discard if mu_group < 0 (not compressed)
-    #                 # max_mu, min_mu = self.max_mu_compress, self.min_mu_compress
-    #             else:
-    #                 mu_group = - np.linalg.norm(group_x[i] - group_x[j]) / self.dist_max_x + np.linalg.norm(group_y[i] - group_y[j]) / self.dist_max_y
-    #                 distortion = (mu_group - self.min_mu_stretch) / (self.max_mu_stretch - self.min_mu_stretch) if mu_group > 0 else 0                  # discard if mu_group < 0 (not stretched)
-    #                 # max_mu, min_mu = self.max_mu_stretch, self.min_mu_stretch
-    #             weight = len(groups[i]) * len(groups[j])
-    #             distortion_weight_list.append((distortion, weight))
-
-    #             weighted_distortion = distortion * weight
-    #             if weighted_distortion > 0:
-
-    #                 ## ADDING Distortion info to each points (to aggregate in the future)
-    #                 for idx in groups[i]:
-    #                     if is_false:
-    #                         point_y = self.emb[idx]
-    #                         direction = group_y[j] - point_y
-    #                         # direction = direction / np.linalg.norm(direction)
-    #                         # self.false_log[idx]["direction"].append(-direction)
-    #                         self.false_log[idx]["value"].append(distortion * weight)
-    #                         self.false_log[idx]["idx"].append(groups[j])
-    #                     else:
-    #                         self.missing_log[idx]["value"].append(distortion * weight)
-    #                         self.missing_log[idx]["idx"].append(groups[j])
-
-                    
-
-    #                 for idx in groups[j]:
-    #                     if is_false:
-    #                         point_y = self.emb[idx]
-    #                         direction = group_y[i] - point_y
-    #                         # direction = direction / np.linalg.norm(direction)
-    #                         # self.false_log[idx]["direction"].append(-direction)
-    #                         self.false_log[idx]["value"].append(distortion * weight)
-    #                         self.false_log[idx]["idx"].append(groups[i])
-    #                     else:
-    #                         self.missing_log[idx]["value"].append(distortion * weight)
-    #                         self.missing_log[idx]["idx"].append(groups[i])
-
-
-    #     return distortion_weight_list
-
+   
 
         
