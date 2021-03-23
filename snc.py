@@ -159,14 +159,14 @@ class SNC:
         for i in cluster_a:
             for j in cluster_b: 
                 if j not in log[i]:
-                    log[i][j] = [distortion, 1]
+                    log[i][j] = [distortion * weight, 1]
                 else:
-                    log[i][j] = [log[i][j][0] + distortion, log[i][j][1] + 1]
+                    log[i][j] = [log[i][j][0] + distortion * weight, log[i][j][1] + 1]
                 
                 if i not in log[j]:
-                    log[j][i] = [distortion, 1]
+                    log[j][i] = [distortion * weight, 1]
                 else:
-                    log[j][i] = [log[j][i][0] + distortion, log[j][i][1] + 1]
+                    log[j][i] = [log[j][i][0] + distortion * weight, log[j][i][1] + 1]
    
 
         

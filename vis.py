@@ -17,7 +17,6 @@ def generate_visualization_data(stead_log, cohev_log, stead_score, cohev_score, 
     conti_trust = knn_based_measure(raw, emb, raw_neighbors, emb_neighbors, k)
 
     ## Get edge data
-
     edges = []
     for i, neighbors in enumerate(emb_neighbors):
         for j in neighbors:
@@ -26,8 +25,13 @@ def generate_visualization_data(stead_log, cohev_log, stead_score, cohev_score, 
     edges_stead_info = get_edges_info(edges, stead_log)
     edges_cohev_info = get_edges_info(edges, cohev_log)
 
-
     edge_keys = set(edges_stead_info.keys()).union(set(edges_cohev_info.keys()))
+
+    ## score ratio
+    stead_score_ratio = (1 - stead_score) * 2 if (1 - stead_score) * 2 > 1 else 1
+    cohev_score_ratio = (1 - cohev_score) * 2 if (1 - cohev_score) * 2 > 1 else 1
+
+
 
     edge_vis_infos = []
     for key in list(edge_keys):
@@ -36,8 +40,8 @@ def generate_visualization_data(stead_log, cohev_log, stead_score, cohev_score, 
         edge_vis_infos.append({
             "start": nodes[0],
             "end": nodes[1],
-            "missing_val": edges_cohev_info[key]  if key in edges_cohev_info else 0,
-            "false_val": edges_stead_info[key]  if key in edges_stead_info else 0
+            "missing_val": edges_cohev_info[key] * stead_score_ratio if key in edges_cohev_info else 0,
+            "false_val": edges_stead_info[key] * cohev_score_ratio if key in edges_stead_info else 0
         })
 
 
@@ -102,13 +106,16 @@ def get_edges_info(edges, log):
         if len(common_keys) == 0:
             continue
         acc = 0
-        for key in common_keys:
-            acc += (log[start][key] + log[end][key]) / 2 
-        acc /= len(common_keys)
+        # for key in common_keys:
+        #     acc += (log[start][key] + log[end][key]) / 2 
+        for key in start_keys:
+            acc += log[start][key]
+        for key in end_keys:
+            acc += log[end][key]
         edges_info[str(start) + "_" + str(end)] = acc
-    # values = edges_info.values()
-    # # max_value = max(values)
-    # # for key in edges_info.keys():
-    # #     edges_info[key] /= max_value
+    values = edges_info.values()
+    max_value = max(values)
+    for key in edges_info.keys():
+        edges_info[key] /= max_value
 
     return edges_info
