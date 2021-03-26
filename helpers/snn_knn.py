@@ -82,3 +82,27 @@ def snn_based_cluster_extraction(knn_info, snn_matrix, seed_idx, walk_num):
             break
 
     return np.array(list(cluster_member))
+
+'''
+random cluster extraction along knn bfs
+'''
+
+def naive_cluster_extraction(knn_info, seed_idx, walk_num):
+    
+    cluster_member = set()
+    cluster_member.add(seed_idx)
+    current_queue = deque([seed_idx])
+    
+    visit_num = 0
+    while visit_num < walk_num:
+        i = current_queue.popleft()
+        knns = knn_info[i]
+        for j in knns:
+            current_queue.append(j)
+            cluster_member.add(j)
+            visit_num += 1
+        if not current_queue:
+            break
+
+    return np.array(list(cluster_member))
+
