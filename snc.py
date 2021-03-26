@@ -10,7 +10,6 @@ from pyclustering.cluster.xmeans import xmeans
 from helpers import distance_matrix as dm
 from helpers import cluster_strategy as cs
 from concurrent.futures import ThreadPoolExecutor
-from multiprocessing import Process
 
 class SNC:
     def __init__(
@@ -49,16 +48,16 @@ class SNC:
 
     def fit(self):
 
-        ## distance matrix
-        self.raw_dist_matrix = dm.dist_matrix_gpu(self.raw)
-        self.emb_dist_matrix = dm.dist_matrix_gpu(self.emb)
+        # ## distance matrix
+        # self.raw_dist_matrix = dm.dist_matrix_gpu(self.raw)
+        # self.emb_dist_matrix = dm.dist_matrix_gpu(self.emb)
 
-        ## normalizing
-        self.raw_dist_max = np.max(self.raw_dist_matrix)
-        self.emb_dist_max = np.max(self.emb_dist_matrix)
+        # ## normalizing
+        # self.raw_dist_max = np.max(self.raw_dist_matrix)
+        # self.emb_dist_max = np.max(self.emb_dist_matrix)
         
-        self.raw_dist_matrix /= self.raw_dist_max
-        self.emb_dist_matrix /= self.emb_dist_max 
+        # self.raw_dist_matrix /= self.raw_dist_max
+        # self.emb_dist_matrix /= self.emb_dist_max 
 
 
         self.max_compress = None
@@ -67,7 +66,7 @@ class SNC:
         self.min_stretch  = None
 
         self.cstrat = cs.install_strategy(self.cluster_strategy, self.cluster_parameter, 
-                                          self.raw_dist_matrix, self.emb_dist_matrix)
+                                          self.raw, self.emb)
         
         self.max_compress, self.min_compress, self.max_stretch, self.min_stretch = self.cstrat.preprocessing()
 
