@@ -65,11 +65,11 @@ metrics.fit()
 print(metrics.steadiness(), metrics.cohesiveness())
 ```
 
-> There exists number of parameters for Steadiness & Cohesiveness, but can use default setting (which is described in our paper) by only injecting original data `raw` and projection data `emb` as arguments. Detailed explanation for these parameters is like this:
-> - **`raw`**: the original (raw) high-dimensional data which used to generate multidimensional projections. Should be a 2D array (or a 2D np array) with shape `(n_samples, n_dim)` where `n_samples` denotes the number of data points in dataset and `n_dim` is the original size of dimensionality (number of features).
-> - **`emb`**: the projected (embedded) data of **`raw`** (i.e., MDP result). Should be a 2D array (or a 2D np array) with shape `(n_samples, n_reduced_dim)` where `n_reduced_dim` denotes the dimensionality of projection. 
-> 
-> Refer [API description](#api) for more details about hyperparameter setting.  
+There exists number of parameters for Steadiness & Cohesiveness, but can use default setting (which is described in our paper) by only injecting original data `raw` and projection data `emb` as arguments. Detailed explanation for these parameters is like this:
+- **`raw`**: the original (raw) high-dimensional data which used to generate multidimensional projections. Should be a 2D array (or a 2D np array) with shape `(n_samples, n_dim)` where `n_samples` denotes the number of data points in dataset and `n_dim` is the original size of dimensionality (number of features).
+- **`emb`**: the projected (embedded) data of **`raw`** (i.e., MDP result). Should be a 2D array (or a 2D np array) with shape `(n_samples, n_reduced_dim)` where `n_reduced_dim` denotes the dimensionality of projection. 
+
+Refer [API description](#api) for more details about hyperparameter setting.  
 
 ## API
 
