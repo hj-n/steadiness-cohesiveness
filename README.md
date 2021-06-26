@@ -10,8 +10,6 @@
 <!--   </a> -->
     ·
     <a href="mailto:hj@hcil.snu.ac.kr">Contact</a>
-
-    
   </p>
 </p>
 
@@ -50,7 +48,7 @@ pip3 install requirements.txt
 import sys
 
 sys.path.append("/absolute/path/to/steadiness-cohesiveness")
-import snc as sc
+from snc import SNC
 
 ...
 
@@ -67,11 +65,11 @@ metrics.fit()
 print(metrics.steadiness(), metrics.cohesiveness())
 ```
 
-There exists number of parameters for Steadiness & Cohesiveness, but can use default setting (which is described in our paper) by only injecting original data `raw` and projection data `emb` as arguments. Detailed explanation for these parameters is like this:
-- **`raw`**: the original (raw) high-dimensional data which used to generate multidimensional projections. Should be a 2D array (or a 2D np array) with shape `(n_samples, n_dim)` where `n_samples` denotes the number of data points in dataset and `n_dim` is the original size of dimensionality (number of features).
-- **`emb`**: the projected (embedded) data of **`raw`** (i.e., MDP result). Should be a 2D array (or a 2D np array) with shape `(n_samples, n_reduced_dim)` where `n_reduced_dim` denotes the dimensionality of projection. 
-
- Refer [API description](#api) for more details about hyperparameter setting.  
+> There exists number of parameters for Steadiness & Cohesiveness, but can use default setting (which is described in our paper) by only injecting original data `raw` and projection data `emb` as arguments. Detailed explanation for these parameters is like this:
+> - **`raw`**: the original (raw) high-dimensional data which used to generate multidimensional projections. Should be a 2D array (or a 2D np array) with shape `(n_samples, n_dim)` where `n_samples` denotes the number of data points in dataset and `n_dim` is the original size of dimensionality (number of features).
+> - **`emb`**: the projected (embedded) data of **`raw`** (i.e., MDP result). Should be a 2D array (or a 2D np array) with shape `(n_samples, n_reduced_dim)` where `n_reduced_dim` denotes the dimensionality of projection. 
+> 
+> Refer [API description](#api) for more details about hyperparameter setting.  
 
 ## API
 
@@ -91,25 +89,27 @@ class SNC(
 )
 ```
 
-***`raw`*** : *`Array, shape=(n_samples, n_dim), dtype=float or int`*
-
-- The original (raw) high-dimensional data which used to generate MDP
-- Note that `n_samples` denotes the number of data points in dataset and `n_dim` is the original size of dimensionality
-
-
-***`emb`*** : *`Array, shape=(n_samples, n_reduced_dim), dtype=float or int`*
-
-***`iteration`*** : *`int, (optional, default: 200)`*
-
-***`walk_num_ratio`*** : *`float, (optional, default: 0.4)`*
-
-***`dist_strategy`*** : *`string, (optional, default: "snn")`*
-
-***`dist_parameter`*** : *`dict, (optional, default: {})`*
-
-***`dist_function`*** : *`function, (optional, default: None)`*
-
-***`cluster_strategy`*** : *`string, (optional, default: "dbscan")`*
+> ***`raw`*** : *`Array, shape=(n_samples, n_dim), dtype=float or int`*
+> - The original (raw) high-dimensional data which used to generate MDP
+> - `n_samples`: the number of data points in dataset / `n_dim`: is the original size of dimensionality
+>
+>
+> ***`emb`*** : *`Array, shape=(n_samples, n_reduced_dim), dtype=float or int`*
+> - The projected (embedded) data of **`raw`**
+> - 
+> 
+> ***`iteration`*** : *`int, (optional, default: 200)`*
+> 
+> ***`walk_num_ratio`*** : *`float, (optional, default: 0.4)`*
+> 
+> ***`dist_strategy`*** : *`string, (optional, default: "snn")`*
+> 
+> ***`dist_parameter`*** : *`dict, (optional, default: {})`*
+> 
+> ***`dist_function`*** : *`function, (optional, default: None)`*
+> 
+> ***`cluster_strategy`*** : *`string, (optional, default: "dbscan")`*
+> 
 
 
 ### Methods
@@ -117,7 +117,13 @@ class SNC(
 ```python3
 SNC.fit(record_vis_info=False)
 ```
-***`record_vis_info`*** : *`bool, (optional, default: False)`*
+
+> Initializating Steadiness & Cohesiveness : Preprocessing (e.g., distance matrix computation) and preparation for computing Steadiness and Cohesiveness. 
+> 
+> ***`record_vis_info`*** : *`bool, (optional, default: False)`*
+> - If `True`, SNC object records the information needed to make [distortion visualization of Steadiness & Cohesiveness](#visualizing-steadiness-and-cohesiveness)
+> - method `vis_info()` becomes able to called when the parameter is set as `True`
+> - Recording the informations incurs extra overhead!!
 
 
 ```python3
@@ -125,11 +131,18 @@ SNC.steadiness()
 SNC.cohesiveness()
 ```
 
+> Performs the main computation of Steadiness and Cohesiveness and return the result.
+> Note that this step generates large proportion of the computation.
+
 ```python3
 SNC.vis_info(file_path=None)
 ```
 
-***`file_path`*** : *`bool, (optional, default: None)`*
+> Able to be performed when `record_vis_info` parameter is set as `True` (Otherwise raises Error)
+>
+> ***`file_path`*** : *`bool, (optional, default: None)`*
+> - if `file_path` is not given as arugment, returns visualization infos
+> - if `file_path` is given, visualization infos are saved in designated path
 
 
 
@@ -137,7 +150,7 @@ SNC.vis_info(file_path=None)
 
 
 
-## Visualizing Steadiness & Cohesiveness
+## Visualizing Steadiness and Cohesiveness
 
 
 ![vis](https://user-images.githubusercontent.com/38465539/123515745-b0590680-d6d3-11eb-816d-e725fd5841ee.png)
