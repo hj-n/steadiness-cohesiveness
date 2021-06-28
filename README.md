@@ -125,21 +125,21 @@ class SNC(
 >     - low `"alpha"` converts smaller similarities to higher dissimilarities (distances).
 >   - `"k"` : *`int, (optional, default: 20)`* 
 >     - used for constructing `k`-Nearest Neighbror graph which becomes a basis to compute SNN similarity. 
-> - if `dist_parameter == "euclidean"`, `dist_parameter` does nothing
-> - if `dist_parameter == "predefined"`, you can freely utilize `dist_parameter` in `dist_function`, which is decribed below
+> - if `dist_parameter == "euclidean"`, `dist_parameter` does nothing.
+> - if `dist_parameter == "predefined"`, you can freely utilize `dist_parameter` in `dist_function`, which is decribed below.
 >   
 > ***`dist_function`*** : *`function, (optional, default: None)`*
 > - if you set `dist_strategy` as `"predefined"`, you should pass the function to calculate distance as parameter (otherwise the class raises error)
-> - the function must get three parameters as arguments : two points `a`,`b`, their length `n_dim`, and `dist_parameter` which is given by user
+> - the function must get three parameters as arguments : two points `a`,`b`, their length `n_dim`, and `dist_parameter` which is given by user.
 >   - `a` and `b` will be 1D numpy array with size `n_dim`
 >   - `n_dim` will be an integer number
-> - return value should be a single float value which denotes the distance between `a` and `b`
+> - return value should be a single float value which denotes the distance between `a` and `b`.
 >
 > ***`cluster_strategy`*** : *`string, (optional, default: "dbscan")`*
-> - Remind: Steadiness and Cohesiveness measures inter-cluster reliability by checking the maintenance of clusters from one space in the opposite space (Refer [Why Steadiness and Cohesiveness](#why-steadiness-and-cohesiveness). 
+> - Remind: Steadiness and Cohesiveness measures inter-cluster reliability by checking the maintenance of clusters from one space in the opposite space (Refer [Why Steadiness and Cohesiveness](#why-steadiness-and-cohesiveness)). 
 > - This is done by again "clustering" the cluster in the opposite side and measuring how much the cluster is splitted. `cluster_strategy` is a hyperparameter to determine the way to conduct such "clustering
 > - currently supports:
->   - `"dbscan"` : based on density-based clustering algorithm, mainly utilizing [HDBSCAN](https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html) algorithm.
+>   - `"dbscan"` : based on density-based clustering algorithm, mainly utilizing [HDBSCAN](https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html) ligrary.
 >   - `"x-means"` : based on X-Means clustering algorithm
 >   - `"'K'-means"` : based on K-Means clustering algorithm, where users can freely change `'K'` value by substituting it with integer number.
 >     - e.g., `15-means`, `20-means`, etc. 
