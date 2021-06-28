@@ -111,9 +111,9 @@ class SNC(
 > ***`dist_strategy`*** : *`string, (optional, default: "snn")`*
 > - the selection of the way to compute distance 
 > - currently supports: 
->   - "snn" : utilizes Shared Nearest Neighbor based dissimilarity 
->   - "euclidean"
->   - "predefined" : allows user-defined distance function
+>   - `"snn"` : utilizes Shared Nearest Neighbor based dissimilarity 
+>   - `"euclidean"`
+>   - `"predefined"` : allows user-defined distance function
 > - We highly recommend to use default distance strategy "snn", as it well considers clusters in high-dimensional space.
 > - if you set `dist_strategy` as "predefined", you should also explicitly pass the way to compute distance as `dist_function` parameter. THe distance for cluster automatically computed as average linkage.
 > 
@@ -139,7 +139,10 @@ class SNC(
 > - Remind: Steadiness and Cohesiveness measures inter-cluster reliability by checking the maintenance of clusters from one space in the opposite space (Refer [Why Steadiness and Cohesiveness](#why-steadiness-and-cohesiveness). 
 > - This is done by again "clustering" the cluster in the opposite side and measuring how much the cluster is splitted. `cluster_strategy` is a hyperparameter to determine the way to conduct such "clustering
 > - currently supports:
->   - 
+>   - `"dbscan"` : based on density-based clustering algorithm, mainly utilizing [HDBSCAN](https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html) algorithm.
+>   - `"x-means"` : based on X-Means clustering algorithm
+>   - `"'K'-means"` : based on K-Means clustering algorithm, where users can freely change `'K'` value by substituting it with integer number.
+>     - e.g., `15-means`, `20-means`, etc. 
 
 
 ### Methods
