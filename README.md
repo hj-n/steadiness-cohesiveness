@@ -1,4 +1,4 @@
-![](https://user-images.githubusercontent.com/38465539/123514952-6b7fa080-d6d0-11eb-8f1b-da2bb5b8a0e4.png)
+![](https://user-images.githubusercontent.com/38465539/123574467-d9c87e00-d80a-11eb-8d19-36a9f8498a95.png)
 ---
 <p align="center">
   <i>Quality Metrics for evaluating the inter-cluster reliability of Mutldimensional Projections</i>
@@ -96,16 +96,36 @@ class SNC(
 >
 > ***`emb`*** : *`Array, shape=(n_samples, n_reduced_dim), dtype=float or int`*
 > - The projected (embedded) data of **`raw`**
-> - 
+> - `n_reduced_dim`: dimensionality of the projection
 > 
 > ***`iteration`*** : *`int, (optional, default: 200)`*
+> - denotes the number of partial distortion computation (extracting => evaluating maintainence in the opposite side)
+> - Higher `iteration` generates the more deterministic / reliable result, but computation time increases linearly to `iteration`
+> - we recommend at least 100 iterations
 > 
 > ***`walk_num_ratio`*** : *`float, (optional, default: 0.4)`*
+> - determines the amount of traverse held to extract a cluster
+> - for the data with `n_samples` samples, the total traverse number to extract a cluster is `n_samples * walk_num_ratio` 
+> - the size of extracted cluster grows as `walk_num_ratio` increases, but does not effect the result significantly
 > 
 > ***`dist_strategy`*** : *`string, (optional, default: "snn")`*
+> - the selection of the way to compute distance 
+> - currently supports: 
+>   - "snn" : utilizes Shared Nearest Neighbor based dissimilarity 
+>   - "euclidean"
+>   - "predefined" : allows user-defined distance function
+> - We highly recommend to use default distance strategy "snn", as it well considers clusters in high-dimensional space.
+> - if you set `dist_strategy` as "predefined", you should also explicitly pass the way to compute distance as `dist_function` parameter. THe distance for cluster automatically computed as average linkage.
 > 
 > ***`dist_parameter`*** : *`dict, (optional, default: {})`*
-> 
+> - inject parameters for distance computations 
+> - if `dist_strategy == "snn`, `dist_parameter` dictionary should hold:
+>   - `"alpha"` : *`float, (optional, default: 0.1)`*
+>     - the hyperparameter which panalizes low similarity between data points / clusters.
+>     - low `"alpha"` converts smaller similarities to higher dissimilarities (distances).
+>   - `"k"` : *`int, (optional, default: 20)`* 
+>     - used for constructing `k`-Nearest Neighbror graph which becomes a basis to compute SNN similarity. 
+>   
 > ***`dist_function`*** : *`function, (optional, default: None)`*
 > 
 > ***`cluster_strategy`*** : *`string, (optional, default: "dbscan")`*
