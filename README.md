@@ -24,7 +24,7 @@ However, previous local metrics to evaluate MDP (e.g., Trustworthiness & Continu
 
 Steadiness & Cohesiveness were designed and implemented to bridge such a gap. By repeatedly extracting a random cluster from one space and measuring how well the cluster stays still in the opposite space, the metrics measure inter-cluster reliability. Note that Steadiness measures the extent to which clusters in the projected space form clusters in the original space, and Cohesiveness measures the opposite.
 
-For more details, please refer our paper (TBA).
+For more details, please refer to our paper (TBA).
 
 *(documentation still in progress)*
 
