@@ -16,11 +16,10 @@ class SNC:
                  self,
                  raw,                      # raw data
                  emb,                      # emb data
-                 iteration=100,           # iteration number
-                 walk_num_ratio=0.5,             # random walk number,
+                 iteration=200,           # iteration number
+                 walk_num_ratio=0.4,             # random walk number,
                  cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
                  cluster_parameter={},  # clustering paramters for current clustering method / cluster extraction
-                 record=False,   # record underlying distortion data for the visualization
                 ):
         self.raw = np.array(raw, dtype=np.float64)
         self.emb = np.array(emb, dtype=np.float64)
@@ -29,13 +28,12 @@ class SNC:
         self.walk_num = int(self.N * walk_num_ratio)
         self.cluster_strategy = cluster_strategy
         self.cluster_parameter = cluster_parameter
-        self.record = record
 
         ## target score
         self.cohev_score = None
         self.stead_score = None
 
-        ## Distortion log
+        ## Distortion log 
         self.stead_log = [] 
         for __ in range(self.N):
             new_dict = { }
@@ -46,24 +44,13 @@ class SNC:
             self.cohev_log.append(new_dict)
 
 
-    def fit(self):
-
-        # ## distance matrix
-        # self.raw_dist_matrix = dm.dist_matrix_gpu(self.raw)
-        # self.emb_dist_matrix = dm.dist_matrix_gpu(self.emb)
-
-        # ## normalizing
-        # self.raw_dist_max = np.max(self.raw_dist_matrix)
-        # self.emb_dist_max = np.max(self.emb_dist_matrix)
-        
-        # self.raw_dist_matrix /= self.raw_dist_max
-        # self.emb_dist_matrix /= self.emb_dist_max 
-
-
+    def fit(self, record_vis_info=False):
         self.max_compress = None
         self.min_compress = None
         self.max_stretch  = None
         self.min_stretch  = None
+        
+        self.record = record_vis_info
 
         self.cstrat = cs.install_strategy(self.cluster_strategy, self.cluster_parameter, 
                                           self.raw, self.emb)
