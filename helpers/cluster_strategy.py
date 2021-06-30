@@ -4,7 +4,6 @@ from sklearn.cluster import KMeans
 from pyclustering.cluster.xmeans import xmeans
 
 
-
 import numpy as np
 import hdbscan
 from . import distance_matrix as dm
@@ -102,11 +101,8 @@ class SNNCS(ClusterStrategy):
         self.emb_snn_matrix /= emb_snn_max
 
         # Compute dist matrix 
-        # self.raw_snn_dist_matrix =  (1 / (self.raw_snn_matrix + self.a) - 0.5) * 2
-        # self.emb_snn_dist_matrix =  (1 / (self.emb_snn_matrix + self.a) - 0.5) * 2
-
-        self.raw_snn_dist_matrix = (1 / (self.raw_snn_matrix + self.a)) - 1
-        self.emb_snn_dist_matrix = (1 / (self.emb_snn_matrix + self.a)) - 1
+        self.raw_snn_dist_matrix = 1 / (self.raw_snn_matrix + self.a)
+        self.emb_snn_dist_matrix = 1 / (self.emb_snn_matrix + self.a)
 
         dissimilarity_matrix = self.raw_snn_dist_matrix - self.emb_snn_dist_matrix
         dissimilarity_max = np.max(dissimilarity_matrix)
@@ -164,11 +160,8 @@ class SNNCS(ClusterStrategy):
         raw_similarity = np.sum((self.raw_snn_matrix[cluster_a].T)[cluster_b]) / pair_num
         emb_similarity = np.sum((self.emb_snn_matrix[cluster_a].T)[cluster_b]) / pair_num
 
-        # raw_dist = (1 / (raw_similarity + self.a) - 0.5) * 2
-        # emb_dist = (1 / (emb_similarity + self.a) - 0.5) * 2
-
-        raw_dist = 1 / (raw_similarity + self.a) - 1
-        emb_dist = 1 / (emb_similarity + self.a) - 1
+        raw_dist = 1 / (raw_similarity + self.a) 
+        emb_dist = 1 / (emb_similarity + self.a) 
 
         return raw_dist, emb_dist
     
@@ -202,7 +195,6 @@ SNN Similarity + XMEANS
 overrides SNNCS
 '''
 class SNNXM(SNNCS):
-
     ## KMEANS with precomputed distance based on snn
     def clustering(self, mode, indices):
         if mode == "steadiness":
@@ -216,8 +208,6 @@ class SNNXM(SNNCS):
         clusters = np.zeros(len(indices), dtype=np.int32)
         labels = clusterer.get_clusters()
 
-
-        # print(labels)
         for cnum, cluster in enumerate(labels):
             for idx in cluster:
                 clusters[idx] = cnum
