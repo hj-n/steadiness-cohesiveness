@@ -7,12 +7,18 @@ import numpy as np
 import hdbscan
 from . import distance_matrix as dm
 
+
+'''
+Helper functions for generating basic infos
+e.g., knn info, distance matrix...
+'''
+
 def get_euclidean_infos(raw, emb, dist_parameter, length, k):
     raw_dist_matrix = dm.dist_matrix_gpu(raw)
     emb_dist_matrix = dm.dist_matrix_gpu(emb)
     
-    raw_dist_max = np.max(self.raw_dist_matrix)
-    emb_dist_max = np.max(self.emb_dist_matrix)
+    raw_dist_max = np.max(raw_dist_matrix)
+    emb_dist_max = np.max(emb_dist_matrix)
 
     raw_dist_matrix /= raw_dist_max
     emb_dist_matrix /= emb_dist_max
@@ -23,6 +29,8 @@ def get_euclidean_infos(raw, emb, dist_parameter, length, k):
     return {
         "raw_dist_matrix" : raw_dist_matrix,
         "emb_dist_matrix" : emb_dist_matrix, 
+        "raw_dist_max"    : raw_dist_max,
+        "emb_dist_max"    : emb_dist_max, 
         "raw_knn"         : raw_knn_info,
         "emb_knn"         : emb_knn_info
     }
@@ -30,13 +38,13 @@ def get_euclidean_infos(raw, emb, dist_parameter, length, k):
 
 def get_snn_infos(raw, emb, dist_parameter, length, k):
 
-    infos = get_euclidean_infos(raw, emb, dist_parameter, k)
+    infos = get_euclidean_infos(raw, emb, dist_parameter, length, k)
     
     # Compute snn matrix
     raw_snn_matrix = sk.snn_gpu(infos["raw_knn"], length, k)
     emb_snn_matrix = sk.snn_gpu(infos["emb_knn"], length, k)
     raw_snn_max    = np.max(raw_snn_matrix)
-    emb_enn_max    = np.max(emb_snn_matrix)
+    emb_snn_max    = np.max(emb_snn_matrix)
 
     # normalize snn matrix
     raw_snn_matrix /= raw_snn_max
@@ -53,6 +61,12 @@ def get_snn_infos(raw, emb, dist_parameter, length, k):
     infos["emb_snn_matrix"]  = emb_snn_matrix
 
     return infos
+
+
+'''
+Helper functions to extract a cluster
+used to extract_cluster 
+'''
 
 def get_a_cluster_snn(infos, mode, seed_idx, walk_num):
     if mode == "steadiness":   ## extract from the embedded (projected) space
@@ -74,19 +88,91 @@ def get_a_cluster_naive(infos, mode, seed_idx, walk_num):
 
 
 '''
+Helper functions for cluster the given indices
+'''
+
+def get_clustering_dbscan(dist_matrix, data, indices, dist_parameter):
+    cluster_dist_matrix = (dist_matrix[indices].T)[indices]
+    np.fill_diagonal(cluster_dist_matrix, 0)
+
+    clusterer = hdbscan.HDBSCAN(metric="precomputed", allow_single_cluster=True)
+    clusterer.fit(cluster_dist_matrix)
+
+    return clusterer.labels_
+
+def get_clustering_xmeans(dist_matrix, data, indices, dist_parameter):
+    clusterer = xmeans(data[indices])
+    clusterer.process()
+
+    clusterer = np.zeros(len(indices), dtype=np.int32)
+    labels = clusterer.get_clusters()
+
+    for cnum, cluster in enumerate(labels):
+        for idx in cluster:
+            clusters[idx] = cnum
+
+    return clusters.tolist()
+
+def get_clustering_kmeans(dist_matrix, data, indices, dist_parameter):
+    clusterer = KMeans(n_clusters=dist_parameter["K"])
+    clusterer.fit(data[indices])
+
+    return clusterer.labels_
+
+
+'''
+Helper functions to compute the distances between clusters
+'''
+
+def get_snn_cluster_distance(cluster_a, cluster_b, raw, emb, infos, dist_parameter):
+    pair_num = cluster_a.size * cluster_b.size
+    if cluster_a.size == 1:
+        cluster_a = cluster_a[0]
+    if cluster_b.size == 1:
+        cluster_b = cluster_b[0]
+    raw_sim = np.sum(((infos["raw_snn_matrix"][cluster_a]).T)[cluster_b]) / pair_num
+    emb_sim = np.sum(((infos["emb_snn_matrix"][cluster_a]).T)[cluster_b]) / pair_num
+
+    raw_dist = 1 / (raw_sim + dist_parameter["alpha"])
+    emb_dist = 1 / (emb_sim + dist_parameter["alpha"])
+
+    return raw_dist, emb_dist
+
+def get_euc_cluster_distance(cluster_a, cluster_b, raw, emb, infos, dist_parameter):
+    a_raw_centroid, a_emb_centroid = euc_get_centroid(cluster_a, raw, emb)
+    b_raw_centroid, b_emb_centroid = euc_get_centroid(cluster_b, raw, emb)
+
+    raw_dist = np.linalg.norm(a_raw_centroid - b_raw_centroid) / infos["raw_dist_max"]
+    emb_dist = np.linalg.norm(a_emb_centroid - b_emb_centroid) / infos["emb_dist_max"]
+
+def euc_get_centroid(cluster, raw, emb):
+    if (cluster.size == 1):
+        raw_centroid = raw[cluster[0]]
+        emb_centroid = emb[cluster[0]]
+    else:
+        raw_centroid = np.sum(raw[cluster], axis=0) / len(cluster)
+        emb_centorid = np.sum(emb[cluster], axis=0) / len(cluster)
+    return raw_centroid, emb_centroid
+
+'''
 INSTALLING Hyperparameter functions
 '''
 
 def install_hparam(dist_strategy, dist_parameter, cluster_strategy, raw, emb):
     if (dist_strategy == "snn"):
         if (cluster_strategy == "dbscan"):
-            return SNNCS(dist_parameter, raw, emb)
+            # return SNNCS(dist_parameter, raw, emb)
+            return HparamFunctions(
+                raw, emb, dist_parameter, 
+                get_snn_infos, get_a_cluster_snn, get_clustering_dbscan, get_snn_cluster_distance
+            )
         if (cluster_strategy == "x-means"):
             return SNNXM(dist_parameter, raw, emb)
         else:
             cluster_strategy_splitted = cluster_strategy.split("-")
             if (cluster_strategy_splitted[1] == "means"):
                 K_val = int(cluster_strategy_splitted[0])
+                dist_parameter["K"] = K_vals
                 return SNNKM(dist_parameter, raw, emb, K_val)
                 
     raise Exception("Wrong strategy choice!! check dist_strategy ('" + dist_strategy + 
@@ -94,21 +180,22 @@ def install_hparam(dist_strategy, dist_parameter, cluster_strategy, raw, emb):
 
 
 
-
 class HparamFunctions():
     '''
     Saving raw, emb info and setting parameter
     '''
-    def __init__(self, raw, emb, dist_parameter, get_infos, get_a_cluster):
+    def __init__(self, raw, emb, dist_parameter, get_infos, get_a_cluster, get_clustering, get_cluster_distance):
         self.raw = raw
         self.emb = emb
         self.length = len(self.raw)
         self.dist_parameter = dist_parameter
         self.k = dist_parameter["k"]
-        
+
         ## Inject functions
         self.get_infos = get_infos
         self.get_a_cluster = get_a_cluster
+        self.get_clustering = get_clustering
+        self.get_cluster_distance = get_cluster_distance
 
     def preprocessing(self):
         self.infos = self.get_infos(self.raw, self.emb, self.dist_parameter, self.length, self.k)
@@ -131,7 +218,7 @@ class HparamFunctions():
         seed_idx = np.random.randint(self.length)
         extracted_cluster = []
         while len(extracted_cluster) == 0:
-            cluster_candidate.size = self.get_a_cluster(self.infos, seed_idx, wall_num)
+            cluster_candidate = self.get_a_cluster(self.infos, mode, seed_idx, walk_num)
             if cluster_candidate.size > 1:
                 extracted_cluster = cluster_candidate
         return extracted_cluster
@@ -142,9 +229,15 @@ class HparamFunctions():
     and return the clustereing result
     mode : steadiness / cohesiveness 
     '''
-    @abstractmethod
     def clustering(self, mode, indices):
-        pass
+        if mode == "steadiness":
+            dist_matrix = self.infos["raw_dist_matrix"]
+            data = self.raw
+        if mode == "cohesiveness":
+            dist_matrix = self.infos["emb_dist_matrix"]
+            data = self.emb
+        
+        return self.get_clustering(dist_matrix, data, indices, self.dist_parameter)
     
     '''
     Compute the distance between two clusters in raw / emb space
@@ -153,7 +246,7 @@ class HparamFunctions():
     '''
     @abstractmethod
     def compute_distance(self, mode, cluster_a, cluster_b):
-        pass
+        return self.get_cluster_distance(cluster_a, cluster_b, self.raw, self.emb, self.infos, self.dist_parameter)
 
 
 
@@ -223,7 +316,7 @@ class SNNCS(ClusterStrategy):
         self.raw_dist_matrix /= self.raw_dist_max
         self.emb_dist_matrix /= self.emb_dist_max 
 
-        self.a = parameter["alpha"]    # parameter for similairty => distance = 1 / 1 + similarity
+        self.a = dist_parameter["alpha"]    # parameter for similairty => distance = 1 / 1 + similarity
 
     def preprocessing(self):
         # Compute knn infos

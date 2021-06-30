@@ -25,14 +25,15 @@ class SNC:
                  dist_function=None,       # inject predefined distance function
                  cluster_strategy="dbscan" # determines the way to consider clusters
                 ):
-        self.raw = np.array(raw, dtype=np.float64)
-        self.emb = np.array(emb, dtype=np.float64)
-        self.N   = len(raw)    # number of points
+        self.raw  = np.array(raw, dtype=np.float64)
+        self.emb  = np.array(emb, dtype=np.float64)
+        self.N    = len(raw)    # number of points
         self.iter = iteration
         self.walk_num = int(self.N * walk_num_ratio)
 
-        self.dist_strategy = dist_strategy
-        self.dist_parameter = dist_parameter
+        self.dist_strategy    = dist_strategy
+        self.dist_parameter   = dist_parameter
+        self.dist_function    = dist_function
         self.cluster_strategy = cluster_strategy
 
         ## target score
@@ -59,7 +60,8 @@ class SNC:
         self.record = record_vis_info
 
         self.cstrat = hp.install_hparam(
-            self.dist_strategy, self.dist_parameter, self.cluster_strategy,
+            self.dist_strategy, self.dist_parameter, 
+            self.cluster_strategy,
             self.raw, self.emb
         )
         
