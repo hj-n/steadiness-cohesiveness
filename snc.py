@@ -8,7 +8,7 @@ import sys
 from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
 from helpers import distance_matrix as dm
-from helpers import cluster_strategy as cs
+from helpers import hparam_functions as hp
 from concurrent.futures import ThreadPoolExecutor
 
 class SNC:
@@ -58,7 +58,7 @@ class SNC:
         
         self.record = record_vis_info
 
-        self.cstrat = cs.install_strategy(
+        self.cstrat = hp.install_hparam(
             self.dist_strategy, self.dist_parameter, self.cluster_strategy,
             self.raw, self.emb
         )
