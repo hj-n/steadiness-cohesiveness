@@ -13,7 +13,7 @@ Helper functions for generating basic infos
 e.g., knn info, distance matrix...
 '''
 
-def get_euclidean_infos(raw, emb, dist_parameter, length, k):
+def get_euclidean_infos(raw, emb, dist_parameter, dist_function, length, k):
     raw_dist_matrix = dm.dist_matrix_gpu(raw)
     emb_dist_matrix = dm.dist_matrix_gpu(emb)
     
@@ -35,10 +35,39 @@ def get_euclidean_infos(raw, emb, dist_parameter, length, k):
         "emb_knn"         : emb_knn_info
     }
 
+def get_predefined_infos(raw, emb, dist_parameter, dist_function, length, k):
+    raw_dist_matrix = np.zeros((length, length))
+    emb_dist_matrix = np.zeros((length, length))
 
-def get_snn_infos(raw, emb, dist_parameter, length, k):
+    for i in range(length):
+        for j in range(length):
+            raw_dist_matrix[i, j] = dist_function(raw[i], raw[j], dist_parameter)
+            emb_dist_matrix[i, j] = dist_function(emb[i], emb[i], dist_parameter)
+    
+    raw_dist_max = np.max(raw_dist_matrix)
+    emb_dist_max = np.max(emb_dist_matrix)
 
-    infos = get_euclidean_infos(raw, emb, dist_parameter, length, k)
+    raw_dist_matrix /= raw_dist_max
+    emb_dist_matrix /= emb_dist_max
+
+    raw_knn_info = sk.knn_info(raw_dist_matrix, k) 
+    emb_knn_info = sk.knn_info(emb_dist_matrix, k) 
+
+    return {
+        "raw_dist_matrix" : raw_dist_matrix,
+        "emb_dist_matrix" : emb_dist_matrix, 
+        "raw_dist_max"    : raw_dist_max,
+        "emb_dist_max"    : emb_dist_max, 
+        "raw_knn"         : raw_knn_info,
+        "emb_knn"         : emb_knn_info
+    }
+
+
+
+
+def get_snn_infos(raw, emb, dist_parameter, dist_function, length, k):
+
+    infos = get_euclidean_infos(raw, emb, dist_parameter, dist_function, length, k)
     
     # Compute snn matrix
     raw_snn_matrix = sk.snn_gpu(infos["raw_knn"], length, k)
@@ -156,11 +185,22 @@ def euc_get_centroid(cluster, raw, emb):
         emb_centroid = np.sum(emb[cluster], axis=0) / len(cluster)
     return raw_centroid, emb_centroid
 
+def get_predefined_cluster_distance(cluster_a, cluster_b, raw, emb, infos, dist_parameter):
+    pair_num = cluster_a.size * cluster_b.size
+    if cluster_a.size == 1:
+        cluster_a = cluster_a[0]
+    if cluster_b.size == 1:
+        cluster_b = cluster_b[0]
+    raw_dist = np.sum((infos["raw_dist_matrix"][cluster_a].T)[cluster_b]) / pair_num
+    emb_dist = np.sum((infos["emb_dist_matrix"][cluster_a].T)[cluster_b]) / pair_num
+
+    return raw_dist, emb_dist
+
 '''
 INSTALLING Hyperparameter functions
 '''
 
-def install_hparam(dist_strategy, dist_parameter, cluster_strategy, raw, emb):
+def install_hparam(dist_strategy, dist_parameter, dist_function, cluster_strategy, raw, emb):
     get_infos = None
     get_a_cluster = None
     get_clusterinng = None 
@@ -176,7 +216,9 @@ def install_hparam(dist_strategy, dist_parameter, cluster_strategy, raw, emb):
         get_a_cluster = get_a_cluster_naive
         get_cluster_distance = get_euc_cluster_distance
     elif dist_strategy == "predefined":
-        pass
+        get_infos = get_predefined_infos
+        get_a_cluster = get_a_cluster_naive
+        get_cluster_distance = get_predefined_cluster_distance
     else:
         raise Exception("Wrong strategy choice!! check dist_strategy ('" + dist_strategy + "')")
 
@@ -195,7 +237,7 @@ def install_hparam(dist_strategy, dist_parameter, cluster_strategy, raw, emb):
             raise Exception("Wrong strategy choice!! check cluster_strategy ('" + cluster_strategy + "')")
 
     return HparamFunctions(
-        raw, emb, dist_parameter,
+        raw, emb, dist_parameter, dist_function,
         get_infos, get_a_cluster, get_clustering, get_cluster_distance
     )
     
@@ -204,11 +246,12 @@ class HparamFunctions():
     '''
     Saving raw, emb info and setting parameter
     '''
-    def __init__(self, raw, emb, dist_parameter, get_infos, get_a_cluster, get_clustering, get_cluster_distance):
+    def __init__(self, raw, emb, dist_parameter, dist_function, get_infos, get_a_cluster, get_clustering, get_cluster_distance):
         self.raw = raw
         self.emb = emb
         self.length = len(self.raw)
         self.dist_parameter = dist_parameter
+        self.dist_function  = dist_function
         self.k = dist_parameter["k"]
 
         ## Inject functions
@@ -218,7 +261,7 @@ class HparamFunctions():
         self.get_cluster_distance = get_cluster_distance
 
     def preprocessing(self):
-        self.infos = self.get_infos(self.raw, self.emb, self.dist_parameter, self.length, self.k)
+        self.infos = self.get_infos(self.raw, self.emb, self.dist_parameter, self.dist_function, self.length, self.k)
         dissim_matrix = self.infos["raw_dist_matrix"] - self.infos["emb_dist_matrix"]
 
         dissim_max = np.max(dissim_matrix)
@@ -264,7 +307,6 @@ class HparamFunctions():
     return two distance (raw_dist, emb_dist)
     mode: steadiness / cohesiveness
     '''
-    @abstractmethod
     def compute_distance(self, mode, cluster_a, cluster_b):
         return self.get_cluster_distance(cluster_a, cluster_b, self.raw, self.emb, self.infos, self.dist_parameter)
 

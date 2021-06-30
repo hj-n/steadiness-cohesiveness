@@ -60,7 +60,7 @@ class SNC:
         self.record = record_vis_info
 
         self.cstrat = hp.install_hparam(
-            self.dist_strategy, self.dist_parameter, 
+            self.dist_strategy, self.dist_parameter, self.dist_function,
             self.cluster_strategy,
             self.raw, self.emb
         )
