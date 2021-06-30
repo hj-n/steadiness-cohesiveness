@@ -145,13 +145,15 @@ def get_euc_cluster_distance(cluster_a, cluster_b, raw, emb, infos, dist_paramet
     raw_dist = np.linalg.norm(a_raw_centroid - b_raw_centroid) / infos["raw_dist_max"]
     emb_dist = np.linalg.norm(a_emb_centroid - b_emb_centroid) / infos["emb_dist_max"]
 
+    return raw_dist, emb_dist
+
 def euc_get_centroid(cluster, raw, emb):
     if (cluster.size == 1):
         raw_centroid = raw[cluster[0]]
         emb_centroid = emb[cluster[0]]
     else:
         raw_centroid = np.sum(raw[cluster], axis=0) / len(cluster)
-        emb_centorid = np.sum(emb[cluster], axis=0) / len(cluster)
+        emb_centroid = np.sum(emb[cluster], axis=0) / len(cluster)
     return raw_centroid, emb_centroid
 
 '''
@@ -159,32 +161,44 @@ INSTALLING Hyperparameter functions
 '''
 
 def install_hparam(dist_strategy, dist_parameter, cluster_strategy, raw, emb):
-    if (dist_strategy == "snn"):
-        if (cluster_strategy == "dbscan"):
-            return HparamFunctions(
-                raw, emb, dist_parameter, 
-                get_snn_infos, get_a_cluster_snn, get_clustering_dbscan, get_snn_cluster_distance
-            )
-        if (cluster_strategy == "x-means"):
-            return HparamFunctions(
-                raw, emb, dist_parameter,
-                get_snn_infos, get_a_cluster_snn, get_clustering_xmeans, get_snn_cluster_distance
-            )
-        else:
+    get_infos = None
+    get_a_cluster = None
+    get_clusterinng = None 
+    get_cluster_distance = None
+
+    ## Prepare proper functions for distance strategy
+    if dist_strategy == "snn": 
+        get_infos = get_snn_infos
+        get_a_cluster = get_a_cluster_snn
+        get_cluster_distance = get_snn_cluster_distance
+    elif dist_strategy == "euclidean":
+        get_infos = get_euclidean_infos
+        get_a_cluster = get_a_cluster_naive
+        get_cluster_distance = get_euc_cluster_distance
+    elif dist_strategy == "predefined":
+        pass
+    else:
+        raise Exception("Wrong strategy choice!! check dist_strategy ('" + dist_strategy + "')")
+
+    ## Prepare proper functions for cluster strategy
+    if cluster_strategy == "dbscan":
+        get_clustering = get_clustering_dbscan
+    elif cluster_strategy == "x-means":
+        get_clustering = get_clustering_xmeans
+    else:
+        if cluster_strategy[-5:] == "means":
             cluster_strategy_splitted = cluster_strategy.split("-")
-            if (cluster_strategy_splitted[1] == "means"):
-                K_val = int(cluster_strategy_splitted[0])
-                dist_parameter["K"] = K_val
-                return HparamFunctions(
-                    raw, emb, dist_parameter,
-                    get_snn_infos, get_a_cluster_snn, get_clustering_kmeans, get_snn_cluster_distance
-                )
+            K_val = int(cluster_strategy_splitted[0])
+            dist_parameter["K"] = K_val
+            get_clustering = get_clustering_kmeans
+        else:
+            raise Exception("Wrong strategy choice!! check cluster_strategy ('" + cluster_strategy + "')")
 
-                
-    raise Exception("Wrong strategy choice!! check dist_strategy ('" + dist_strategy + 
-                    "') and cluster_strategy ('" + cluster_strategy + "')")
-
-
+    return HparamFunctions(
+        raw, emb, dist_parameter,
+        get_infos, get_a_cluster, get_clustering, get_cluster_distance
+    )
+    
 
 class HparamFunctions():
     '''
