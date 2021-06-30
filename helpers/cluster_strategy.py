@@ -9,16 +9,20 @@ import numpy as np
 import hdbscan
 from . import distance_matrix as dm
 
-def install_strategy(strategy : str, parameter, raw, emb):
-    cstrat = {
-        "snn" : SNNCS(parameter, raw, emb),
-        "snnkm" : SNNKM(parameter, raw, emb),
-        "snnxm" : SNNXM(parameter, raw, emb),
-        "euc" : EUCCS(parameter, raw, emb),
-        "euckm" : EUCKM(parameter, raw, emb),
-        "eucxm" : EUCXM(parameter, raw, emb)
-    }[strategy]
-    return cstrat
+def install_strategy(dist_strategy, dist_parameter, cluster_strategy, raw, emb):
+    if (dist_strategy == "snn"):
+        if (cluster_strategy == "dbscan"):
+            return SNNCS(dist_parameter, raw, emb)
+        if (cluster_strategy == "x-means"):
+            return SNNXM(dist_parameter, raw, emb)
+        else:
+            cluster_strategy_splitted = cluster_strategy.split("-")
+            if (cluster_strategy_splitted[1] == "means"):
+                k_val = int(cluster_strategy_splitted[0])
+                return SNNKM(dist_parameter, raw, emb, k_val)
+                
+    raise Exception("Wrong strategy choice!! check dist_strategy ('" + dist_strategy + 
+                    "') and cluster_strategy ('" + cluster_strategy + "')")
 
 
 class ClusterStrategy(ABC):
@@ -26,11 +30,6 @@ class ClusterStrategy(ABC):
     '''
     Saving raw, emb info and setting parameter
     '''
-    # def __init__(self, raw_dist_matrix, emb_dist_matrix):
-    #     self.raw_dist_matrix = raw_dist_matrix
-    #     self.emb_dist_matrix = emb_dist_matrix
-    #     self.length = len(raw_dist_matrix)
-
     def __init__(self, raw, emb):
         self.raw = raw
         self.emb = emb
@@ -85,7 +84,7 @@ class SNNCS(ClusterStrategy):
 
 
         self.k = parameter["k"]
-        self.a = 0.1    # parameter for similairty => distance = 1 / 1 + similarity
+        self.a = parameter["alpha"]    # parameter for similairty => distance = 1 / 1 + similarity
 
     def preprocessing(self):
         # Compute knn infos
@@ -181,9 +180,9 @@ overrides SNNCS
 '''
 class SNNKM(SNNCS):
 
-    def __init__(self, parameter, raw, emb):
+    def __init__(self, parameter, raw, emb, k):
         super().__init__(parameter, raw, emb)
-        self.cluster_num = parameter["cluster_num"]
+        self.cluster_num = k
 
     ## KMEANS with precomputed distance based on snn
     def clustering(self, mode, indices):

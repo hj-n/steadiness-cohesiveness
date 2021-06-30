@@ -16,18 +16,24 @@ class SNC:
                  self,
                  raw,                      # raw data
                  emb,                      # emb data
-                 iteration=200,           # iteration number
-                 walk_num_ratio=0.4,             # random walk number,
-                 cluster_strategy="snn",     # set the strategy for extracting cluster / clustering (snn, hdb, knn...)
-                 cluster_parameter={},  # clustering paramters for current clustering method / cluster extraction
+                 iteration=200,            # iteration number
+                 walk_num_ratio=0.4,       # random walk number,
+                 dist_strategy="snn",      # determines the way to compute distance 
+                 dist_parameter={          # parameters used to compute distance
+                     "alpha": 0.1, "k": 20
+                 },        
+                 dist_function=None,       # inject predefined distance function
+                 cluster_strategy="dbscan" # determines the way to consider clusters
                 ):
         self.raw = np.array(raw, dtype=np.float64)
         self.emb = np.array(emb, dtype=np.float64)
         self.N   = len(raw)    # number of points
         self.iter = iteration
         self.walk_num = int(self.N * walk_num_ratio)
+
+        self.dist_strategy = dist_strategy
+        self.dist_parameter = dist_parameter
         self.cluster_strategy = cluster_strategy
-        self.cluster_parameter = cluster_parameter
 
         ## target score
         self.cohev_score = None
@@ -52,8 +58,10 @@ class SNC:
         
         self.record = record_vis_info
 
-        self.cstrat = cs.install_strategy(self.cluster_strategy, self.cluster_parameter, 
-                                          self.raw, self.emb)
+        self.cstrat = cs.install_strategy(
+            self.dist_strategy, self.dist_parameter, self.cluster_strategy,
+            self.raw, self.emb
+        )
         
         self.max_compress, self.min_compress, self.max_stretch, self.min_stretch = self.cstrat.preprocessing()
 
@@ -115,8 +123,6 @@ class SNC:
 
                 if self.record == True:
                     self.__record_log(mode, distortion, weight, separated_clusters[i], separated_clusters[j])
-
-
 
         return partial_distortion_sum, partial_weight_sum
 
