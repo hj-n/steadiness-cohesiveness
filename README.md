@@ -206,7 +206,7 @@ This section provides some examples to show how Steadiness and Cohesiveness resp
 
 #### Increasing `n_neighbors`
 
-UMAP has two important hyperparameters: `n_neighbors` (nearest neighbors) and `min_dist`. Here, we test how Steadiness and Cohesiveness vary against UMAP embeddings with increasing `n_neighbors`. `n_neighbors` denotes the number of nearest neighbors used to formulate the graph representing the original structure of data. Low `n_neighbors` values make UMAP focus more on local structure, while high values work in the opposite. `min_dist` works similarly; low `min_dist` values pack points together (focusing on local structure), and high values do the opposite. 
+UMAP has two important hyperparameters: `n_neighbors` (nearest neighbors) and `min_dist`. Here, we test how Steadiness and Cohesiveness vary against UMAP embeddings with increasing `n_neighbors`. `n_neighbors` denotes the number of nearest neighbors used to formulate the graph representing the original structure of data. Low `n_neighbors` values make UMAP focus more on local structure, while high values work in the opposite. 
 
 Here, the [Spheres](http://proceedings.mlr.press/v119/moor20a.html) and the [Mammoth](https://pair-code.github.io/understanding-umap/) dataset was used for the test. The Spheres dataset consists of eleven spheres living in a 101-dimensional space. The dataset represents ten spheres with each consisting of 250 points, which are enclosed by another larger sphere with 2,500 points. The Mammoth dataset consists of 50,00 points constituting the 3D structure of a mammoth skeleton. 
 
@@ -231,7 +231,9 @@ In contrast, other metrics, except DTM, failed to capture the increase of qualit
 
 #### Increasing `min_dist`
 
-Then how about `min_dist`? This time, we generated projections of [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) dataset with increasing `min_dist`. The projections and their evaluation result is as follows.
+Then how about `min_dist`? This time, we generated projections of [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) dataset with increasing `min_dist`. 
+Alike `n_neighbors`, low `min_dist` values pack points together (focusing on local structure), and high values do the opposite. 
+The projections and their evaluation result is as follows.
 
 
 ![](https://user-images.githubusercontent.com/38465539/124188004-a121f080-daf9-11eb-818e-cf4a96990e32.png)
@@ -239,7 +241,7 @@ Then how about `min_dist`? This time, we generated projections of [Fashion-MNIST
 <img src="https://user-images.githubusercontent.com/38465539/124189744-2c03ea80-dafc-11eb-89fd-38305bcec254.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124189744-2c03ea80-dafc-11eb-89fd-38305bcec254.png" width="45%"/>
 </p>
 
-We previously noted that increasing `min_dist` makes projections focus more on the global structure. Thus, the decrement of Trustworthiness and MRRE [Missing] is quite a natural result, as they focus on small local structure around each point. The surprising thing here is that Cohesiveness increases as `min_dist` increases. This result indicates that classes of the Fashion-MNIST dataset are not well separated as represented in the projections with a low `min_dist` value. 
+We previously noted that large `min_dist` values make projections focus more on the global structure. Thus, the decrement of Trustworthiness and MRRE [Missing] is quite natural, as they focus on small local structures around each point. The surprising thing here is that Cohesiveness increases as `min_dist` increases. This result indicates that classes of the Fashion-MNIST dataset are not well separated as represented in the projections with a low `min_dist` value. 
 According to our case study (refer to the paper (TBA)), it is common to perceive that projections with well-divided clusters better reflect the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure. 
 
 
