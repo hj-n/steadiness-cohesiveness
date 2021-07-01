@@ -9,6 +9,7 @@ from sklearn.neighbors import KDTree
 from pyclustering.cluster.xmeans import xmeans
 from helpers import distance_matrix as dm
 from helpers import hparam_functions as hp
+from helpers import visualization as vis
 from concurrent.futures import ThreadPoolExecutor
 
 class SNC:
@@ -50,6 +51,11 @@ class SNC:
             new_dict = { }
             self.cohev_log.append(new_dict)
 
+        ## Check whether the log is recorded
+        self.finished_stead = False
+        self.finished_cohev = False
+        
+
 
     def fit(self, record_vis_info=False):
         self.max_compress = None
@@ -71,12 +77,53 @@ class SNC:
 
     def steadiness(self):
         self.stead_score = self.__measure("steadiness", self.max_compress, self.min_compress)
+        self.finished_stead = True
         return self.stead_score
 
     
     def cohesiveness(self):
         self.cohev_score = self.__measure("cohesiveness", self.max_stretch, self.min_stretch)
+        self.finished_cohev = True
         return self.cohev_score   
+
+    def vis_info(self, file_path=None, label=None, k=10):
+        ## Exception handling
+        if not self.record:
+            raise Exception("The record_vis_info flag currently has 'False' value.")
+        if not self.finished_stead:
+            raise Exception("Please compute steadiness before extracting visualization infos")
+        if not self.finished_cohev:
+            raise Exception("Please compute cohesiveness before extracting visualization infos")
+
+        for datum_log in self.stead_log:
+            for key_idx in datum_log:
+                datum_log[key_idx] = datum_log[key_idx][0] / datum_log[key_idx][1]
+        for datum_log in self.cohev_log:
+            for key_idx in datum_log:
+                datum_log[key_idx] = datum_log[key_idx][0] / datum_log[key_idx][1]
+
+        points, missing_log, edge_vis_infos = vis.generate_visualization_data( 
+            self.stead_log, self.cohev_log, 
+            self.stead_score, self.cohev_score, label, 
+            self.raw, self.emb, k
+        )
+
+        if file_path == None:
+            return points, missing_log, edge_vis_infos
+        else:
+            if file_path[-1] == "/":
+                file_path += "info.json"
+            elif not (file_path[-5:] == ".json"):
+                file_path += ".json"
+            with open(file_path, "w") as file:
+                json.dump({
+                    "points": points,
+                    "missing_info": missing_log,
+                    "edge_info": edge_vis_infos
+                }, file)
+
+    
+
 
     def record_result(self):
         if self.record:

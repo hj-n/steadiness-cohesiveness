@@ -68,7 +68,7 @@ def generate_visualization_data(stead_log, cohev_log, stead_score, cohev_score, 
         info_dict["coor"] = coor.tolist()
         info_dict["cont"] = conti_trust[i][0]
         info_dict["trust"] = conti_trust[i][1]
-        info_dict["label"] = label[i]
+        info_dict["label"] = label[i] if label != None else 0
         points.append(info_dict)
 
     return points, missing_log, edge_vis_infos
