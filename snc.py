@@ -21,7 +21,7 @@ class SNC:
                  walk_num_ratio=0.4,       # random walk number,
                  dist_strategy="snn",      # determines the way to compute distance 
                  dist_parameter={          # parameters used to compute distance
-                     "alpha": 0.1, "k": 20
+                     "alpha": 0.1, "k": 100
                  },        
                  dist_function=None,       # inject predefined distance function
                  cluster_strategy="dbscan" # determines the way to consider clusters
