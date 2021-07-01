@@ -16,7 +16,7 @@
 </p>
 
 
-## Research Motivation
+## Steadiness & Cohesiveness
 
 We cannot trust the embedding results (i.e., the results of multidimensional projections (MDP) such as [*t*-SNE](https://lvdmaaten.github.io/tsne/), [UMAP](https://github.com/lmcinnes/umap), or [PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)). As distortions inherently occur when reducing dimensionality, meaningful patterns in projections can be less trustworthy and thus disturb users’ accurate comprehension of the original data, leading to interpretation bias. Therefore, it is vital to measure the overall distortions using quantitative metrics or visualize where and how the distortions occurred in the projection.
 
