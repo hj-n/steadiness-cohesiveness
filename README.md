@@ -189,9 +189,11 @@ SNC.vis_info(file_path=None, label=None, k=10)
 > - if `file_path` is not given as arugment, returns visualization infos
 > - if `file_path` is given, visualization info is saved in the file with designated name (and path)
 > - if you only designate the directory (`file_path` ends with `/`), info is saved as `info.json` inside the directory
+> 
 > ***`label`*** : *`Array, (optional, default: None), shape=(n_samples), dtype=int`*
 > - 1D array which holds the label (class) information of dataset
 > - if `None`, all points are considered to have a identical label "0"
+> 
 > ***`k`*** : *`int, (optional, default: 10)`*
 > - the `k` value for constructing kNN graph used in visualization
 
