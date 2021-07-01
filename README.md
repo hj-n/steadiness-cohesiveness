@@ -200,7 +200,7 @@ SNC.vis_info(file_path=None, label=None, k=10)
 
 ## Examples
 
-This section provides some examples to show how Steadiness and Cohesiveness reponse to diverse projections. For more detailed experiments and evaluations, please refer our paper (TBA).
+This section provides some examples to show how Steadiness and Cohesiveness reponse to diverse projections. For more detailed experiments and evaluations, please refer to our paper (TBA).
 
 ### vs. Varying UMAP hyperparameters
 
@@ -214,12 +214,18 @@ The UMAP projections of Mammoth (upper row) Spheres (bottom row) dataset with in
 
 ![](https://user-images.githubusercontent.com/38465539/124187732-353f8800-daf9-11eb-9754-3c7ba19aea84.png) 
 
-We then applied Steadiness & Cohesiveness to the projections. We also applied previous local metrics (Trustworthiness & Continuity, Mean Relative Rank Errors) with *k*=10 and global metrics (Stress, DTM), to make the comparison
+Let's first examine the projections carefully. For Mammoth dataset, projections larger `n_neighbors` preserves the skeleton structure. For Spheres dataset, you can see the points from outer sphere (blue points) escapes from the cluster mainly formed by inner clusters when `n_neighbors` grow. Therefore, we can intuitively indicate that larger `n_neighbors` values better preserves the original inter-cluster structure for both dataset.
+
+Now its time to make test!! We applied Steadiness & Cohesiveness to the projections. Previous local metrics (Trustworthiness & Continuity, Mean Relative Rank Errors) with *k*=10 and global metrics (Stress, DTM) were also applied for the comparison.
 
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38465539/124186611-8a7a9a00-daf7-11eb-8df8-9ef94560467c.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124186611-8a7a9a00-daf7-11eb-8df8-9ef94560467c.png" width="80%"/>
 </p>
+
+As a result, we can find that Steadiness well captured the increment of the projection quality occurred by the increasing `n_neighbors` values, both for Mammoth (left) and Spheres (right). 
+Cohesiveness increased only for Mammoth dataset.
+In contrast, other metrics, except DTM, failed to capture the increase of quality.
 
 
 
@@ -235,17 +241,22 @@ Then how about `min_dist`? This time, we generated projections of [Fashion-MNIST
 </p>
 
 We aforementioned that increasing `min_dist` make projections focus more on global structure. Thus, the decrement of Trustworthiness and MRRE [Missing] is quite a natural result, as they focus on small local structure around each point. The surprising thing here is that Cohesiveness increases as `min_dist` increases. This result indicates that classes of Fashion-MNIST dataset are not well seperated as represented in the projections with low `min_dist` value. 
-According to our case study (refer to the paper (TBA)), it is common to perceive that projections with well-divided clusters better reflects the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure.
+According to our case study (refer to the paper (TBA)), it is common to perceive that projections with well-divided clusters better reflects the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure. 
 
 
 
-### Capturing quality alteration
 
-The metrics *must* capture the obvious quality changement. To test our metrics' ability to capture the quality alteration of projections, we conducted two tests utilizing PCA. 
+### Capturing PCA quality alteration
+
+The metrics *must* capture the obvious quality changement. To test our metrics' ability to capture the quality alteration of projections, we conducted two tests utilizing PCA. In the first experiment, we generated 2D PCA projections of [MNIST](https://en.wikipedia.org/wiki/MNIST_database) dataset by using different principle components ranks (from (1st, 2nd) to (20th, 22nd)). It is evident that the projections with low-rank principle components will have lower score, as they cannot well preserve the varaince of the dataset. For the second experiment, we varied the number of principle components from 2 to 22. Obviously, the quality of projections, which are now not limited to 2D, should be increase when they can utilize more principle components. 
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38465539/124189753-2e664480-dafc-11eb-8b4b-67e3c585bdf1.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124189753-2e664480-dafc-11eb-8b4b-67e3c585bdf1.png" width="80%"/>
 </p>
+
+Unsurprisingly, all metircs, including Steadiness and Cohesiveness, well captured the quality alteration for both the first (left) and second (right) experiments. 
+
+
 
 ## Visualizing Steadiness and Cohesiveness
 
