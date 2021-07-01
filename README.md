@@ -52,7 +52,7 @@ from snc import SNC
 ...
 
 # k value for computing Shared Nearest Neighbor-based dissimilarity 
-parameter = { "k": 10, "alpha": 0.1 }
+parameter = { "k": 100, "alpha": 0.1 }
 
 metrics = SNC(
   raw=raw_data, 
@@ -128,13 +128,13 @@ class SNC(
 > - We highly recommend to use default distance strategy "snn", as it well considers clusters in high-dimensional space.
 > - if you set `dist_strategy` as "predefined", you should also explicitly pass the way to compute distance as `dist_function` parameter. THe distance for cluster automatically computed as average linkage.
 > 
-> ***`dist_parameter`*** : *`dict, (optional, default: { "alpha": 0.1, "k": 20 })`*
+> ***`dist_parameter`*** : *`dict, (optional, default: { "alpha": 0.1, "k": 100 })`*
 > - inject parameters for distance computations 
 > - if `dist_strategy == "snn`, `dist_parameter` dictionary should hold:
 >   - `"alpha"` : *`float, (optional, default: 0.1)`*
 >     - the hyperparameter which panalizes low similarity between data points / clusters.
 >     - low `"alpha"` converts smaller similarities to higher dissimilarities (distances).
->   - `"k"` : *`int, (optional, default: 20)`* 
+>   - `"k"` : *`int, (optional, default: 100)`* 
 >     - used for constructing `k`-Nearest Neighbror graph which becomes a basis to compute SNN similarity. 
 > - if `dist_parameter == "euclidean"`, `dist_parameter` does nothing.
 > - if `dist_parameter == "predefined"`, you can freely utilize `dist_parameter` in `dist_function`, which is decribed below.
