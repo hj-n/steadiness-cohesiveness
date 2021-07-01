@@ -129,6 +129,7 @@ class SNC(
 >     - used for constructing `k`-Nearest Neighbror graph which becomes a basis to compute SNN similarity. 
 > - if `dist_parameter == "euclidean"`, `dist_parameter` does nothing.
 > - if `dist_parameter == "predefined"`, you can freely utilize `dist_parameter` in `dist_function`, which is decribed below.
+>   - Note that unlike `"snn"` and `"euclidean"`, the computation of "predefined" is not parallelized, thus requries much time to be computed
 >   
 > ***`dist_function`*** : *`function, (optional, default: None)`*
 > - if you set `dist_strategy` as `"predefined"`, you should pass the function to calculate distance as parameter (otherwise the class raises error)
