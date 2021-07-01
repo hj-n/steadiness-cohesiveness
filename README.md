@@ -200,6 +200,52 @@ SNC.vis_info(file_path=None, label=None, k=10)
 
 ## Examples
 
+This section provides some examples to show how Steadiness and Cohesiveness reponse to diverse projections. For more detailed experiments and evaluations, please refer our paper (TBA).
+
+### vs. Varying UMAP hyperparameters
+
+#### Increasing `n_neighbors`
+
+UMAP has two important hyperparamters: `n_neighbors` (nearest neighbors) and `min_dist`. Here, we test how Steadiness and Cohesiveness varies against UMAP embeddings with increasing `n_neighbors`. `n_neighbors` denotes the number of nearest neighbors used to formulate the graph representing the original structure of data. Low `n_neighbors` values make UMAP to focus more on local structure, while high values work in opposite. `min_dist` works similar; low `min_dist` values packs points together (focusing on local structure), and high values do opposite. 
+
+Here, [Spheres](http://proceedings.mlr.press/v119/moor20a.html) and [Mammoth](https://pair-code.github.io/understanding-umap/) dataset was used for the test. Spheres dataset consists of eleven spheres living in 101-dimensional space. The dataset represents ten spheres with each consisting of 250 points, which are enclosed by another larger sphere with 2,500 points. Mammoth dataset consists of 50,00 points consistuting the 3D structure of a mammoth skeleton. 
+
+The UMAP projections of Mammoth (upper row) Spheres (bottom row) dataset with increasing `n_neighbors` are as follows:
+
+![](https://user-images.githubusercontent.com/38465539/124187732-353f8800-daf9-11eb-9754-3c7ba19aea84.png) 
+
+We then applied Steadiness & Cohesiveness to the projections. We also applied previous local metrics (Trustworthiness & Continuity, Mean Relative Rank Errors) with *k*=10 and global metrics (Stress, DTM), to make the comparison
+
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/38465539/124186611-8a7a9a00-daf7-11eb-8df8-9ef94560467c.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124186611-8a7a9a00-daf7-11eb-8df8-9ef94560467c.png" width="80%"/>
+</p>
+
+
+
+
+#### Increasing `min_dist`
+
+Then how about `min_dist`? This time, we generated projections of [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) dataset with increasing `min_dist`. The projections and their evaluation result is as follows.
+
+
+![](https://user-images.githubusercontent.com/38465539/124188004-a121f080-daf9-11eb-818e-cf4a96990e32.png)
+<p align="center">
+<img src="https://user-images.githubusercontent.com/38465539/124189744-2c03ea80-dafc-11eb-89fd-38305bcec254.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124189744-2c03ea80-dafc-11eb-89fd-38305bcec254.png" width="45%"/>
+</p>
+
+We aforementioned that increasing `min_dist` make projections focus more on global structure. Thus, the decrement of Trustworthiness and MRRE [Missing] is quite a natural result, as they focus on small local structure around each point. The surprising thing here is that Cohesiveness increases as `min_dist` increases. This result indicates that classes of Fashion-MNIST dataset are not well seperated as represented in the projections with low `min_dist` value. 
+According to our case study (refer to the paper (TBA)), it is common to perceive that projections with well-divided clusters better reflects the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure.
+
+
+
+### Capturing quality alteration
+
+The metrics *must* capture the obvious quality changement. To test our metrics' ability to capture the quality alteration of projections, we conducted two tests utilizing PCA. 
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/38465539/124189753-2e664480-dafc-11eb-8b4b-67e3c585bdf1.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124189753-2e664480-dafc-11eb-8b4b-67e3c585bdf1.png" width="80%"/>
+</p>
 
 ## Visualizing Steadiness and Cohesiveness
 
