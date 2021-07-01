@@ -1,7 +1,9 @@
-![](https://user-images.githubusercontent.com/38465539/123574467-d9c87e00-d80a-11eb-8d19-36a9f8498a95.png)
----
 <p align="center">
-  <i>Quality Metrics for evaluating the inter-cluster reliability of Mutldimensional Projections</i>
+<img src="https://user-images.githubusercontent.com/38465539/123574467-d9c87e00-d80a-11eb-8d19-36a9f8498a95.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/123574467-d9c87e00-d80a-11eb-8d19-36a9f8498a95.png" width="75%"/>
+</p>
+
+<p align="center">
+  <i><b>Quality Metrics for evaluating the inter-cluster reliability of Mutldimensional Projections</b></i> 
   <br />
     <a href="">Docs</a>
     ·
@@ -10,7 +12,7 @@
 <!--   </a> -->
     ·
     <a href="mailto:hj@hcil.snu.ac.kr">Contact</a>
-  </p>
+  
 </p>
 
 
@@ -101,7 +103,7 @@ class SNC(
 > ***`iteration`*** : *`int, (optional, default: 200)`*
 > - denotes the number of partial distortion computation (extracting => evaluating maintainence in the opposite side)
 > - Higher `iteration` generates the more deterministic / reliable result, but computation time increases linearly to `iteration`.
-> - we recommend at least 100 iterations to be set.
+> - we recommend at least 200 iterations to be set.
 > 
 > ***`walk_num_ratio`*** : *`float, (optional, default: 0.4)`*
 > - determines the amount of traverse held to extract a cluster
@@ -127,6 +129,7 @@ class SNC(
 >     - used for constructing `k`-Nearest Neighbror graph which becomes a basis to compute SNN similarity. 
 > - if `dist_parameter == "euclidean"`, `dist_parameter` does nothing.
 > - if `dist_parameter == "predefined"`, you can freely utilize `dist_parameter` in `dist_function`, which is decribed below.
+>   - Note that unlike `"snn"` and `"euclidean"`, the computation of "predefined" is not parallelized, thus requries much time to be computed
 >   
 > ***`dist_function`*** : *`function, (optional, default: None)`*
 > - if you set `dist_strategy` as `"predefined"`, you should pass the function to calculate distance as parameter (otherwise the class raises error)
