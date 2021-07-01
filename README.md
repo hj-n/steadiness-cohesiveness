@@ -36,20 +36,19 @@ If you have trouble using Steadiness & Cohesiveness in your project or research,
 We appreciate all requests about utilizing our metrics!!
 
 ### Installation
-Steadiness and Cohesiveness are served with conda environment
+Steadiness and Cohesiveness are served with conda virtual environment.
 
 ```sh
-## Download file in your project directory
-conda activate ...
-pip3 install requirements.txt
+git clone https://github.com/hj-n/steadiness-cohesiveness snc
+conda env create -f snc/env/snc_virtual_env.yaml
+conda activate sncvirtual
 ```
+
+
 
 ### How to use Stediness & Cohesiveness
 
 ```python
-import sys
-
-sys.path.append("/absolute/path/to/steadiness-cohesiveness")
 from snc import SNC
 
 ...
@@ -65,6 +64,18 @@ metrics = SNC(
 )
 metrics.fit()
 print(metrics.steadiness(), metrics.cohesiveness())
+
+```
+
+if you installed Steadiness & Cohesiveness outside your project directory:
+
+```python
+import sys
+
+sys.path.append("/absolute/path/to/steadiness-cohesiveness")
+from snc import SNC
+
+...
 ```
 
 There exists number of parameters for Steadiness & Cohesiveness, but can use default setting (which is described in our paper) by only injecting original data `raw` and projection data `emb` as arguments. Detailed explanation for these parameters is like this:
