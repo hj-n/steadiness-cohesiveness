@@ -208,13 +208,13 @@ This section provides some examples to show how Steadiness and Cohesiveness resp
 
 UMAP has two important hyperparameters: `n_neighbors` (nearest neighbors) and `min_dist`. Here, we test how Steadiness and Cohesiveness vary against UMAP embeddings with increasing `n_neighbors`. `n_neighbors` denotes the number of nearest neighbors used to formulate the graph representing the original structure of data. Low `n_neighbors` values make UMAP focus more on local structure, while high values work in the opposite. 
 
-Here, the [Spheres](http://proceedings.mlr.press/v119/moor20a.html) and the [Mammoth](https://pair-code.github.io/understanding-umap/) dataset was used for the test. The Spheres dataset consists of eleven spheres living in a 101-dimensional space. The dataset represents ten spheres with each consisting of 250 points, which are enclosed by another larger sphere with 2,500 points. The Mammoth dataset consists of 50,00 points constituting the 3D structure of a mammoth skeleton. 
+The [Spheres](http://proceedings.mlr.press/v119/moor20a.html) and the [Mammoth](https://pair-code.github.io/understanding-umap/) dataset are used for the test. The Spheres dataset consists of eleven spheres living in a 101-dimensional space. The dataset represents ten spheres with each consisting of 250 points, which are enclosed by another larger sphere with 2,500 points. The Mammoth dataset consists of 5,000 points constituting the 3D structure of a mammoth skeleton. 
 
 The UMAP projections of Mammoth (upper row) Spheres (bottom row) dataset with increasing `n_neighbors` are as follows:
 
 ![](https://user-images.githubusercontent.com/38465539/124187732-353f8800-daf9-11eb-9754-3c7ba19aea84.png) 
 
-Let's first examine the projections carefully. For the Mammoth dataset, projections larger `n_neighbors` preserves the skeleton structure. For the Spheres dataset, you can see the points from the outer sphere (blue points) escapes from the cluster mainly formed by inner clusters when `n_neighbors` grow. Therefore, we can intuitively indicate that larger `n_neighbors` values better preserves the original inter-cluster structure for both datasets.
+Let's first examine the projections carefully. For the Mammoth dataset, projections with larger `n_neighbors` preserves the skeleton structure. For the Spheres dataset, you can see the points from the outer sphere (blue points) escapes from the cluster mainly formed by inner spheres when `n_neighbors` grow. Therefore, we can intuitively indicate that the projections with larger `n_neighbors` values better preserve the original inter-cluster structure for both datasets.
 
 Now it's time to conduct a test!! We applied Steadiness & Cohesiveness to the projections. Previous local metrics (Trustworthiness & Continuity, Mean Relative Rank Errors) with *k*=10 and global metrics (Stress, DTM) were also applied for the comparison.
 
@@ -223,8 +223,8 @@ Now it's time to conduct a test!! We applied Steadiness & Cohesiveness to the pr
 </p>
 
 As a result, we can find that Steadiness well captured the increment of the projection quality occurred by the increasing `n_neighbors` values, both for Mammoth (left) and Spheres (right). 
-Cohesiveness increased only for the Mammoth dataset.
-In contrast, other metrics, except DTM, failed to capture the increase of quality.
+However, Cohesiveness increased only for the Mammoth dataset.
+Still, other metrics, except DTM, failed to capture the increment of projection quality.
 
 
 
@@ -249,13 +249,13 @@ According to our case study (refer to the paper (TBA)), it is common to perceive
 
 ### Capturing PCA quality alteration
 
-The metrics *must* capture the obvious quality degradation or increment. To test our metrics' ability to capture the quality alteration of projections, we conducted two tests utilizing PCA. In the first experiment, we generated 2D PCA projections of [MNIST](https://en.wikipedia.org/wiki/MNIST_database) dataset by using different principle components ranks (from (1st, 2nd) to (20th, 22nd)). The projections with low-rank principal components will have a lower score, as they cannot well preserve the variance of the dataset. For the second experiment, we varied the number of principal components from 2 to 22. Obviously, the quality of projections should be increase when they can utilize more principal components (i.e., lie in higher dimension). 
+MDP metrics *must* capture the obvious quality degradation or increment. To test our metrics' ability to capture such alteration, we conducted two tests utilizing PCA. In the first experiment, we generated 2D PCA projections of [MNIST](https://en.wikipedia.org/wiki/MNIST_database) dataset by utilizing principal component pairs with decreasing ranks (from (1st, 2nd) to (21th, 22nd)). The projections with low-rank principal components will have a lower score, as they cannot well preserve the variance of the dataset. For the second experiment, we varied the number of principal components from 2 to 22. Obviously, the quality of projections should be increase when they can utilize more principal components (i.e., lie in higher dimension). 
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38465539/124189753-2e664480-dafc-11eb-8b4b-67e3c585bdf1.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124189753-2e664480-dafc-11eb-8b4b-67e3c585bdf1.png" width="80%"/>
 </p>
 
-Unsurprisingly, all metrics, including Steadiness and Cohesiveness, well captured the quality alteration for both the first (left) and second (right) experiments. 
+Unsurprisingly, all metrics, including Steadiness and Cohesiveness, well captured the quality alteration for both the first (left) and the second (right) experiment. 
 
 
 ## Visualizing Steadiness and Cohesiveness
