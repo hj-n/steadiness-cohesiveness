@@ -216,7 +216,7 @@ The UMAP projections of Mammoth (upper row) Spheres (bottom row) dataset with in
 
 Let's first examine the projections carefully. For the Mammoth dataset, projections with larger `n_neighbors` preserves the skeleton structure. For the Spheres dataset, you can see the points from the outer sphere (blue points) escapes from the cluster mainly formed by inner spheres when `n_neighbors` grow. Therefore, we can intuitively indicate that the projections with larger `n_neighbors` values better preserve the original inter-cluster structure for both datasets.
 
-Now it's time to conduct a test!! We applied Steadiness & Cohesiveness to the projections. Previous local metrics (Trustworthiness & Continuity, Mean Relative Rank Errors) with *k*=10 and global metrics (Stress, DTM) were also applied for the comparison.
+Now it's time to conduct a test!! We applied Steadiness & Cohesiveness (with default hyperparameter setting) to the projections. Previous local metrics (Trustworthiness & Continuity, Mean Relative Rank Errors) with *k*=10 and global metrics (Stress, DTM) were also applied for the comparison. For global metrics, we used the values that are subtracted from 1, to assign lower values to low-quality projections.
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38465539/124186611-8a7a9a00-daf7-11eb-8df8-9ef94560467c.png" alt="" data-canonical-src="https://user-images.githubusercontent.com/38465539/124186611-8a7a9a00-daf7-11eb-8df8-9ef94560467c.png" width="80%"/>
