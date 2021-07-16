@@ -8,7 +8,7 @@
     <a href="">Docs</a>
     ·
 <!--     <a href=""> -->
-      Paper
+      <a href="http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/Measuring_and_Explaining_the_Inter_Cluster_Reliability_of_Multidimensional_Projections__for_VIS2021__%281%29.pdf?1626439932">Paper</a>
 <!--   </a> -->
     ·
     <a href="mailto:hj@hcil.snu.ac.kr">Contact</a>
@@ -26,7 +26,7 @@ However, previous local metrics to evaluate MDP (e.g., Trustworthiness & Continu
 
 By repeatedly extracting a random cluster from one space and measuring how well the cluster stays still in the opposite space, Steadiness & Cohesiveness measure inter-cluster reliability. Note that Steadiness measures the extent to which clusters in the projected space form clusters in the original space, and Cohesiveness measures the opposite.
 
-For more details, please refer to our paper (TBA).
+For more details, please refer to our [paper](http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/Measuring_and_Explaining_the_Inter_Cluster_Reliability_of_Multidimensional_Projections__for_VIS2021__%281%29.pdf?1626439932).
 
 ## Basic Usage 
 
@@ -200,7 +200,7 @@ SNC.vis_info(file_path=None, label=None, k=10)
 
 ## Examples
 
-This section provides some examples to show how Steadiness and Cohesiveness respond to the projections with diverse qualities and characteristics. For more detailed experiments and evaluations, please refer to our paper (TBA).
+This section provides some examples to show how Steadiness and Cohesiveness respond to the projections with diverse qualities and characteristics. For more detailed experiments and evaluations, please refer to our [paper](http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/Measuring_and_Explaining_the_Inter_Cluster_Reliability_of_Multidimensional_Projections__for_VIS2021__%281%29.pdf?1626439932).
 
 ### vs. Varying UMAP hyperparameters
 
@@ -242,7 +242,7 @@ The projections and their evaluation result is as follows.
 </p>
 
 We previously noted that large `min_dist` values make projections focus more on the global structure. Thus, the decrement of Trustworthiness and MRRE [Missing] is quite natural, as they focus on small local structures around each point. The surprising thing here is that Cohesiveness increases as `min_dist` increases. This result indicates that classes of the Fashion-MNIST dataset are not well separated as represented in the projections with a low `min_dist` value. 
-According to our case study (refer to the paper (TBA)), it is common to perceive that projections with well-divided clusters better reflect the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure. 
+According to our case study (refer to the [paper](http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/Measuring_and_Explaining_the_Inter_Cluster_Reliability_of_Multidimensional_Projections__for_VIS2021__%281%29.pdf?1626439932), it is common to perceive that projections with well-divided clusters better reflect the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure. 
 
 
 
@@ -275,9 +275,28 @@ Please check [relability map repository](https://github.com/hj-n/snc-reliability
 
 ## References / Citation
 
-TBA
+If you have used Steadiness & Cohesvieness for your project and wish to reference it, please cite our TVCG paper.
+
+> H. Jeon, H.-K. Ko, Y. Kim, J. Jo, and J. Seo, “Measuring and explaining the inter-cluster reliability of multidimensional projections,” *IEEE Transactions on Visualization and Computer Graphics (TVCG, Proc. VIS)*, 2021. to appear. 
+
+
+#### Bibtex
+
+```bib
+@article{jeon21tvcg,
+  author={Jeon, Hyeon and Ko, Hyung-Kwon and Kim, Youngtaek and Jo, Jaemin and Seo, Jinwook},
+  journal={IEEE Transactions on Visualization and Computer Graphics (TVCG, Proc. VIS)}, 
+  title={Measuring and Explaining the Inter-Cluster Reliability of Multidimensional Projections}, 
+  year={2021},
+  note={to appear.}
+}
+
+```
+
 
 ## Contributors
 
-TBA
+[Hyeon Jeon](https://github.com/hj-n), [Hyung-Kwon Ko](https://github.com/hyungkwonko), [Jaemin Jo](https://github.com/e-), [Youngtaek Kim](https://github.com/ytaek), and Jinwook Seo.
+
+This software is mainly developed / maintained by Human-computer Interaction Laboratory @ Seoul National University.
 
