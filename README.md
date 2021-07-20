@@ -200,7 +200,7 @@ SNC.vis_info(file_path=None, label=None, k=10)
 
 ## Examples
 
-This section provides some examples to show how Steadiness and Cohesiveness respond to the projections with diverse qualities and characteristics. For more detailed experiments and evaluations, please refer to our [paper](http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/Measuring_and_Explaining_the_Inter_Cluster_Reliability_of_Multidimensional_Projections__for_VIS2021__%281%29.pdf?1626439932).
+This section provides some examples to show how Steadiness and Cohesiveness respond to the projections with diverse qualities and characteristics. For more detailed experiments and evaluations, please refer to our [paper](http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/jeon_2021_tvcg.pdf?1626669574).
 
 ### vs. Varying UMAP hyperparameters
 
@@ -242,7 +242,7 @@ The projections and their evaluation result is as follows.
 </p>
 
 We previously noted that large `min_dist` values make projections focus more on the global structure. Thus, the decrement of Trustworthiness and MRRE [Missing] is quite natural, as they focus on small local structures around each point. The surprising thing here is that Cohesiveness increases as `min_dist` increases. This result indicates that classes of the Fashion-MNIST dataset are not well separated as represented in the projections with a low `min_dist` value. 
-According to our case study (refer to the [paper](http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/Measuring_and_Explaining_the_Inter_Cluster_Reliability_of_Multidimensional_Projections__for_VIS2021__%281%29.pdf?1626439932), it is common to perceive that projections with well-divided clusters better reflect the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure. 
+According to our case study (refer to the [paper](http://hcil.snu.ac.kr/system/publications/pdfs/000/000/157/original/jeon_2021_tvcg.pdf?1626669574), it is common to perceive that projections with well-divided clusters better reflect the inter-cluster structure; this result shows that such a common perception could lead to a misinterpretation of inter-cluster structure. 
 
 
 
