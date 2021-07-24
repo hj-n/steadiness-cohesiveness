@@ -277,14 +277,14 @@ Please check [relability map repository](https://github.com/hj-n/snc-reliability
 
 If you have used Steadiness & Cohesvieness for your project and wish to reference it, please cite our TVCG paper.
 
-> H. Jeon, H.-K. Ko, Y. Kim, J. Jo, and J. Seo, “Measuring and explaining the inter-cluster reliability of multidimensional projections,” *IEEE Transactions on Visualization and Computer Graphics (TVCG, Proc. VIS)*, 2021. to appear. 
+> H. Jeon, H.-K. Ko, J. Jo, Y. Kim, and J. Seo, “Measuring and explaining the inter-cluster reliability of multidimensional projections,” *IEEE Transactions on Visualization and Computer Graphics (TVCG, Proc. VIS)*, 2021. to appear. 
 
 
 #### Bibtex
 
 ```bib
 @article{jeon21tvcg,
-  author={Jeon, Hyeon and Ko, Hyung-Kwon and Kim, Youngtaek and Jo, Jaemin and Seo, Jinwook},
+  author={Jeon, Hyeon and Ko, Hyung-Kwon and Jo, Jaemin and Kim, Youngtaek and Seo, Jinwook},
   journal={IEEE Transactions on Visualization and Computer Graphics (TVCG, Proc. VIS)}, 
   title={Measuring and Explaining the Inter-Cluster Reliability of Multidimensional Projections}, 
   year={2021},
