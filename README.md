@@ -88,8 +88,8 @@ Refer [API description](#api) for more details about hyperparameter setting.
 class SNC(
     raw, 
     emb, 
-    iteration=200, 
-    walk_num_ratio=0.4, 
+    iteration=150, 
+    walk_num_ratio=0.3, 
     dist_strategy="snn", 
     dist_paramter={}, 
     dist_function=None,
@@ -106,12 +106,12 @@ class SNC(
 > - The projected (embedded) data of **`raw`**.
 > - `n_reduced_dim`: dimensionality of the projection
 > 
-> ***`iteration`*** : *`int, (optional, default: 200)`*
+> ***`iteration`*** : *`int, (optional, default: 150)`*
 > - The number of partial distortion computation (extracting => evaluating maintainence in the opposite side).
 > - Higher `iteration` generates the more deterministic / reliable result, but computation time increases linearly to `iteration`.
-> - We recommend 200 iterations as a minimum.
+> - We recommend 150 iterations as a minimum.
 > 
-> ***`walk_num_ratio`*** : *`float, (optional, default: 0.4)`*
+> ***`walk_num_ratio`*** : *`float, (optional, default: 0.3)`*
 > - The amount of traverse held to extract a cluster.
 > - For a data with `n_samples` samples, the total traverse number to extract a cluster is `n_samples * walk_num_ratio`.
 > - The size of extracted cluster grows as `walk_num_ratio` increases, but does not effect the result significantly.
