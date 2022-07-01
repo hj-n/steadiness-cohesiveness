@@ -17,11 +17,11 @@ class SNC:
                  self,
                  raw,                      # raw data
                  emb,                      # emb data
-                 iteration=200,            # iteration number
-                 walk_num_ratio=0.4,       # random walk number,
+                 iteration=150,            # iteration number
+                 walk_num_ratio=0.3,       # random walk number,
                  dist_strategy="snn",      # determines the way to compute distance 
                  dist_parameter={          # parameters used to compute distance
-                     "alpha": 0.1, "k": 100
+                     "alpha": 0.1, "k": "sqrt"
                  },        
                  dist_function=None,       # inject predefined distance function
                  cluster_strategy="dbscan" # determines the way to consider clusters
@@ -33,6 +33,9 @@ class SNC:
         self.walk_num = int(self.N * walk_num_ratio)
 
         self.dist_strategy    = dist_strategy
+        if ("k" not in dist_parameter) or (dist_parameter["k"] == "sqrt"):
+          dist_parameter["k"] = int(np.sqrt(self.N))
+
         self.dist_parameter   = dist_parameter
         self.dist_function    = dist_function
         self.cluster_strategy = cluster_strategy
