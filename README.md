@@ -34,12 +34,10 @@ If you have trouble using Steadiness & Cohesiveness in your project or research,
 We appreciate all requests about utilizing our metrics!!
 
 ### Installation
-Steadiness and Cohesiveness are served with conda virtual environment.
+Steadiness and Cohesiveness can be installed via pip
 
 ```sh
-git clone https://github.com/hj-n/steadiness-cohesiveness snc
-conda env create -f snc/env/snc_virtual_env.yaml
-conda activate sncvirtual
+pip install snc
 ```
 
 
@@ -47,12 +45,11 @@ conda activate sncvirtual
 ### How to use Stediness & Cohesiveness
 
 ```python
-from snc import SNC
+from snc.snc import SNC
 
 ...
 
-# k value for computing Shared Nearest Neighbor-based dissimilarity 
-parameter = { "k": 100, "alpha": 0.1 }
+parameter = { "k": 'sqrt', "alpha": 0.1 }
 
 metrics = SNC(
   raw=raw_data, 
@@ -128,14 +125,15 @@ class SNC(
 > - We highly recommend to use default distance strategy "snn".
 > - If you set `dist_strategy` as "predefined", you should also explicitly pass the way to compute distance as `dist_function` parameter. THe distance for cluster automatically computed as average linkage.
 > 
-> ***`dist_parameter`*** : *`dict, (optional, default: { "alpha": 0.1, "k": 100 })`*
+> ***`dist_parameter`*** : *`dict, (optional, default: { "alpha": 0.1, "k": 'sqrt' })`*
 > - Parameters for distance computations 
 > - if `dist_strategy == "snn`, `dist_parameter` dictionary should hold:
 >   - `"alpha"` : *`float, (optional, default: 0.1)`*
 >     - The hyperparameter which panalizes low similarity between data points / clusters.
 >     - A low `"alpha"` converts smaller similarities to higher dissimilarities (distances).
->   - `"k"` : *`int, (optional, default: 100)`* 
+>   - `"k"` : *`int or string, (optional, default: 'sqrt')`* 
 >     - The number of nearest neighbors for `k`-Nearest Neighbror graph which becomes a basis to compute SNN similarity.
+>     - If `k == 'sqrt'`, `k` is set as the square root of the length of data
 > - if `dist_parameter == "euclidean"`, `dist_parameter` does nothing.
 > - if `dist_parameter == "predefined"`, you can freely utilize `dist_parameter` in `dist_function`.
 >   - Note that unlike `"snn"` and `"euclidean"`, the computation of "predefined" is not parallelized, thus requries much time to be computed
