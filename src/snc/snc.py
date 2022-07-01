@@ -2,8 +2,8 @@ import numpy as np
 import json
 
 
-from helpers import hparam_functions as hp
-from helpers import visualization as vis
+from .helpers import hparam_functions as hp
+from .helpers import visualization as vis
 
 class SNC:
     def __init__(

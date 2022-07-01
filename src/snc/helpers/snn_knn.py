@@ -1,4 +1,4 @@
-from numba import cuda, njit, prange
+from numba import cuda
 from sklearn.neighbors import NearestNeighbors
 from collections import deque
 
