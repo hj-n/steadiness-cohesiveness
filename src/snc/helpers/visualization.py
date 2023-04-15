@@ -43,6 +43,17 @@ def generate_visualization_data(stead_log, cohev_log, stead_score, cohev_score, 
             "missing_val": edges_cohev_info[key] * stead_score_ratio if key in edges_cohev_info else 0,
             "false_val": edges_stead_info[key] * cohev_score_ratio if key in edges_stead_info else 0
         })
+        
+    vertices_stead_info = get_vertices_info(stead_log)
+    vertices_cohev_info = get_vertices_info(cohev_log)
+    
+    vertices_vis_infos = []
+    for i, _ in enumerate(emb):
+        vertices_vis_infos.append({
+						"index": i,
+						"missing_val": vertices_cohev_info[i] * stead_score_ratio,
+						"false_val": vertices_stead_info[i] * cohev_score_ratio
+				})
 
 
     ## get missing info from cohev_log
@@ -71,7 +82,7 @@ def generate_visualization_data(stead_log, cohev_log, stead_score, cohev_score, 
         info_dict["label"] = label[i] if label != None else 0
         points.append(info_dict)
 
-    return points, missing_log, edge_vis_infos
+    return points, missing_log, edge_vis_infos, vertices_vis_infos
     
   
 
@@ -119,3 +130,14 @@ def get_edges_info(edges, log):
         edges_info[key] /= max_value
 
     return edges_info
+
+def get_vertices_info(log):
+    vertices_info = np.zeros(len(log))
+    for i, datum in enumerate(log):
+        for key in datum:
+            vertices_info[i] += datum[key]
+    max_value = max(vertices_info)
+    for i, _ in enumerate(vertices_info):
+        vertices_info[i] /= max_value
+    
+    return vertices_info

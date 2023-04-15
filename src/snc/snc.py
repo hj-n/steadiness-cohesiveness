@@ -90,6 +90,9 @@ class SNC:
             raise Exception("Please compute steadiness before extracting visualization infos")
         if not self.finished_cohev:
             raise Exception("Please compute cohesiveness before extracting visualization infos")
+      
+
+
 
         for datum_log in self.stead_log:
             for key_idx in datum_log:
@@ -98,14 +101,14 @@ class SNC:
             for key_idx in datum_log:
                 datum_log[key_idx] = datum_log[key_idx][0] / datum_log[key_idx][1]
 
-        points, missing_log, edge_vis_infos = vis.generate_visualization_data( 
+        points, missing_log, edge_vis_infos, vertices_vis_infos = vis.generate_visualization_data( 
             self.stead_log, self.cohev_log, 
             self.stead_score, self.cohev_score, label, 
             self.raw, self.emb, k
         )
 
         if file_path == None:
-            return points, missing_log, edge_vis_infos
+            return points, missing_log, edge_vis_infos, vertices_vis_infos
         else:
             if file_path[-1] == "/":
                 file_path += "info.json"
@@ -115,7 +118,8 @@ class SNC:
                 json.dump({
                     "points": points,
                     "missing_info": missing_log,
-                    "edge_info": edge_vis_infos
+                    "edge_info": edge_vis_infos,
+                    "vertices_info": vertices_vis_infos
                 }, file)
 
     
