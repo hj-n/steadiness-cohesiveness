@@ -94,7 +94,7 @@ class SNC(
     dist_paramter={}, 
     dist_function=None,
     cluster_strategy="dbscan",
-		snn_knn_matrix=None
+    snn_knn_matrix=None
 )
 ```
 
