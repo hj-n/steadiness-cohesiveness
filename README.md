@@ -93,7 +93,8 @@ class SNC(
     dist_strategy="snn", 
     dist_paramter={}, 
     dist_function=None,
-    cluster_strategy="dbscan"
+    cluster_strategy="dbscan",
+		snn_knn_matrix=None
 )
 ```
 
@@ -122,6 +123,7 @@ class SNC(
 >   - `"snn"` : utilizes Shared Nearest Neighbor based on dissimilarity 
 >   - `"euclidean"`
 >   - `"predefined"` : allows user-defined distance function
+>   - `"inject_snn"` : inject knn and snn info
 > - We highly recommend to use default distance strategy "snn".
 > - If you set `dist_strategy` as "predefined", you should also explicitly pass the way to compute distance as `dist_function` parameter. THe distance for cluster automatically computed as average linkage.
 > 
@@ -153,7 +155,14 @@ class SNC(
 >   - `"x-means"` : based on X-Means clustering algorithm
 >   - `"'K'-means"` : based on K-Means clustering algorithm, where users can freely change `'K'` value by substituting it with integer number.
 >     - e.g., `15-means`, `20-means`, etc. 
-
+> ***`snn_knn_matrix`*** : *`dict, (optional, default: None)`*
+> - If you want to inject precomputed snn and knn, use this parameter
+> - To inject the parameter, you should set `dist_strategy` as `"inject_snn"`
+> - The dictionary should hold:
+>	  - `"raw_snn"` : *`Array, shape=(n_samples, n_samples), dtype=float`*, the snn matrix of raw data
+>	  - `"raw_knn"` : *`Array, shape=(n_samples, n_samples), dtype=float`*, the knn matrix of raw data
+>	  - `"emb_snn"` : *`Array, shape=(n_samples, n_samples), dtype=float`*, the snn matrix of embedded data
+>	  - `"emb_knn"` : *`Array, shape=(n_samples, n_samples), dtype=float`*, the knn matrix of embedded data
 
 ### Methods
 

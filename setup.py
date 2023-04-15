@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
 	name="snc",
-	version="0.0.5",
+	version="0.0.6",
 	author="Hyeon Jeon",
 	author_email="hj@hcil.snu.ac.kr",
 	description="Implementation of Steadiness & Cohesiveness",
