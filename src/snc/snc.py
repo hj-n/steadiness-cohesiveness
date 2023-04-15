@@ -17,7 +17,8 @@ class SNC:
                      "alpha": 0.1, "k": "sqrt"
                  },        
                  dist_function=None,       # inject predefined distance function
-                 cluster_strategy="dbscan" # determines the way to consider clusters
+                 cluster_strategy="dbscan", # determines the way to consider clusters
+                 snn_knn_matrix=None,  # inject predefined similarity matrix (dist_strategy should be "inject_snn")
                 ):
         self.raw  = np.array(raw, dtype=np.float64)
         self.emb  = np.array(emb, dtype=np.float64)
@@ -32,6 +33,7 @@ class SNC:
         self.dist_parameter   = dist_parameter
         self.dist_function    = dist_function
         self.cluster_strategy = cluster_strategy
+        self.snn_knn_matrix   = snn_knn_matrix
 
         ## target score
         self.cohev_score = None
@@ -63,7 +65,7 @@ class SNC:
 
         self.cstrat = hp.install_hparam(
             self.dist_strategy, self.dist_parameter, self.dist_function,
-            self.cluster_strategy,
+            self.cluster_strategy, self.snn_knn_matrix,
             self.raw, self.emb
         )
         
