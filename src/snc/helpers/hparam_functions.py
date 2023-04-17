@@ -14,8 +14,8 @@ e.g., knn info, distance matrix...
 '''
 
 def get_euclidean_infos(raw, emb, dist_parameter, dist_function, length, k, snn_knn_matrix):
-    raw_dist_matrix = dm.dist_matrix_gpu(raw)
-    emb_dist_matrix = dm.dist_matrix_gpu(emb)
+    raw_dist_matrix = dm.dist_matrix(raw)
+    emb_dist_matrix = dm.dist_matrix(emb)
     
     raw_dist_max = np.max(raw_dist_matrix)
     emb_dist_max = np.max(emb_dist_matrix)
@@ -70,8 +70,8 @@ def get_snn_infos(raw, emb, dist_parameter, dist_function, length, k, snn_knn_ma
     infos = get_euclidean_infos(raw, emb, dist_parameter, dist_function, length, k, snn_knn_matrix)
     
     # Compute snn matrix
-    raw_snn_matrix = sk.snn_gpu(infos["raw_knn"], length, k)
-    emb_snn_matrix = sk.snn_gpu(infos["emb_knn"], length, k)
+    raw_snn_matrix = sk.snn(infos["raw_knn"], length, k)
+    emb_snn_matrix = sk.snn(infos["emb_knn"], length, k)
     raw_snn_max    = np.max(raw_snn_matrix)
     emb_snn_max    = np.max(emb_snn_matrix)
 
