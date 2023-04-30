@@ -13,13 +13,15 @@ class SNC:
                  iteration=150,            # iteration number
                  walk_num_ratio=0.3,       # random walk number,
                  dist_strategy="snn",      # determines the way to compute distance 
-                 dist_parameter={          # parameters used to compute distance
-                     "alpha": 0.1, "k": "sqrt"
-                 },        
+                 dist_parameter=None,      # parameters used to compute distance
                  dist_function=None,       # inject predefined distance function
                  cluster_strategy="dbscan", # determines the way to consider clusters
                  snn_knn_matrix=None,  # inject predefined similarity matrix (dist_strategy should be "inject_snn")
                 ):
+        if dist_parameter is None:
+            dist_parameter = {
+                "alpha": 0.1, "k": "sqrt"
+            }
         self.raw  = np.array(raw, dtype=np.float64)
         self.emb  = np.array(emb, dtype=np.float64)
         self.N    = len(raw)    # number of points
