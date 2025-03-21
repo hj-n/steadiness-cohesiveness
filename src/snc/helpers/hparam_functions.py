@@ -16,21 +16,21 @@ e.g., knn info, distance matrix...
 def get_euclidean_infos(raw, emb, dist_parameter, dist_function, length, k, snn_knn_matrix):
     raw_dist_matrix = dm.dist_matrix(raw)
     emb_dist_matrix = dm.dist_matrix(emb)
-    
+
     raw_dist_max = np.max(raw_dist_matrix)
     emb_dist_max = np.max(emb_dist_matrix)
 
     raw_dist_matrix /= raw_dist_max
     emb_dist_matrix /= emb_dist_max
 
-    raw_knn_info = sk.knn_info(raw_dist_matrix, k) 
-    emb_knn_info = sk.knn_info(emb_dist_matrix, k) 
+    raw_knn_info = sk.knn_info(raw_dist_matrix, k)
+    emb_knn_info = sk.knn_info(emb_dist_matrix, k)
 
     return {
         "raw_dist_matrix" : raw_dist_matrix,
-        "emb_dist_matrix" : emb_dist_matrix, 
+        "emb_dist_matrix" : emb_dist_matrix,
         "raw_dist_max"    : raw_dist_max,
-        "emb_dist_max"    : emb_dist_max, 
+        "emb_dist_max"    : emb_dist_max,
         "raw_knn"         : raw_knn_info,
         "emb_knn"         : emb_knn_info
     }
@@ -43,21 +43,21 @@ def get_predefined_infos(raw, emb, dist_parameter, dist_function, length, k, snn
         for j in range(length):
             raw_dist_matrix[i, j] = dist_function(raw[i], raw[j], dist_parameter)
             emb_dist_matrix[i, j] = dist_function(emb[i], emb[i], dist_parameter)
-    
+
     raw_dist_max = np.max(raw_dist_matrix)
     emb_dist_max = np.max(emb_dist_matrix)
 
     raw_dist_matrix /= raw_dist_max
     emb_dist_matrix /= emb_dist_max
 
-    raw_knn_info = sk.knn_info(raw_dist_matrix, k) 
-    emb_knn_info = sk.knn_info(emb_dist_matrix, k) 
+    raw_knn_info = sk.knn_info(raw_dist_matrix, k)
+    emb_knn_info = sk.knn_info(emb_dist_matrix, k)
 
     return {
         "raw_dist_matrix" : raw_dist_matrix,
-        "emb_dist_matrix" : emb_dist_matrix, 
+        "emb_dist_matrix" : emb_dist_matrix,
         "raw_dist_max"    : raw_dist_max,
-        "emb_dist_max"    : emb_dist_max, 
+        "emb_dist_max"    : emb_dist_max,
         "raw_knn"         : raw_knn_info,
         "emb_knn"         : emb_knn_info
     }
@@ -68,7 +68,7 @@ def get_predefined_infos(raw, emb, dist_parameter, dist_function, length, k, snn
 def get_snn_infos(raw, emb, dist_parameter, dist_function, length, k, snn_knn_matrix):
 
     infos = get_euclidean_infos(raw, emb, dist_parameter, dist_function, length, k, snn_knn_matrix)
-    
+
     # Compute snn matrix
     raw_snn_matrix = sk.snn(infos["raw_knn"], length, k)
     emb_snn_matrix = sk.snn(infos["emb_knn"], length, k)
@@ -95,24 +95,24 @@ def get_inject_snn_infos(raw, emb, dist_parameter, dist_function, length, k, snn
     infos = {}
     infos["raw_knn"] = snn_knn_matrix["raw_knn"]
     infos["emb_knn"] = snn_knn_matrix["emb_knn"]
-    
+
     infos["raw_snn_matrix"] = snn_knn_matrix["raw_snn"]
     infos["emb_snn_matrix"] = snn_knn_matrix["emb_snn"]
-    
+
     raw_snn_max		= np.max(infos["raw_snn_matrix"])
     emb_snn_max		= np.max(infos["emb_snn_matrix"])
-    
-    infos["raw_snn_matrix"] /= raw_snn_max
-    infos["emb_snn_matrix"] /= emb_snn_max
-    
+
+    infos["raw_snn_matrix"] = infos["raw_snn_matrix"] / raw_snn_max
+    infos["emb_snn_matrix"] = infos["emb_snn_matrix"] / emb_snn_max
+
     infos["raw_dist_matrix"] = 1 / (infos["raw_snn_matrix"] + dist_parameter["alpha"])
     infos["emb_dist_matrix"] = 1 / (infos["emb_snn_matrix"] + dist_parameter["alpha"])
-    
+
     return infos
 
 '''
 Helper functions to extract a cluster
-used to extract_cluster 
+used to extract_cluster
 '''
 
 def get_a_cluster_snn(infos, mode, seed_idx, walk_num):
@@ -122,7 +122,7 @@ def get_a_cluster_snn(infos, mode, seed_idx, walk_num):
     if mode == "cohesiveness": ## extract from the original space
         knn_info   = infos["raw_knn"]
         snn_matrix = infos["raw_snn_matrix"]
-    
+
     return sk.snn_based_cluster_extraction(knn_info, snn_matrix, seed_idx, walk_num)
 
 def get_a_cluster_naive(infos, mode, seed_idx, walk_num):
@@ -130,7 +130,7 @@ def get_a_cluster_naive(infos, mode, seed_idx, walk_num):
         knn_info = infos["emb_knn"]
     if mode == "cohesiveness":
         knn_info = infos["raw_knn"]
-    
+
     return sk.naive_cluster_extraction(knn_info, seed_idx, walk_num)
 
 
@@ -221,11 +221,11 @@ INSTALLING Hyperparameter functions
 def install_hparam(dist_strategy, dist_parameter, dist_function, cluster_strategy, snn_knn_matrix, raw, emb):
     get_infos = None
     get_a_cluster = None
-    get_clusterinng = None 
+    get_clusterinng = None
     get_cluster_distance = None
 
     ## Prepare proper functions for distance strategy
-    if dist_strategy == "snn": 
+    if dist_strategy == "snn":
         get_infos = get_snn_infos
         get_a_cluster = get_a_cluster_snn
         get_cluster_distance = get_snn_cluster_distance
@@ -262,7 +262,7 @@ def install_hparam(dist_strategy, dist_parameter, dist_function, cluster_strateg
         raw, emb, dist_parameter, dist_function,
         get_infos, get_a_cluster, get_clustering, get_cluster_distance, snn_knn_matrix
     )
-    
+
 
 class HparamFunctions():
     '''
@@ -299,7 +299,7 @@ class HparamFunctions():
 
     '''
     Extract the clusters from the given incidices
-    mode : steadiness / cohesiveness 
+    mode : steadiness / cohesiveness
     '''
     def extract_cluster(self, mode, walk_num):
         seed_idx = np.random.randint(self.length)
@@ -309,12 +309,12 @@ class HparamFunctions():
             if cluster_candidate.size > 1:
                 extracted_cluster = cluster_candidate
         return extracted_cluster
-    
+
 
     '''
     Get the indices of the points which to be clustered as input
     and return the clustereing result
-    mode : steadiness / cohesiveness 
+    mode : steadiness / cohesiveness
     '''
     def clustering(self, mode, indices):
         if mode == "steadiness":
@@ -323,9 +323,9 @@ class HparamFunctions():
         if mode == "cohesiveness":
             dist_matrix = self.infos["emb_dist_matrix"]
             data = self.emb
-        
+
         return self.get_clustering(dist_matrix, data, indices, self.dist_parameter)
-    
+
     '''
     Compute the distance between two clusters in raw / emb space
     return two distance (raw_dist, emb_dist)
